@@ -23,6 +23,7 @@ export interface Item {
   implicits: ItemMod[];
   explicits: ItemMod[];
   raw_text: string;
+  icon_url?: string;
 }
 
 export interface PassiveSpec {
@@ -42,6 +43,7 @@ export interface Gem {
   quality: number;
   is_support: boolean;
   is_enabled: boolean;
+  icon_url?: string;
 }
 
 export interface SkillGroup {
@@ -160,6 +162,40 @@ export interface DeltaReport {
   top_gaps: DeltaGap[];
   guide_build_name: string;
   character_name: string;
+}
+
+// --- Build Guide models (scraped from mobalytics.gg) ---
+
+export interface GuideGem {
+  name: string;
+  icon_url: string;
+  is_support: boolean;
+}
+
+export interface GuideGemGroup {
+  slot: string;
+  gems: GuideGem[];
+}
+
+export interface GuideItem {
+  slot: string;
+  name: string;
+  base_type: string;
+  icon_url: string;
+}
+
+export interface LevelBracket {
+  title: string;
+  gem_groups: GuideGemGroup[];
+  items: GuideItem[];
+}
+
+export interface BuildGuide {
+  url: string;
+  title: string;
+  class_name: string;
+  ascendancy_name: string;
+  brackets: LevelBracket[];
 }
 
 // Placeholder response from analyze_delta while OAuth is pending

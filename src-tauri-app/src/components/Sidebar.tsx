@@ -1,6 +1,6 @@
 import type { Accessor, Setter } from "solid-js";
 
-export type Page = "decode" | "delta";
+export type Page = "decode" | "delta" | "guide";
 
 interface SidebarProps {
   page: Accessor<Page>;
@@ -21,6 +21,13 @@ export default function Sidebar(props: SidebarProps) {
         >
           <span class="nav-icon">{"\u{1F4DC}"}</span>
           Decode Build
+        </button>
+        <button
+          class={`nav-item ${props.page() === "guide" ? "active" : ""}`}
+          onClick={() => props.setPage("guide")}
+        >
+          <span class="nav-icon">{"\u{1F4D6}"}</span>
+          Build Guide
         </button>
         <button
           class={`nav-item ${props.page() === "delta" ? "active" : ""}`}

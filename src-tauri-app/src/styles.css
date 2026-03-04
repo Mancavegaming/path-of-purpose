@@ -374,6 +374,15 @@ button:disabled {
 .item-name.rarity-rare { color: var(--rarity-rare); }
 .item-name.rarity-unique { color: var(--rarity-unique); }
 
+.item-card-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 4px;
+  background: var(--bg-primary);
+}
+
 .item-base {
   color: var(--text-muted);
   font-size: 12px;
@@ -396,25 +405,150 @@ button:disabled {
 
 /* --- Skill group card --- */
 
-.gem-list {
-  margin: var(--space-sm) 0 0;
-  padding: 0;
-  list-style: none;
-  font-size: 13px;
+.skill-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
-.gem-list li {
-  padding: 2px 0;
+.skill-card-main {
+  border-color: var(--accent);
+}
+
+.skill-card-header {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
 }
 
-.gem-active { color: var(--text-primary); font-weight: 500; }
-.gem-support { color: var(--text-secondary); }
-.gem-disabled { color: var(--text-muted); text-decoration: line-through; }
+.skill-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
 
-.gem-level {
+.skill-card-slot {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.skill-card-main-badge {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.gem-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.gem-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 6px var(--space-md);
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+  transition: background 0.1s;
+}
+
+.gem-row:last-child {
+  border-bottom: none;
+}
+
+.gem-row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.gem-row-disabled {
+  opacity: 0.4;
+}
+
+.gem-icon-wrapper {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  border: 2px solid var(--border);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+}
+
+.gem-icon-wrapper.gem-icon-active {
+  border-color: #c44;
+}
+
+.gem-icon-wrapper.gem-icon-support {
+  border-color: #49a;
+}
+
+.gem-icon-wrapper.gem-icon-disabled {
+  border-color: var(--text-muted);
+}
+
+.gem-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gem-icon-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.gem-icon-fallback.gem-icon-active {
+  background: rgba(204, 68, 68, 0.2);
+  color: #e66;
+}
+
+.gem-icon-fallback.gem-icon-support {
+  background: rgba(68, 153, 170, 0.2);
+  color: #6bb;
+}
+
+.gem-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.gem-name {
+  font-size: 13px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gem-name-active {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.gem-name-support {
+  color: var(--text-secondary);
+}
+
+.gem-meta {
   font-size: 11px;
   color: var(--text-muted);
 }
@@ -493,8 +627,7 @@ button:disabled {
   margin-bottom: var(--space-xs);
 }
 
-.passive-link {
-  display: inline-block;
+.tree-toggle-btn {
   margin-top: var(--space-sm);
   padding: var(--space-xs) var(--space-md);
   background: var(--accent-bg);
@@ -502,13 +635,28 @@ button:disabled {
   border: 1px solid var(--accent);
   border-radius: var(--radius);
   font-size: 12px;
-  text-decoration: none;
+  cursor: pointer;
   transition: background 0.15s;
 }
 
-.passive-link:hover {
+.tree-toggle-btn:hover {
   background: var(--accent);
   color: #fff;
+}
+
+.tree-viewer {
+  margin-top: var(--space-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #000;
+}
+
+.tree-iframe {
+  width: 100%;
+  height: 500px;
+  border: none;
+  display: block;
 }
 
 /* --- Loading & error states --- */
@@ -547,6 +695,64 @@ button:disabled {
   padding: var(--space-sm) var(--space-md);
   margin-bottom: var(--space-md);
   font-size: 13px;
+}
+
+/* --- Build Guide page --- */
+
+.guide-bracket-content {
+  margin-top: var(--space-md);
+}
+
+.guide-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-sm);
+}
+
+.guide-item-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-sm) var(--space-md);
+}
+
+.guide-item-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 4px;
+  background: var(--bg-primary);
+}
+
+.guide-item-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.guide-item-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.guide-item-slot {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.guide-item-base {
+  font-size: 11px;
+  color: var(--text-secondary);
 }
 
 /* --- Scrollbar --- */

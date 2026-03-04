@@ -18,7 +18,14 @@ def cmd_decode(args: argparse.Namespace) -> None:
     """Decode a PoB export code and print the build summary."""
     import sys
     code = sys.stdin.read().strip() if args.stdin else args.code
-    build = decode_pob_code(code)
+    if not code:
+        print("No PoB code provided. Paste a Path of Building export code.", file=sys.stderr)
+        sys.exit(1)
+    try:
+        build = decode_pob_code(code)
+    except Exception as exc:
+        print(str(exc), file=sys.stderr)
+        sys.exit(1)
     print(build.summary())
     if args.verbose:
         print(json.dumps(build.model_dump(mode="json"), indent=2))
@@ -88,6 +95,35 @@ def cmd_character(args: argparse.Namespace) -> None:
     asyncio.run(_run())
 
 
+def cmd_scrape_guide(args: argparse.Namespace) -> None:
+    """Scrape a mobalytics.gg build guide and print structured JSON."""
+    import sys
+    from pop.scrapers.mobalytics import scrape_build_guide
+
+    url = sys.stdin.read().strip() if args.stdin else args.url
+    if not url:
+        print("No URL provided. Paste a mobalytics.gg build guide URL.", file=sys.stderr)
+        sys.exit(1)
+
+    async def _run() -> None:
+        try:
+            guide = await scrape_build_guide(url)
+        except Exception as exc:
+            # Extract a clean message from httpx or ValueError
+            msg = str(exc)
+            if "404" in msg:
+                msg = "Build guide not found (404). Check the URL is correct."
+            elif "timeout" in msg.lower() or "timed out" in msg.lower():
+                msg = "Request timed out. Mobalytics may be slow — try again."
+            elif "connect" in msg.lower():
+                msg = f"Could not connect to Mobalytics: {msg}"
+            print(msg, file=sys.stderr)
+            sys.exit(1)
+        print(json.dumps(guide.model_dump(mode="json"), indent=2))
+
+    asyncio.run(_run())
+
+
 def cmd_delta(args: argparse.Namespace) -> None:
     """Compare a PoB build against a live character via Delta Engine."""
     from pop.build_parser import decode_pob_code
@@ -148,6 +184,12 @@ def main() -> None:
     p_char.add_argument("name", help="Character name (case-sensitive)")
     p_char.add_argument("-v", "--verbose", action="store_true", help="Print full JSON")
     p_char.set_defaults(func=cmd_character)
+
+    # --- scrape_guide ---
+    p_scrape = subparsers.add_parser("scrape_guide", help="Scrape a mobalytics.gg build guide")
+    p_scrape.add_argument("url", nargs="?", default="", help="Mobalytics guide URL")
+    p_scrape.add_argument("--stdin", action="store_true", help="Read URL from stdin")
+    p_scrape.set_defaults(func=cmd_scrape_guide)
 
     # --- delta ---
     p_delta = subparsers.add_parser("delta", help="Compare a PoB build against a live character")

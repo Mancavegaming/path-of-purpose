@@ -248,3 +248,50 @@ class Build(BaseModel):
             f"| Items: {len(self.items)} "
             f"| Skill groups: {len(self.skill_groups)}"
         )
+
+
+# ---------------------------------------------------------------------------
+# Build Guide models (scraped from mobalytics.gg leveling guides)
+# ---------------------------------------------------------------------------
+
+
+class GuideGem(BaseModel):
+    """A gem entry from a leveling guide."""
+
+    name: str
+    icon_url: str = ""
+    is_support: bool = False
+
+
+class GuideGemGroup(BaseModel):
+    """A group of gems assigned to a gear slot in a leveling guide."""
+
+    slot: str  # "Body Armour", "Helmet", etc.
+    gems: list[GuideGem] = Field(default_factory=list)
+
+
+class GuideItem(BaseModel):
+    """A recommended item from a leveling guide."""
+
+    slot: str
+    name: str
+    base_type: str = ""
+    icon_url: str = ""
+
+
+class LevelBracket(BaseModel):
+    """One level bracket (e.g. 1-18, 18-31) from a leveling guide."""
+
+    title: str  # "1-18", "18-31", "Maps - Day 1", etc.
+    gem_groups: list[GuideGemGroup] = Field(default_factory=list)
+    items: list[GuideItem] = Field(default_factory=list)
+
+
+class BuildGuide(BaseModel):
+    """Scraped leveling guide from mobalytics.gg."""
+
+    url: str
+    title: str
+    class_name: str = ""
+    ascendancy_name: str = ""
+    brackets: list[LevelBracket] = Field(default_factory=list)

@@ -19,6 +19,14 @@ export default function ItemCard(props: ItemCardProps) {
   return (
     <div class="card">
       <div class="card-header">
+        <Show when={item().icon_url}>
+          <img
+            class="item-card-icon"
+            src={item().icon_url}
+            alt={item().name || item().base_type}
+            loading="lazy"
+          />
+        </Show>
         <div>
           <span class={`item-name ${rarityClass()}`}>
             {item().name || item().base_type}

@@ -1,9 +1,15 @@
-import { For } from "solid-js";
+import { createSignal, For } from "solid-js";
 import type { SkillGroup } from "../lib/types";
 
 interface SkillGroupCardProps {
   group: SkillGroup;
   isMain: boolean;
+}
+
+/** Build a poewiki gem icon URL from the gem name. */
+function gemIconUrl(name: string): string {
+  const slug = name.replace(/ /g, "_");
+  return `https://www.poewiki.net/wiki/Special:FilePath/${slug}_inventory_icon.png`;
 }
 
 export default function SkillGroupCard(props: SkillGroupCardProps) {
@@ -20,37 +26,60 @@ export default function SkillGroupCard(props: SkillGroupCardProps) {
   };
 
   return (
-    <div class="card">
-      <div class="card-header">
-        <h4 class="card-title">
-          {title()}
-          {props.isMain ? " (Main)" : ""}
-        </h4>
+    <div class={`skill-card ${props.isMain ? "skill-card-main" : ""}`}>
+      <div class="skill-card-header">
+        <span class="skill-card-title">{title()}</span>
         {group().slot && (
-          <span class="build-meta">{group().slot}</span>
+          <span class="skill-card-slot">{group().slot}</span>
         )}
+        {props.isMain && <span class="skill-card-main-badge">Main</span>}
       </div>
 
-      <ul class="gem-list">
+      <div class="gem-grid">
         <For each={group().gems}>
-          {(gem) => {
-            const cls = !gem.is_enabled
-              ? "gem-disabled"
-              : gem.is_support
-                ? "gem-support"
-                : "gem-active";
-            return (
-              <li>
-                <span class={cls}>{gem.name}</span>
-                <span class="gem-level">
-                  Lv{gem.level}
-                  {gem.quality > 0 ? ` / ${gem.quality}%` : ""}
-                </span>
-              </li>
-            );
-          }}
+          {(gem) => <GemRow gem={gem} />}
         </For>
-      </ul>
+      </div>
+    </div>
+  );
+}
+
+function GemRow(props: { gem: SkillGroupCardProps["group"]["gems"][0] }) {
+  const gem = () => props.gem;
+  const [imgFailed, setImgFailed] = createSignal(false);
+
+  const colorClass = () => {
+    if (!gem().is_enabled) return "gem-icon-disabled";
+    if (gem().is_support) return "gem-icon-support";
+    return "gem-icon-active";
+  };
+
+  return (
+    <div class={`gem-row ${!gem().is_enabled ? "gem-row-disabled" : ""}`}>
+      <div class={`gem-icon-wrapper ${colorClass()}`}>
+        {!imgFailed() ? (
+          <img
+            src={gem().icon_url || gemIconUrl(gem().name)}
+            alt={gem().name}
+            class="gem-icon-img"
+            loading="lazy"
+            onError={() => setImgFailed(true)}
+          />
+        ) : (
+          <div class={`gem-icon-fallback ${colorClass()}`}>
+            {gem().is_support ? "S" : "A"}
+          </div>
+        )}
+      </div>
+      <div class="gem-info">
+        <span class={`gem-name ${gem().is_support ? "gem-name-support" : "gem-name-active"}`}>
+          {gem().name}
+        </span>
+        <span class="gem-meta">
+          Lv {gem().level}
+          {gem().quality > 0 ? ` / ${gem().quality}%` : ""}
+        </span>
+      </div>
     </div>
   );
 }

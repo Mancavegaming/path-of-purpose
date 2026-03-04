@@ -1,5 +1,6 @@
 import { Show } from "solid-js";
 import type { PassiveSpec } from "../lib/types";
+import { openPassiveTree } from "../lib/commands";
 
 interface PassiveTreePanelProps {
   spec: PassiveSpec;
@@ -7,6 +8,13 @@ interface PassiveTreePanelProps {
 
 export default function PassiveTreePanel(props: PassiveTreePanelProps) {
   const spec = () => props.spec;
+
+  function handleOpenTree() {
+    const url = spec().url;
+    if (url) {
+      openPassiveTree(url);
+    }
+  }
 
   return (
     <div class="passive-panel">
@@ -26,14 +34,9 @@ export default function PassiveTreePanel(props: PassiveTreePanelProps) {
       </div>
 
       <Show when={spec().url}>
-        <a
-          class="passive-link"
-          href={spec().url}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          View on pathofexile.com
-        </a>
+        <button class="tree-toggle-btn" onClick={handleOpenTree}>
+          View Passive Tree
+        </button>
       </Show>
     </div>
   );

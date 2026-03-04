@@ -131,7 +131,14 @@ def _decompress_code(code: str) -> bytes:
         raise ValueError(f"Base64 decode failed: {exc}") from exc
 
     try:
-        return zlib.decompress(raw)
+        # Try raw deflate first (wbits=-15), which is what PoB uses
+        return zlib.decompress(raw, -15)
+    except zlib.error:
+        pass
+
+    try:
+        # Fall back to zlib header (wbits=15) or auto-detect (wbits=47)
+        return zlib.decompress(raw, 47)
     except zlib.error as exc:
         raise ValueError(f"Zlib decompress failed: {exc}") from exc
 
@@ -492,6 +499,15 @@ def _parse_item_text(raw: str) -> Item:
             item.level = _int(line.split(":", 1)[1].strip())
             continue
 
+        # Skip metadata lines that shouldn't be displayed
+        if line.startswith(("Unique ID:", "Item Level:", "Sockets:",
+                           "Selected Variant:", "Variant:", "Has Alt Variant",
+                           "Has Variant", "Crafted:", "Prefix:", "Suffix:",
+                           "ArmourData:", "Evasion:", "EnergyShield:",
+                           "Ward:", "Block:", "BasePercentile:",
+                           "CraftedQuality:")):
+            continue
+
         # Implicits count marker
         if line.startswith("Implicits:"):
             implicit_count = _int(line.split(":", 1)[1].strip())
@@ -507,11 +523,11 @@ def _parse_item_text(raw: str) -> Item:
 
         # Implicit mods
         if parsing_implicits and implicits_remaining > 0:
-            mod_text = line.lstrip("{").rstrip("}")  # PoB wraps crafted mods in {}
+            is_crafted, mod_text = _strip_crafted(line)
             item.implicits.append(ItemMod(
                 text=mod_text,
                 is_implicit=True,
-                is_crafted=line.startswith("{"),
+                is_crafted=is_crafted,
             ))
             implicits_remaining -= 1
             if implicits_remaining == 0:
@@ -519,8 +535,7 @@ def _parse_item_text(raw: str) -> Item:
             continue
 
         # Explicit mods (everything after implicits)
-        is_crafted = line.startswith("{") and line.endswith("}")
-        mod_text = line.lstrip("{").rstrip("}")
+        is_crafted, mod_text = _strip_crafted(line)
         item.explicits.append(ItemMod(
             text=mod_text,
             is_crafted=is_crafted,
@@ -560,6 +575,21 @@ def _parse_config(root: etree._Element) -> BuildConfig:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+
+def _strip_crafted(line: str) -> tuple[bool, str]:
+    """
+    Detect and strip PoB crafted mod markers.
+
+    PoB marks crafted mods either as:
+    - {crafted}Mod text here    (tag prefix)
+    - {Mod text here}           (whole line wrapped)
+    """
+    if line.startswith("{crafted}"):
+        return True, line[9:]  # len("{crafted}") == 9
+    if line.startswith("{") and line.endswith("}"):
+        return True, line[1:-1]
+    return False, line
 
 
 def _int(value: str) -> int:
