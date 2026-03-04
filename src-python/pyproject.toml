@@ -1,0 +1,33 @@
+[project]
+name = "path-of-purpose-engine"
+version = "0.1.0"
+description = "Path of Purpose — PoE build analysis engine"
+requires-python = ">=3.11"
+
+dependencies = [
+    "httpx>=0.27",
+    "authlib>=1.3",
+    "keyring>=25.0",
+    "lxml>=5.0",
+    "pydantic>=2.5",
+    "rapidfuzz>=3.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "nuitka>=2.0",
+    "ruff>=0.3",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

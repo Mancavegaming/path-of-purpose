@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+.pytest_cache/
+.venv/
+venv/
+
+# Node / Tauri frontend
+node_modules/
+src-tauri-app/dist/
+
+# Rust / Cargo
+target/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Environment / secrets
+.env
+.env.*
+
+# Claude Code session data
+.claude/
