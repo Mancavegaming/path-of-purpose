@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(\"/c/Users/ideal/AppData/Local/Microsoft/WindowsApps/python3.exe\":*)",
+      "Bash(node:*)",
+      "Bash(py:*)",
+      "Bash(cmd:*)",
+      "Bash(\"/c/Users/ideal/AppData/Local/Programs/Python/Python314/python.exe\":*)",
+      "Bash(export:*)",
+      "Bash($PYTHON:*)",
+      "Bash(rustc:*)",
+      "Bash(\"/c/Users/ideal/AppData/Local/Microsoft/WindowsApps/winget.exe\" install:*)",
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(ls:*)",
+      "Bash(powershell.exe:*)",
+      "Bash(find:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(cargo check:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite:*)",
+      "Bash(netstat:*)",
+      "Bash(tasklist:*)",
+      "Bash(taskkill:*)",
+      "WebFetch(domain:pobb.in)",
+      "Bash(curl:*)",
+      "Bash(\"C:\\\\Users\\\\ideal\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\python.exe\":*)",
+      "Bash(gh repo:*)",
+      "Bash(where gh:*)",
+      "Bash(git init:*)",
+      "Bash(git status:*)",
+      "Bash(git config:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git remote:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}

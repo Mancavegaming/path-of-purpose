@@ -30,6 +30,3 @@ Desktop.ini
 # Environment / secrets
 .env
 .env.*
-
-# Claude Code session data
-.claude/
