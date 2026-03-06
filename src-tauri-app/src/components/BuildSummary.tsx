@@ -7,6 +7,8 @@ import PassiveTreePanel from "./PassiveTreePanel";
 
 interface BuildSummaryProps {
   build: Build;
+  onItemClick?: (item: Item) => void;
+  selectedItem?: Item | null;
 }
 
 const SLOT_CATEGORIES: { label: string; slots: string[] }[] = [
@@ -129,6 +131,24 @@ export default function BuildSummary(props: BuildSummaryProps) {
         />
       </Show>
 
+      {/* Bracket notes */}
+      <Show when={b().bracket_notes}>
+        {(notes) => {
+          const currentTitle = () => variantTitles()[activeVariant()] ?? "";
+          const currentNotes = () => notes()[currentTitle()];
+          return (
+            <Show when={currentNotes()}>
+              {(n) => (
+                <div class="bracket-notes">
+                  <div class="bracket-notes-title">Notes — {currentTitle()}</div>
+                  <div class="bracket-notes-body">{n()}</div>
+                </div>
+              )}
+            </Show>
+          );
+        }}
+      </Show>
+
       {/* Stats grid */}
       <div class="stat-grid">
         <div class="stat-box">
@@ -157,8 +177,11 @@ export default function BuildSummary(props: BuildSummaryProps) {
         </div>
       </div>
 
-      {/* Passive tree panel */}
-      <Show when={variantSpec()}>
+      {/* Passive tree panel — hidden for generated builds with no real tree data */}
+      <Show when={(() => {
+        const spec = variantSpec();
+        return spec && (spec.nodes.length > 0 || spec.url) ? spec : false;
+      })()}>
         {(spec) => <PassiveTreePanel spec={spec()} />}
       </Show>
 
@@ -185,7 +208,13 @@ export default function BuildSummary(props: BuildSummaryProps) {
               <h3 class="section-title slot-category">{category.label}</h3>
               <div class="card-grid">
                 <For each={category.items}>
-                  {(item) => <ItemCard item={item} />}
+                  {(item) => (
+                    <ItemCard
+                      item={item}
+                      onClick={props.onItemClick}
+                      selected={props.selectedItem?.id === item.id && props.selectedItem?.slot === item.slot}
+                    />
+                  )}
                 </For>
               </div>
             </>

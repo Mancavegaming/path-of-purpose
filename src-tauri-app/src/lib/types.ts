@@ -24,6 +24,8 @@ export interface Item {
   explicits: ItemMod[];
   raw_text: string;
   icon_url?: string;
+  stat_priority?: string[];
+  notes?: string;
 }
 
 export interface PassiveSpec {
@@ -34,6 +36,9 @@ export interface PassiveSpec {
   nodes: number[];
   overrides: Record<number, number>;
   url: string;
+  key_nodes?: string[];
+  total_points?: number;
+  priority?: string;
 }
 
 export interface Gem {
@@ -82,6 +87,7 @@ export interface Build {
   active_item_set: number;
   pob_version: string;
   build_name: string;
+  bracket_notes?: Record<string, string>;
 }
 
 // --- Delta Engine models (src-python/pop/delta/models.py) ---
@@ -182,12 +188,23 @@ export interface GuideItem {
   name: string;
   base_type: string;
   icon_url: string;
+  stat_priority?: string[];
+  notes?: string;
+}
+
+export interface PassiveTreeSpec {
+  total_points: number;
+  key_nodes: string[];
+  priority: string;
+  url: string;
 }
 
 export interface LevelBracket {
   title: string;
   gem_groups: GuideGemGroup[];
   items: GuideItem[];
+  passive_tree?: PassiveTreeSpec | null;
+  notes?: string;
 }
 
 export interface BuildGuide {
@@ -203,4 +220,92 @@ export interface DeltaPendingResponse {
   status: "oauth_pending";
   message: string;
   guide_decoded: boolean;
+}
+
+// --- Trade models (src-python/pop/trade/models.py) ---
+
+export interface TradePrice {
+  amount: number;
+  currency: string;
+  type: string;
+}
+
+export interface TradeListing {
+  id: string;
+  item_name: string;
+  type_line: string;
+  ilvl: number;
+  corrupted: boolean;
+  price: TradePrice | null;
+  explicit_mods: string[];
+  implicit_mods: string[];
+  crafted_mods: string[];
+  account_name: string;
+  whisper: string;
+  icon_url: string;
+  attacks_per_second: number;
+}
+
+export interface TradeSearchResult {
+  total: number;
+  listings: TradeListing[];
+  query_id: string;
+  trade_url: string;
+}
+
+// --- Item Comparison models (src-python/pop/trade/dps_estimator.py) ---
+
+export interface WeaponDps {
+  physical_dps: number;
+  elemental_dps: number;
+  total_dps: number;
+  attacks_per_second: number;
+}
+
+export interface StatDelta {
+  stat_name: string;
+  equipped_value: number;
+  trade_value: number;
+  difference: number;
+  pct_change: number;
+}
+
+export interface ItemComparison {
+  equipped_name: string;
+  trade_name: string;
+  slot: string;
+  is_weapon: boolean;
+  equipped_dps: WeaponDps | null;
+  trade_dps: WeaponDps | null;
+  dps_change_pct: number;
+  equipped_flat_dps: number;
+  trade_flat_dps: number;
+  flat_dps_change: number;
+  stat_deltas: StatDelta[];
+  summary: string;
+}
+
+// --- Build Generator models (src-python/pop/ai/models.py) ---
+
+export interface BuildPreferences {
+  main_skill: string;
+  weapon_type: string;
+  class_name: string;
+  ascendancy_name: string;
+  budget_chaos: number;
+  league: string;
+  playstyle: string;
+}
+
+// --- AI Advisor models (src-python/pop/ai/models.py) ---
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface ChatResponse {
+  message: string;
+  conversation_id: string;
+  tokens_used: number;
 }

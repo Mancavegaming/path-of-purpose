@@ -25,7 +25,7 @@ path-of-purpose/
 ├── src-python/                      # Python sidecar
 │   ├── pyproject.toml               # Python deps & config
 │   ├── pop/                         # "Path of Purpose" package
-│   │   ├── main.py                  # JSON-RPC entry point
+│   │   ├── main.py                  # CLI entry point (decode, trade_search, ai_chat, compare_items, etc.)
 │   │   ├── build_parser/
 │   │   │   ├── pob_decode.py        # PoB code → XML → Build model
 │   │   │   └── models.py            # Build, Item, PassiveSpec, SkillGroup, SkillSet, ItemSet
@@ -35,6 +35,18 @@ path-of-purpose/
 │   │   │   ├── gear_diff.py         # Gear slot comparison
 │   │   │   ├── gem_diff.py          # Skill gem comparison
 │   │   │   └── models.py            # DeltaReport, SlotDelta, GemGap, etc.
+│   │   ├── ai/
+│   │   │   ├── advisor.py           # Stateless Claude advisor (history provided per call)
+│   │   │   ├── models.py            # ChatMessage, ChatRequest, ChatResponse
+│   │   │   └── key_store.py         # Anthropic API key storage (keyring)
+│   │   ├── trade/
+│   │   │   ├── client.py            # Async trade API client (search + fetch)
+│   │   │   ├── models.py            # TradeQuery, TradeListing, WeaponDps, StatDelta, ItemComparison
+│   │   │   ├── query_builder.py     # Build → trade search query conversion
+│   │   │   ├── stat_cache.py        # Stat ID cache for trade API
+│   │   │   └── dps_estimator.py     # Weapon DPS calc + stat extraction + item comparison
+│   │   ├── scrapers/
+│   │   │   └── mobalytics.py        # Mobalytics.gg build guide scraper
 │   │   ├── oauth/
 │   │   │   ├── client.py            # OAuth PKCE flow
 │   │   │   └── token_store.py       # Encrypted token storage
@@ -47,6 +59,11 @@ path-of-purpose/
 │       ├── fixtures/                # Sample PoB codes, XML
 │       ├── test_pob_decode.py       # Build parser tests
 │       ├── test_delta_engine.py     # Delta engine tests
+│       ├── test_dps_estimator.py    # DPS estimator + item comparison tests
+│       ├── test_ai_advisor.py       # AI advisor tests (mocked Anthropic)
+│       ├── test_trade_client.py     # Trade client tests
+│       ├── test_trade_query_builder.py # Trade query builder tests
+│       ├── test_trade_stat_cache.py # Stat cache tests
 │       ├── test_oauth.py            # OAuth tests
 │       ├── test_poe_api.py          # PoE API tests
 │       └── test_rate_limiter.py     # Rate limiter tests
@@ -69,13 +86,18 @@ path-of-purpose/
     │       ├── BuildSummary.tsx      # Build overview with variant tabs + gear categories
     │       ├── VariantTabs.tsx       # Reusable tab bar for build variants
     │       ├── PassiveTreePanel.tsx  # Node count + tree version + poe.com link
-    │       ├── ItemCard.tsx          # Single item display
+    │       ├── ItemCard.tsx          # Single item display (clickable for trade search)
     │       ├── SkillGroupCard.tsx    # Skill group with gem list
-    │       ├── GapCard.tsx          # Delta gap display card
-    │       └── Sidebar.tsx          # Nav sidebar
+    │       ├── GapCard.tsx           # Delta gap display card
+    │       ├── Sidebar.tsx           # Nav sidebar
+    │       ├── RightPanel.tsx        # Split layout: trade results (top) + AI chat (bottom)
+    │       ├── TradePanel.tsx        # Trade search results with listing selection
+    │       ├── TradeListingCard.tsx   # Trade listing with Compare button
+    │       ├── ItemComparisonPanel.tsx # Side-by-side DPS/stat comparison
+    │       └── AiAdvisorPanel.tsx    # AI chat with build/item/trade context
     └── src-tauri/                   # Rust backend
         ├── Cargo.toml
-        ├── src/lib.rs               # Tauri commands (decode, delta)
+        ├── src/lib.rs               # Tauri commands (decode, trade_search, compare_items, ai_chat, etc.)
         ├── src/main.rs              # Tauri entry point
         ├── tauri.conf.json          # Tauri config
         ├── capabilities/            # Tauri v2 permissions
@@ -84,18 +106,20 @@ path-of-purpose/
 
 ```
 
-## Phase Status (as of 2026-03-03)
-- **Phase 1: COMPLETE** — 121 tests passing
-  - PoB decoder with SkillSet/ItemSet variant support (multi-variant builds)
-  - OAuth PKCE client for PoE API
-  - PoE API client with rate limiter (token bucket)
-  - Delta Engine: passive/gear/gem diff with top-3 gap ranking
+## Phase Status (as of 2026-03-04)
+- **Phase 1: COMPLETE** — PoB decoder, OAuth, PoE API, Delta Engine
   - BLOCKED on live testing: OAuth registration requires emailing oauth@grindinggear.com
-- **Phase 2: IN PROGRESS** — Tauri desktop shell + UI
+- **Phase 2: IN PROGRESS** — 192 tests passing. Tauri desktop shell + UI
   - Build decode page with variant tabs (5 variants supported)
   - Gear grouped by slot category (Weapons, Armour, Jewelry, Flasks)
   - Passive tree panel with pathofexile.com tree viewer link
   - Delta analysis page (UI complete, awaiting live data from OAuth)
+  - Mobalytics.gg build guide scraper
+  - Trade search panel with item selection from build
+  - Item comparison: DPS estimator for weapons, stat deltas for armor/jewelry
+  - AI Advisor (Anthropic Claude) with stateless history, build/item/trade context
+  - Right panel: merged split layout (trade top / AI chat bottom)
+  - Compare button on trade listings for side-by-side item comparison
 - Phase 3: Trade API / Budget Stewardship
 - Phase 4: Sacred Overlay (log monitor + verse triggers)
 - Phase 5: Grace AI moderation
@@ -106,13 +130,16 @@ path-of-purpose/
 - PoB exports are Base64 + zlib-compressed XML — parse with lxml, NOT run PoB headlessly
 - Builds with variants wrap skills in `<SkillSet>` and items in `<ItemSet>` elements
 - Delta Engine does structural gap analysis, NOT full DPS calculation (unsolved outside PoB's Lua)
+- DPS Estimator provides simplified weapon DPS (phys+ele+APS) and stat deltas for item comparison
 - PoE API rate limit: 45 req/period, must cache aggressively
 - PoE 2 passive tree is completely different from PoE 1 — abstract behind interface
 - Python packaging: Nuitka standalone folder mode. Tauri bundles the folder.
+- AI Advisor is stateless — frontend sends full `messages[]` history each call (Python subprocess is fresh each invocation)
+- AI context includes build info, selected item, and trade listing for contextual advice
 
 ## Dependencies
 **Python** (src-python/pyproject.toml):
-- httpx, authlib, keyring, lxml, pydantic, rapidfuzz
+- httpx, authlib, keyring, lxml, pydantic, rapidfuzz, anthropic
 - Dev: pytest, pytest-asyncio, nuitka, ruff
 
 **Node** (src-tauri-app/package.json):
@@ -124,7 +151,7 @@ path-of-purpose/
 
 ## Dev Commands
 ```bash
-# Run Python tests (121 tests)
+# Run Python tests (192 tests)
 cd src-python && python -m pytest
 
 # Run specific test file

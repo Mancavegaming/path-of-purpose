@@ -1,32 +1,87 @@
-import { createSignal } from "solid-js";
+import { createSignal, onMount } from "solid-js";
 import Sidebar, { type Page } from "./components/Sidebar";
 import DecodePage from "./pages/DecodePage";
 import DeltaPage from "./pages/DeltaPage";
-import GuidePage from "./pages/GuidePage";
-import type { Build } from "./lib/types";
+import GeneratorPage from "./pages/GeneratorPage";
+import type { Build, BuildGuide } from "./lib/types";
+import {
+  listSavedBuilds,
+  loadSavedBuild,
+  deleteSavedBuild,
+  type SavedBuildEntry,
+} from "./lib/commands";
+import { guideToBuild } from "./lib/buildUtils";
+import { initAuth } from "./lib/auth";
 import "./styles.css";
 
 function App() {
-  const [page, setPage] = createSignal<Page>("decode");
+  const [page, setPage] = createSignal<Page>("build");
   const [loadedBuild, setLoadedBuild] = createSignal<Build | null>(null);
+  const [savedBuilds, setSavedBuilds] = createSignal<SavedBuildEntry[]>([]);
 
-  function onLoadSavedBuild(build: Build) {
+  async function refreshSavedBuilds() {
+    try {
+      const builds = await listSavedBuilds();
+      setSavedBuilds(builds);
+    } catch {
+      // Ignore — saved builds are non-critical
+    }
+  }
+
+  onMount(() => {
+    initAuth();
+    refreshSavedBuilds();
+  });
+
+  function handleGeneratorComplete(build: Build) {
     setLoadedBuild(build);
-    setPage("decode");
+    setPage("build");
+  }
+
+  async function handleLoadSavedBuild(name: string) {
+    try {
+      const result = await loadSavedBuild(name);
+      if (result.kind === "build") {
+        setLoadedBuild(result.data as Build);
+      } else {
+        setLoadedBuild(guideToBuild(result.data as BuildGuide));
+      }
+      setPage("build");
+    } catch (e) {
+      console.error("Failed to load saved build:", e);
+    }
+  }
+
+  async function handleDeleteSavedBuild(name: string) {
+    try {
+      await deleteSavedBuild(name);
+      await refreshSavedBuilds();
+    } catch (e) {
+      console.error("Failed to delete saved build:", e);
+    }
   }
 
   return (
     <div class="app-layout">
-      <Sidebar page={page} setPage={setPage} onLoadSavedBuild={onLoadSavedBuild} />
+      <Sidebar
+        page={page}
+        setPage={setPage}
+        savedBuilds={savedBuilds}
+        onLoadBuild={handleLoadSavedBuild}
+        onDeleteBuild={handleDeleteSavedBuild}
+      />
       <main class="content">
-        <div style={{ display: page() === "decode" ? "block" : "none" }}>
-          <DecodePage loadedBuild={loadedBuild} setLoadedBuild={setLoadedBuild} />
+        <div style={{ display: page() === "build" ? "block" : "none" }}>
+          <DecodePage loadedBuild={loadedBuild} setLoadedBuild={setLoadedBuild} onSave={refreshSavedBuilds} />
+        </div>
+        <div style={{ display: page() === "generator" ? "block" : "none" }}>
+          <GeneratorPage
+            onComplete={handleGeneratorComplete}
+            onSave={refreshSavedBuilds}
+          />
         </div>
         <div style={{ display: page() === "delta" ? "block" : "none" }}>
           <DeltaPage />
-        </div>
-        <div style={{ display: page() === "guide" ? "block" : "none" }}>
-          <GuidePage />
         </div>
       </main>
     </div>

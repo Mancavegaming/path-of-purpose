@@ -3,6 +3,8 @@ import type { Item } from "../lib/types";
 
 interface ItemCardProps {
   item: Item;
+  onClick?: (item: Item) => void;
+  selected?: boolean;
 }
 
 export default function ItemCard(props: ItemCardProps) {
@@ -16,8 +18,15 @@ export default function ItemCard(props: ItemCardProps) {
     return "rarity-normal";
   };
 
+  const cardClass = () => {
+    let cls = "card";
+    if (props.onClick) cls += " item-selectable";
+    if (props.selected) cls += " item-selected";
+    return cls;
+  };
+
   return (
-    <div class="card">
+    <div class={cardClass()} onClick={() => props.onClick?.(item())}>
       <div class="card-header">
         <Show when={item().icon_url}>
           <img
@@ -39,6 +48,18 @@ export default function ItemCard(props: ItemCardProps) {
           <span class="build-meta">{item().slot}</span>
         </Show>
       </div>
+
+      <Show when={item().stat_priority && item().stat_priority!.length > 0}>
+        <div class="item-stat-tags">
+          <For each={item().stat_priority!}>
+            {(stat) => <span class="item-stat-tag">{stat}</span>}
+          </For>
+        </div>
+      </Show>
+
+      <Show when={item().notes}>
+        <div class="item-notes">{item().notes}</div>
+      </Show>
 
       <Show when={item().implicits.length > 0 || item().explicits.length > 0}>
         <ul class="mod-list">

@@ -277,6 +277,17 @@ class GuideItem(BaseModel):
     name: str
     base_type: str = ""
     icon_url: str = ""
+    stat_priority: list[str] = Field(default_factory=list)
+    notes: str = ""
+
+
+class PassiveTreeSpec(BaseModel):
+    """Passive tree specification for a level bracket."""
+
+    total_points: int = 0
+    key_nodes: list[str] = Field(default_factory=list)
+    priority: str = ""  # e.g. "Life > Sword damage > Crit"
+    url: str = ""  # pathofexile.com passive tree planner URL
 
 
 class LevelBracket(BaseModel):
@@ -285,6 +296,8 @@ class LevelBracket(BaseModel):
     title: str  # "1-18", "18-31", "Maps - Day 1", etc.
     gem_groups: list[GuideGemGroup] = Field(default_factory=list)
     items: list[GuideItem] = Field(default_factory=list)
+    passive_tree: PassiveTreeSpec | None = None
+    notes: str = ""
 
 
 class BuildGuide(BaseModel):

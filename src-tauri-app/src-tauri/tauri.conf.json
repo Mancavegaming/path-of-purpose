@@ -26,13 +26,22 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["nsis"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "createUpdaterArtifacts": "v1Compatible"
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDYxNzE5Q0Q4MjYyM0ZCREUKUldUZSt5TW0ySnh4WWRrdkhWKzMxWExlR3BSL0VjNlp4RGNlRE5laXJPTlhRY0NRVnUzY3BSa20K",
+      "endpoints": [
+        "https://github.com/Mancavegaming/path-of-purpose/releases/latest/download/latest.json"
+      ]
+    }
   }
 }
