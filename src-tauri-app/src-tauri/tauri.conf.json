@@ -38,7 +38,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDYxNzE5Q0Q4MjYyM0ZCREUKUldUZSt5TW0ySnh4WWRrdkhWKzMxWExlR3BSL0VjNlp4RGNlRE5laXJPTlhRY0NRVnUzY3BSa20K",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDRGOUFCODQyQTcxMkY4OEQKUldTTitCS25RcmlhVHpibFhpQW9aT1hzeTkrdGhiZktUU3VvdFVKTXdKbzNvaUIyY3F2Y3ljVEgK",
       "endpoints": [
         "https://github.com/Mancavegaming/path-of-purpose/releases/latest/download/latest.json"
       ]
