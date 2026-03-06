@@ -10,7 +10,8 @@ class Settings(BaseSettings):
 
     anthropic_api_key: str = ""
     gemini_api_key: str = ""
-    ai_provider: str = "gemini"
+    openai_api_key: str = ""
+    ai_provider: str = "openai"
 
     discord_client_id: str = ""
     discord_client_secret: str = ""

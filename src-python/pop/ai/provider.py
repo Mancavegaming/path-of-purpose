@@ -1,8 +1,8 @@
 """
-Unified AI provider abstraction — dispatches to Anthropic or Gemini.
+Unified AI provider abstraction — dispatches to Anthropic, Gemini, or OpenAI.
 
 Provides a single function that both advisor.py and generator.py use
-instead of calling Anthropic SDK directly.
+instead of calling provider SDKs directly.
 """
 
 from __future__ import annotations
@@ -17,6 +17,7 @@ GEMINI_MAX_RETRIES = 3
 
 ANTHROPIC_MODEL = "claude-sonnet-4-6"
 GEMINI_MODEL = "gemini-2.5-flash"
+OPENAI_MODEL = "gpt-4.1-mini"
 
 
 def _sanitize_text(text: str) -> str:
@@ -49,7 +50,9 @@ def chat_completion(
         for m in messages
     ]
 
-    if provider == "gemini":
+    if provider == "openai":
+        return _openai_completion(api_key, system, sanitized, max_tokens)
+    elif provider == "gemini":
         return _gemini_completion(api_key, system, sanitized, max_tokens)
     else:
         return _anthropic_completion(api_key, system, sanitized, max_tokens)
@@ -78,6 +81,35 @@ def _anthropic_completion(
 
     text = response.content[0].text
     tokens_used = (response.usage.input_tokens or 0) + (response.usage.output_tokens or 0)
+    return text, tokens_used
+
+
+def _openai_completion(
+    api_key: str,
+    system: str,
+    messages: list[dict],
+    max_tokens: int,
+) -> tuple[str, int]:
+    """Call the OpenAI API."""
+    from openai import OpenAI, APIError
+
+    client = OpenAI(api_key=api_key)
+
+    oai_messages = [{"role": "system", "content": system}] + messages
+
+    try:
+        response = client.chat.completions.create(
+            model=OPENAI_MODEL,
+            messages=oai_messages,
+            max_tokens=max_tokens,
+        )
+    except APIError as e:
+        raise ValueError(f"OpenAI API error: {e.message}") from e
+
+    text = response.choices[0].message.content or ""
+    tokens_used = 0
+    if response.usage:
+        tokens_used = (response.usage.prompt_tokens or 0) + (response.usage.completion_tokens or 0)
     return text, tokens_used
 
 

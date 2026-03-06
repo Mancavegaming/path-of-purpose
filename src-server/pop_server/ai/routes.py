@@ -36,7 +36,9 @@ router = APIRouter(prefix="/api/ai", tags=["ai"])
 
 def _get_api_key() -> str:
     """Return the server-side API key for the configured provider."""
-    if settings.ai_provider == "gemini":
+    if settings.ai_provider == "openai":
+        return settings.openai_api_key
+    elif settings.ai_provider == "gemini":
         return settings.gemini_api_key
     return settings.anthropic_api_key
 
