@@ -222,6 +222,7 @@ class BuildGenerator:
             system=system,
             messages=phase1_messages,
             max_tokens=16384,
+            json_output=True,
         )
 
         data1 = _extract_json(text1)
@@ -253,6 +254,7 @@ class BuildGenerator:
             system=system,
             messages=phase2_messages,
             max_tokens=16384,
+            json_output=True,
         )
 
         data2 = _extract_json(text2)
@@ -306,6 +308,7 @@ class BuildGenerator:
             system=REFINEMENT_SYSTEM_PROMPT,
             messages=[{"role": m.role, "content": m.content} for m in messages],
             max_tokens=16384,
+            json_output=True,
         )
 
         data = _extract_json(text)

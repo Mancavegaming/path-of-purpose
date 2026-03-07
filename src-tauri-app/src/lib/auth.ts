@@ -51,8 +51,8 @@ export async function initAuth(): Promise<void> {
   }
 }
 
-/** Start the Discord login flow. Returns true on success. */
-export async function discordLogin(clientId: string): Promise<boolean> {
+/** Start the Discord login flow. Returns null on success, or an error string on failure. */
+export async function discordLogin(clientId: string): Promise<string | null> {
   try {
     // Get the auth URL
     const authUrl = await invoke<string>("get_discord_auth_url", { clientId });
@@ -83,10 +83,14 @@ export async function discordLogin(clientId: string): Promise<boolean> {
       user: result.user,
     });
 
-    return true;
+    return null;
   } catch (e) {
     console.error("Discord login failed:", e);
-    return false;
+    const msg = String(e);
+    if (msg.includes("403") || msg.includes("must join")) {
+      return "discord_not_member";
+    }
+    return msg;
   }
 }
 

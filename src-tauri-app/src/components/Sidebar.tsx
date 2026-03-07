@@ -28,6 +28,7 @@ interface SidebarProps {
 export default function Sidebar(props: SidebarProps) {
   const [updateStatus, setUpdateStatus] = createSignal("");
   const [updating, setUpdating] = createSignal(false);
+  const [loginError, setLoginError] = createSignal<string | null>(null);
 
   async function handleCheckForUpdates() {
     setUpdating(true);
@@ -84,7 +85,16 @@ export default function Sidebar(props: SidebarProps) {
   }
 
   async function handleLogin() {
-    await discordLogin(DISCORD_CLIENT_ID);
+    setLoginError(null);
+    const error = await discordLogin(DISCORD_CLIENT_ID);
+    if (error) {
+      setLoginError(error);
+    }
+  }
+
+  async function openDiscordInvite() {
+    const { open } = await import("@tauri-apps/plugin-shell");
+    await open("https://discord.gg/uSnAMzsTGP");
   }
 
   async function handleSubscribe() {
@@ -178,9 +188,26 @@ export default function Sidebar(props: SidebarProps) {
         <Show
           when={isLoggedIn()}
           fallback={
-            <button class="discord-login-btn sidebar-login" onClick={handleLogin}>
-              Login with Discord
-            </button>
+            <div class="sidebar-login-section">
+              <button class="discord-login-btn sidebar-login" onClick={handleLogin}>
+                Login with Discord
+              </button>
+              <Show when={loginError()}>
+                <div class="login-error">
+                  <Show
+                    when={loginError() === "discord_not_member"}
+                    fallback={<span class="login-error-text">Login failed: {loginError()}</span>}
+                  >
+                    <span class="login-error-text">
+                      You must join the Path of Purpose Discord server first.
+                    </span>
+                    <button class="discord-join-btn" onClick={openDiscordInvite}>
+                      Join Discord Server
+                    </button>
+                  </Show>
+                </div>
+              </Show>
+            </div>
           }
         >
           <div class="sidebar-user-info">

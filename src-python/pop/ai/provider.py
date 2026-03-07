@@ -31,15 +31,17 @@ def chat_completion(
     system: str,
     messages: list[dict],
     max_tokens: int = 1024,
+    json_output: bool = False,
 ) -> tuple[str, int]:
     """Send a chat completion request to the configured AI provider.
 
     Args:
-        provider: "anthropic" or "gemini"
+        provider: "anthropic", "gemini", or "openai"
         api_key: API key for the provider
         system: System prompt
         messages: List of {"role": "user"/"assistant", "content": "..."}
         max_tokens: Maximum tokens in the response
+        json_output: If True, request structured JSON output (OpenAI json mode)
 
     Returns:
         Tuple of (response_text, tokens_used)
@@ -51,7 +53,7 @@ def chat_completion(
     ]
 
     if provider == "openai":
-        return _openai_completion(api_key, system, sanitized, max_tokens)
+        return _openai_completion(api_key, system, sanitized, max_tokens, json_output)
     elif provider == "gemini":
         return _gemini_completion(api_key, system, sanitized, max_tokens)
     else:
@@ -89,6 +91,7 @@ def _openai_completion(
     system: str,
     messages: list[dict],
     max_tokens: int,
+    json_output: bool = False,
 ) -> tuple[str, int]:
     """Call the OpenAI API."""
     from openai import OpenAI, APIError
@@ -97,12 +100,16 @@ def _openai_completion(
 
     oai_messages = [{"role": "system", "content": system}] + messages
 
+    kwargs: dict = {
+        "model": OPENAI_MODEL,
+        "messages": oai_messages,
+        "max_tokens": max_tokens,
+    }
+    if json_output:
+        kwargs["response_format"] = {"type": "json_object"}
+
     try:
-        response = client.chat.completions.create(
-            model=OPENAI_MODEL,
-            messages=oai_messages,
-            max_tokens=max_tokens,
-        )
+        response = client.chat.completions.create(**kwargs)
     except APIError as e:
         raise ValueError(f"OpenAI API error: {e.message}") from e
 
