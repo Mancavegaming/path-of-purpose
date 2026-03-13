@@ -1345,6 +1345,9 @@ _s("Arcanist Brand Support")  # Brand trigger — no damage mod
 
 _s("Spellslinger Support")  # Trigger — no damage mod
 
+_s("Sacred Wisps Support", modifiers=[
+    _mod("less_damage", -51, source="gem:Sacred Wisps Support")])
+
 _s("Tribal Fury Support")  # Strike range — no direct damage mod
 
 _s("Mark on Hit Support")  # Apply marks — utility

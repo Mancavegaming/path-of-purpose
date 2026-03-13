@@ -10,6 +10,7 @@ import {
   clearTwitchToken,
   startOverlayServer,
   updateOverlayState,
+  logSnapshot,
 } from "../lib/commands";
 
 import {
@@ -21,6 +22,20 @@ import {
   stopSession,
   dismissSuggestion,
   getOverlayPayload,
+  logWatcherStats,
+  logWatcherOffset,
+  logWatcherPath,
+  updateLogWatcherStats,
+  overlayShowDps, setOverlayShowDps,
+  overlayShowDeathRecap, setOverlayShowDeathRecap,
+  overlayShowMapStats, setOverlayShowMapStats,
+  overlayShowTradeWhispers, setOverlayShowTradeWhispers,
+  overlayShowBossBar, setOverlayShowBossBar,
+  overlayShowBossTimer, setOverlayShowBossTimer,
+  overlayShowSessionDash, setOverlayShowSessionDash,
+  overlayShowGraceVerses, setOverlayShowGraceVerses,
+  bossKillSoundPath, setBossKillSoundPath,
+  bossKillSoundEnabled, setBossKillSoundEnabled,
 } from "../lib/streamStore";
 import {
   connect as ircConnect,
@@ -48,6 +63,10 @@ export default function StreamingPage() {
   // Overlay state
   const [overlayUrl, setOverlayUrl] = createSignal("");
   const [overlayRunning, setOverlayRunning] = createSignal(false);
+
+  // Death recap polling
+  const [deathRecapEnabled, setDeathRecapEnabled] = createSignal(false);
+  const [logError, setLogError] = createSignal("");
 
   // Command toggles (track in a signal for reactivity)
   const initStates = (): Record<string, boolean> => {
@@ -98,8 +117,41 @@ export default function StreamingPage() {
     }
   });
 
+  // Death recap polling — read Client.txt every 5s from last offset
+  let logTimer: ReturnType<typeof setInterval> | null = null;
+
+  createEffect(() => {
+    if (deathRecapEnabled()) {
+      // Initial snapshot (full scan)
+      pollLogSnapshot();
+      logTimer = setInterval(pollLogSnapshot, 5000);
+    } else {
+      if (logTimer) {
+        clearInterval(logTimer);
+        logTimer = null;
+      }
+    }
+  });
+
+  async function pollLogSnapshot() {
+    try {
+      const offset = logWatcherOffset();
+      const path = logWatcherPath() || undefined;
+      const snap = await logSnapshot(path, offset || undefined);
+      if (snap.error) {
+        setLogError(snap.error);
+      } else {
+        setLogError("");
+        updateLogWatcherStats(snap);
+      }
+    } catch (e) {
+      setLogError(String(e));
+    }
+  }
+
   onCleanup(() => {
     if (overlayTimer) clearInterval(overlayTimer);
+    if (logTimer) clearInterval(logTimer);
   });
 
   async function handleTwitchLogin() {
@@ -362,6 +414,110 @@ export default function StreamingPage() {
             </Show>
           </div>
 
+          {/* Overlay Section Toggles */}
+          <div class="stream-section">
+            <div class="stream-section-title">Overlay Sections</div>
+            <p class="stream-hint" style={{ "margin-bottom": "8px" }}>
+              Choose which sections appear on the stream overlay.
+            </p>
+            <div class="stream-command-grid">
+              <label class="stream-command-toggle">
+                <input type="checkbox" checked={overlayShowDps()} onChange={(e) => setOverlayShowDps(e.currentTarget.checked)} />
+                <span class="stream-command-name">DPS Ticker</span>
+              </label>
+              <label class="stream-command-toggle">
+                <input type="checkbox" checked={overlayShowBossBar()} onChange={(e) => setOverlayShowBossBar(e.currentTarget.checked)} />
+                <span class="stream-command-name">Boss Readiness</span>
+              </label>
+              <label class="stream-command-toggle">
+                <input type="checkbox" checked={overlayShowDeathRecap()} onChange={(e) => setOverlayShowDeathRecap(e.currentTarget.checked)} />
+                <span class="stream-command-name">Death Recap</span>
+              </label>
+              <label class="stream-command-toggle">
+                <input type="checkbox" checked={overlayShowMapStats()} onChange={(e) => setOverlayShowMapStats(e.currentTarget.checked)} />
+                <span class="stream-command-name">Map Analytics</span>
+              </label>
+              <label class="stream-command-toggle">
+                <input type="checkbox" checked={overlayShowTradeWhispers()} onChange={(e) => setOverlayShowTradeWhispers(e.currentTarget.checked)} />
+                <span class="stream-command-name">Trade Whispers</span>
+              </label>
+              <label class="stream-command-toggle">
+                <input type="checkbox" checked={overlayShowBossTimer()} onChange={(e) => setOverlayShowBossTimer(e.currentTarget.checked)} />
+                <span class="stream-command-name">Boss Timer</span>
+              </label>
+              <label class="stream-command-toggle">
+                <input type="checkbox" checked={overlayShowSessionDash()} onChange={(e) => setOverlayShowSessionDash(e.currentTarget.checked)} />
+                <span class="stream-command-name">Session Dashboard</span>
+              </label>
+              <label class="stream-command-toggle">
+                <input type="checkbox" checked={overlayShowGraceVerses()} onChange={(e) => setOverlayShowGraceVerses(e.currentTarget.checked)} />
+                <span class="stream-command-name">Grace Verses</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Boss Kill Sound */}
+          <div class="stream-section">
+            <div class="stream-section-title">
+              Boss Kill Sound
+              <label class="stream-death-toggle">
+                <input
+                  type="checkbox"
+                  checked={bossKillSoundEnabled()}
+                  onChange={(e) => setBossKillSoundEnabled(e.currentTarget.checked)}
+                />
+                <span>{bossKillSoundEnabled() ? "On" : "Off"}</span>
+              </label>
+            </div>
+            <Show when={bossKillSoundEnabled()}>
+              <div class="stream-field">
+                <label>Sound File</label>
+                <div class="stream-actions" style={{ gap: "8px" }}>
+                  <input
+                    type="text"
+                    class="stream-input"
+                    placeholder="C:\path\to\victory.mp3"
+                    value={bossKillSoundPath()}
+                    onInput={(e) => setBossKillSoundPath(e.currentTarget.value)}
+                    style={{ flex: "1" }}
+                  />
+                  <button
+                    class="btn-secondary"
+                    onClick={async () => {
+                      try {
+                        const { open } = await import("@tauri-apps/plugin-dialog");
+                        const file = await open({
+                          filters: [{ name: "Audio", extensions: ["mp3", "wav", "ogg", "m4a", "flac"] }],
+                          multiple: false,
+                        });
+                        if (file) setBossKillSoundPath(file as string);
+                      } catch {
+                        // dialog plugin not available, user can type path
+                      }
+                    }}
+                  >
+                    Browse
+                  </button>
+                  <Show when={bossKillSoundPath()}>
+                    <button
+                      class="btn-secondary"
+                      onClick={() => {
+                        const audio = new Audio("asset://localhost/" + bossKillSoundPath().replace(/\\/g, "/"));
+                        audio.volume = 0.5;
+                        audio.play().catch(() => {});
+                      }}
+                    >
+                      Test
+                    </button>
+                  </Show>
+                </div>
+                <p class="stream-hint">
+                  Plays on the overlay when a boss is killed. Choose any .mp3, .wav, or .ogg file.
+                </p>
+              </div>
+            </Show>
+          </div>
+
           {/* Command Toggles */}
           <div class="stream-section">
             <div class="stream-section-title">Chat Commands</div>
@@ -398,6 +554,120 @@ export default function StreamingPage() {
                 <span class="stream-stat-value">{commandsHandled()}</span>
               </div>
             </div>
+          </div>
+
+          {/* Death Recap / Log Watcher */}
+          <div class="stream-section">
+            <div class="stream-section-title">
+              Death Recap
+              <label class="stream-death-toggle">
+                <input
+                  type="checkbox"
+                  checked={deathRecapEnabled()}
+                  onChange={(e) => setDeathRecapEnabled(e.currentTarget.checked)}
+                />
+                <span>{deathRecapEnabled() ? "Tracking" : "Off"}</span>
+              </label>
+            </div>
+
+            <Show when={logError()}>
+              <div class="error-toast" style={{ "margin-bottom": "8px" }}>{logError()}</div>
+            </Show>
+
+            <Show when={deathRecapEnabled() && logWatcherPath()}>
+              <p class="stream-hint" style={{ "margin-bottom": "4px" }}>
+                Reading: {logWatcherPath()}
+              </p>
+            </Show>
+
+            <Show
+              when={deathRecapEnabled() && logWatcherStats()}
+              fallback={
+                <p class="stream-hint">
+                  Enable to auto-detect and parse your PoE Client.txt log.
+                  Shows deaths, map runs, and what killed you on the overlay.
+                </p>
+              }
+            >
+              {(() => {
+                const stats = logWatcherStats()!;
+                return (
+                  <>
+                    <div class="stream-session-stats" style={{ "margin-bottom": "12px" }}>
+                      <div class="stream-stat">
+                        <span class="stream-stat-label">Zone</span>
+                        <span class="stream-stat-value">{stats.current_zone || "—"}</span>
+                      </div>
+                      <div class="stream-stat">
+                        <span class="stream-stat-label">Maps</span>
+                        <span class="stream-stat-value">{stats.maps_completed}</span>
+                      </div>
+                      <div class="stream-stat">
+                        <span class="stream-stat-label">Deaths</span>
+                        <span class="stream-stat-value" style={{ color: stats.total_deaths > 0 ? "#f87171" : undefined }}>
+                          {stats.total_deaths}
+                        </span>
+                      </div>
+                      <div class="stream-stat">
+                        <span class="stream-stat-label">Levels</span>
+                        <span class="stream-stat-value">{stats.levels_gained}</span>
+                      </div>
+                      <div class="stream-stat">
+                        <span class="stream-stat-label">Maps/hr</span>
+                        <span class="stream-stat-value">{stats.maps_per_hour.toFixed(1)}</span>
+                      </div>
+                      <div class="stream-stat">
+                        <span class="stream-stat-label">Deaths/hr</span>
+                        <span class="stream-stat-value" style={{ color: stats.deaths_per_hour > 2 ? "#f87171" : undefined }}>
+                          {stats.deaths_per_hour.toFixed(1)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Current map info */}
+                    <Show when={stats.current_map}>
+                      {(map) => (
+                        <div class="stream-death-map">
+                          <div class="stream-death-map-header">
+                            <span>{map().zone_name}</span>
+                            <Show when={map().area_level}>
+                              <span class="stream-death-level">Lv{map().area_level}</span>
+                            </Show>
+                            <span class="stream-death-duration">{map().duration}</span>
+                            <Show when={map().deaths > 0}>
+                              <span class="stream-death-count">{map().deaths} death{map().deaths !== 1 ? "s" : ""}</span>
+                            </Show>
+                          </div>
+                          <Show when={map().death_recaps.length > 0}>
+                            <div class="stream-death-recaps">
+                              <For each={map().death_recaps}>
+                                {(recap) => (
+                                  <div class="stream-death-recap-entry">
+                                    <span class="stream-death-skull">&#x1F480;</span>
+                                    <span class="stream-death-killer">{recap.killer}</span>
+                                    <span class="stream-death-time">{recap.timestamp}</span>
+                                  </div>
+                                )}
+                              </For>
+                            </div>
+                          </Show>
+                        </div>
+                      )}
+                    </Show>
+
+                    {/* Last death */}
+                    <Show when={stats.last_death && !stats.current_map}>
+                      <div class="stream-death-last">
+                        <span class="stream-death-skull">&#x1F480;</span>
+                        Last death: <strong>{stats.last_death!.character}</strong> slain by{" "}
+                        <strong style={{ color: "#f87171" }}>{stats.last_death!.killer}</strong>
+                        {" "}in {stats.last_death!.zone}
+                      </div>
+                    </Show>
+                  </>
+                );
+              })()}
+            </Show>
           </div>
         </div>
 

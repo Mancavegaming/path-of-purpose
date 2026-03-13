@@ -251,6 +251,7 @@ async def _build_filtered_query(
             value={"min": min_count},
         ))
     else:
+        # No stat filters — search by base type only
         stat_groups.append(StatGroup(type="and", filters=[]))
 
     # Build query filters (weapon DPS floor + socket/link requirements)
@@ -1484,6 +1485,118 @@ def cmd_delta_builds(args: argparse.Namespace) -> None:
     print(json.dumps(report.model_dump(mode="json")))
 
 
+def cmd_log_snapshot(args: argparse.Namespace) -> None:
+    """Parse Client.txt from a given offset and return events + stats."""
+    import os
+    from pop.log_watcher.watcher import LogWatcher, SessionStats
+    from pop.log_watcher.monster_names import MONSTER_NAMES
+
+    raw = _safe_stdin_read() if args.stdin else "{}"
+    params = json.loads(raw) if raw else {}
+    log_path = params.get("log_path", "")
+    offset = params.get("offset", 0)  # byte offset to read from
+    character_name = params.get("character_name", "")
+
+    if not log_path or not os.path.exists(log_path):
+        # Try common paths across multiple drives
+        base_paths = [
+            r"Grinding Gear Games\Path of Exile\logs\Client.txt",
+            r"Grinding Gear Games\Path of Exile 2\logs\Client.txt",
+            r"Steam\steamapps\common\Path of Exile\logs\Client.txt",
+            r"Steam\steamapps\common\Path of Exile 2\logs\Client.txt",
+            r"Epic Games\PathOfExile\logs\Client.txt",
+        ]
+        common_paths = []
+        # Program Files paths
+        for base in base_paths:
+            common_paths.append(os.path.expandvars(rf"%ProgramFiles(x86)%\{base}"))
+            common_paths.append(os.path.expandvars(rf"%ProgramFiles%\{base}"))
+        # Also check common Steam library locations on other drives
+        for drive in "CDEFGH":
+            for base in base_paths:
+                common_paths.append(rf"{drive}:\{base}")
+                common_paths.append(rf"{drive}:\Games\{base}")
+                common_paths.append(rf"{drive}:\SteamLibrary\steamapps\common\Path of Exile\logs\Client.txt")
+                common_paths.append(rf"{drive}:\SteamLibrary\steamapps\common\Path of Exile 2\logs\Client.txt")
+        # Deduplicate while preserving order
+        seen = set()
+        unique_paths = []
+        for p in common_paths:
+            norm = os.path.normcase(p)
+            if norm not in seen:
+                seen.add(norm)
+                unique_paths.append(p)
+        for p in unique_paths:
+            if os.path.exists(p):
+                log_path = p
+                break
+
+    if not log_path or not os.path.exists(log_path):
+        print(json.dumps({"error": "Client.txt not found. Please provide log_path.", "found_path": None}))
+        return
+
+    watcher = LogWatcher(log_path, monster_names=MONSTER_NAMES)
+
+    # Read from offset to end of file
+    events = []
+    try:
+        with open(log_path, "r", encoding="utf-8", errors="replace") as f:
+            file_size = os.path.getsize(log_path)
+            if offset > 0 and offset < file_size:
+                f.seek(offset)
+            elif offset == 0:
+                # First call: only read last 50KB to catch recent events
+                start = max(0, file_size - 50 * 1024)
+                f.seek(start)
+                if start > 0:
+                    f.readline()  # skip partial line
+
+            for line in f:
+                line = line.strip()
+                if line:
+                    watcher._process_line(line)
+
+            new_offset = f.tell()
+    except Exception as e:
+        print(json.dumps({"error": str(e)}))
+        return
+
+    result = {
+        "log_path": log_path,
+        "offset": new_offset,
+        "stats": watcher.stats.to_dict(),
+    }
+    print(json.dumps(result))
+
+
+def cmd_fetch_leagues(args: argparse.Namespace) -> None:
+    """Fetch available trade leagues from the PoE trade API."""
+    import httpx
+    import sys
+
+    try:
+        resp = httpx.get(
+            "https://www.pathofexile.com/api/trade/data/leagues",
+            headers={"User-Agent": "PathOfPurpose/0.2.0"},
+            timeout=10.0,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        # Returns {"result": [{"id": "Mirage", "text": "Mirage"}, ...]}
+        seen: set[str] = set()
+        leagues: list[str] = []
+        for entry in data.get("result", []):
+            lid = entry["id"]
+            if lid not in seen:
+                seen.add(lid)
+                leagues.append(lid)
+        print(json.dumps({"leagues": leagues}))
+    except Exception as exc:
+        print(f"Failed to fetch leagues: {exc}", file=sys.stderr)
+        # Return a sensible fallback
+        print(json.dumps({"leagues": ["Standard", "Hardcore"]}))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog="pop",
@@ -1645,6 +1758,14 @@ def main() -> None:
     p_delta_b = subparsers.add_parser("delta_builds", help="Compare two Build objects (guide vs character)")
     p_delta_b.add_argument("--stdin", action="store_true", default=True)
     p_delta_b.set_defaults(func=cmd_delta_builds)
+
+    # --- log_snapshot ---
+    p_log = subparsers.add_parser("log_snapshot", help="Parse recent Client.txt events and return session stats")
+    p_log.add_argument("--stdin", action="store_true", default=True)
+    p_log.set_defaults(func=cmd_log_snapshot)
+
+    p_leagues = subparsers.add_parser("fetch_leagues", help="Fetch current trade leagues from PoE API")
+    p_leagues.set_defaults(func=cmd_fetch_leagues)
 
     args = parser.parse_args()
     args.func(args)

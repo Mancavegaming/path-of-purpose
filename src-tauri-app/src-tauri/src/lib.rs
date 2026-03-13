@@ -1464,8 +1464,216 @@ body {
   margin-top: 4px;
 }
 
+/* Death recap overlay */
+.death-recap {
+  position: absolute;
+  top: 80px;
+  left: 12px;
+  max-width: 360px;
+  pointer-events: none;
+}
+.death-notification {
+  animation: deathSlideIn 0.4s ease-out;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.death-skull { font-size: 22px; }
+.death-text { font-size: 14px; }
+.death-killer { color: #f87171; font-weight: 700; }
+.death-zone { font-size: 11px; color: #8b949e; margin-top: 2px; }
+
+.map-stats-bar {
+  position: absolute;
+  top: 80px;
+  right: 12px;
+  font-size: 12px;
+  color: #8b949e;
+  text-align: right;
+  pointer-events: none;
+  min-width: 220px;
+}
+.map-stats-bar .stat-value { color: #e6edf3; font-weight: 600; }
+.map-stats-bar .death-count { color: #f87171; font-weight: 700; }
+.map-stats-bar .stat-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 0;
+}
+.map-stats-bar .stat-label { color: #8b949e; }
+.map-stats-bar .separator {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  margin: 4px 0;
+}
+.map-stats-bar .record-tag {
+  font-size: 10px;
+  color: #fbbf24;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.map-stats-bar .fastest { color: #4ade80; }
+.map-history-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  padding: 1px 0;
+  opacity: 0.8;
+}
+.map-history-row .zone { color: #c9d1d9; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.map-history-row .time { color: #8b949e; }
+.map-history-row .deaths-badge { color: #f87171; font-weight: 600; }
+
+/* Trade whispers */
+.trade-feed {
+  position: absolute;
+  bottom: 80px;
+  right: 12px;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: none;
+}
+.trade-card {
+  animation: tradeSlideIn 0.3s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  padding: 6px 10px;
+}
+.trade-icon { font-size: 16px; }
+.trade-player { color: #58a6ff; font-weight: 600; }
+.trade-item { color: #fbbf24; font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trade-price { color: #4ade80; font-weight: 600; }
+.trade-currency { color: #8b949e; }
+
+@keyframes tradeSlideIn {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Boss timer */
+.boss-timer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+.boss-timer .boss-name {
+  font-size: 20px;
+  font-weight: 800;
+  color: #ff6b6b;
+  text-shadow: 0 0 20px rgba(255,107,107,0.5);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.boss-timer .boss-time {
+  font-size: 42px;
+  font-weight: 900;
+  color: #fbbf24;
+  text-shadow: 0 0 30px rgba(251,191,36,0.4);
+  font-variant-numeric: tabular-nums;
+}
+.boss-timer .boss-deaths-count {
+  font-size: 14px;
+  color: #f87171;
+  margin-top: 4px;
+}
+
+/* Grace verse on death */
+.grace-verse {
+  position: absolute;
+  bottom: 200px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  max-width: 600px;
+  pointer-events: none;
+  animation: verseFadeIn 1s ease-out;
+}
+.grace-verse .verse-text {
+  font-size: 18px;
+  font-style: italic;
+  color: #e6edf3;
+  text-shadow: 0 0 20px rgba(230,237,243,0.3);
+  line-height: 1.5;
+}
+.grace-verse .verse-ref {
+  font-size: 13px;
+  color: #fbbf24;
+  font-weight: 700;
+  margin-top: 6px;
+}
+@keyframes verseFadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Boss kill celebration */
+.boss-kill-celebration {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  animation: bossKillPulse 3s ease-out forwards;
+}
+.boss-kill-celebration .kill-text {
+  font-size: 36px;
+  font-weight: 900;
+  color: #4ade80;
+  text-shadow: 0 0 40px rgba(74,222,128,0.6);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+.boss-kill-celebration .kill-time {
+  font-size: 20px;
+  color: #fbbf24;
+  margin-top: 8px;
+}
+@keyframes bossKillPulse {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+  40% { transform: translate(-50%, -50%) scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Session dashboard */
+.session-dashboard {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  font-size: 11px;
+  pointer-events: none;
+}
+.session-dashboard .dash-row {
+  display: flex;
+  gap: 16px;
+  color: #8b949e;
+}
+.session-dashboard .dash-item {
+  display: flex;
+  gap: 4px;
+}
+.session-dashboard .dash-val { color: #e6edf3; font-weight: 600; }
+.session-dashboard .dash-val.deaths { color: #f87171; }
+.session-dashboard .dash-val.bosses { color: #4ade80; }
+
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes deathSlideIn {
+  from { opacity: 0; transform: translateX(-30px); }
   to { opacity: 1; transform: translateX(0); }
 }
 .hidden { display: none; }
@@ -1481,6 +1689,14 @@ body {
   <div class="panel boss-bar" id="boss-bar"></div>
 </div>
 
+<div class="death-recap" id="death-recap"></div>
+<div class="panel map-stats-bar hidden" id="map-stats"></div>
+<div class="trade-feed" id="trade-feed"></div>
+<div class="boss-timer panel hidden" id="boss-timer"></div>
+<div class="grace-verse panel hidden" id="grace-verse"></div>
+<div id="boss-kill-container"></div>
+<div class="session-dashboard panel hidden" id="session-dashboard"></div>
+
 <div class="overlay-bottom">
   <div class="suggestions" id="suggestions"></div>
   <div class="panel session-stats" id="session-stats">
@@ -1491,6 +1707,15 @@ body {
 
 <script>
 let lastDps = 0;
+let lastDeathCount = 0;
+let deathNotifications = [];
+let lastTradeCount = 0;
+let tradeNotifications = [];
+let lastBossKills = 0;
+let lastGraceVerse = '';
+let graceVerseTime = 0;
+let bossKillTime = 0;
+let bossKillDuration = '';
 
 function formatDps(v) {
   if (v >= 1e6) return (v / 1e6).toFixed(1) + 'M';
@@ -1534,7 +1759,7 @@ async function poll() {
 
     // Boss readiness
     const bossBar = document.getElementById('boss-bar');
-    if (data.boss_readiness && data.boss_readiness.length) {
+    if (data.show_boss_bar !== false && data.boss_readiness && data.boss_readiness.length) {
       bossBar.innerHTML = data.boss_readiness.map(b =>
         '<div class="boss-pip"><span class="boss-dot ' + b.status + '"></span>' + b.name + '</div>'
       ).join('');
@@ -1557,8 +1782,200 @@ async function poll() {
     document.getElementById('uptime').textContent = formatUptime(data.session_start);
     document.getElementById('cmds').textContent = String(data.commands_handled || 0);
 
-    // Hide panels if no build
-    document.getElementById('dps-panel').classList.toggle('hidden', !data.combined_dps);
+    // Hide panels based on toggles + data
+    document.getElementById('dps-panel').classList.toggle('hidden', !data.combined_dps || data.show_dps === false);
+
+    // Death recap
+    const ls = data.log_stats;
+    if (ls) {
+      // Detect new deaths — show notification
+      const newTotal = ls.total_deaths || 0;
+      if (data.show_death_recap !== false && newTotal > lastDeathCount && lastDeathCount > 0) {
+        const killer = ls.last_death ? ls.last_death.killer : 'Unknown';
+        const zone = ls.last_death ? ls.last_death.zone : '';
+        deathNotifications.push({ killer, zone, time: Date.now() });
+        if (deathNotifications.length > 3) deathNotifications.shift();
+      }
+      lastDeathCount = newTotal;
+
+      // Render death notifications (fade out after 15s)
+      const now = Date.now();
+      deathNotifications = deathNotifications.filter(d => now - d.time < 15000);
+      const deathEl = document.getElementById('death-recap');
+      if (data.show_death_recap !== false && deathNotifications.length > 0) {
+        deathEl.innerHTML = deathNotifications.map(d =>
+          '<div class="panel death-notification">' +
+          '<span class="death-skull">&#x1F480;</span>' +
+          '<div class="death-text">Slain by <span class="death-killer">' + d.killer + '</span>' +
+          (d.zone ? '<div class="death-zone">' + d.zone + '</div>' : '') +
+          '</div></div>'
+        ).join('');
+      } else {
+        deathEl.innerHTML = '';
+      }
+
+      // Trade whisper feed
+      const tradeEl = document.getElementById('trade-feed');
+      if (data.show_trade_whispers !== false && ls.trade_whispers && ls.trade_whispers.length > 0) {
+        const newCount = ls.trade_whispers.length;
+        if (newCount > lastTradeCount) {
+          const newTrades = ls.trade_whispers.slice(0, newCount - lastTradeCount);
+          for (const tw of newTrades) {
+            tradeNotifications.push({ player: tw.player, item: tw.item, price: tw.price, currency: tw.currency, time: Date.now() });
+            if (tradeNotifications.length > 5) tradeNotifications.shift();
+          }
+        }
+        lastTradeCount = newCount;
+
+        // Fade out after 20s
+        tradeNotifications = tradeNotifications.filter(t => Date.now() - t.time < 20000);
+        if (tradeNotifications.length > 0) {
+          tradeEl.innerHTML = tradeNotifications.map(t =>
+            '<div class="panel trade-card">' +
+            '<span class="trade-player">' + t.player + '</span> ' +
+            '<span class="trade-item">' + t.item + '</span> ' +
+            '<span class="trade-price">' + t.price + '</span> ' +
+            '<span class="trade-currency">' + t.currency + '</span>' +
+            '</div>'
+          ).join('');
+        } else {
+          tradeEl.innerHTML = '';
+        }
+      } else {
+        if (tradeEl) tradeEl.innerHTML = '';
+      }
+
+      // Map analytics panel (top-right)
+      const mapEl = document.getElementById('map-stats');
+      if (data.show_map_stats !== false && (ls.current_zone || ls.maps_completed > 0)) {
+        let html = '';
+
+        // Current zone header
+        if (ls.current_map) {
+          html += '<div class="stat-row"><span class="stat-value">' + ls.current_map.zone_name + '</span>';
+          if (ls.current_map.area_level) html += '<span class="stat-value">T' + Math.max(1, ls.current_map.area_level - 67) + '</span>';
+          html += '</div>';
+          html += '<div class="stat-row"><span class="stat-label">Map time</span><span class="stat-value">' + ls.current_map.duration + '</span></div>';
+          if (ls.current_map.deaths > 0) {
+            html += '<div class="stat-row"><span class="stat-label">Deaths this map</span><span class="death-count">' + ls.current_map.deaths + '</span></div>';
+          }
+          html += '<div class="separator"></div>';
+        }
+
+        // Session stats
+        html += '<div class="stat-row"><span class="stat-label">Maps</span><span class="stat-value">' + (ls.maps_completed || 0) + '</span></div>';
+        html += '<div class="stat-row"><span class="stat-label">Maps/hr</span><span class="stat-value">' + (ls.maps_per_hour || 0) + '</span></div>';
+        html += '<div class="stat-row"><span class="stat-label">Avg time</span><span class="stat-value">' + (ls.avg_map_time || '—') + '</span></div>';
+        html += '<div class="stat-row"><span class="stat-label">Deaths</span><span class="death-count">' + (ls.total_deaths || 0) + '</span></div>';
+        html += '<div class="stat-row"><span class="stat-label">Deaths/hr</span><span class="death-count">' + (ls.deaths_per_hour || 0) + '</span></div>';
+
+        // Fastest map record
+        if (ls.fastest_map) {
+          html += '<div class="separator"></div>';
+          html += '<div class="stat-row"><span class="record-tag">Fastest</span><span class="fastest">' + ls.fastest_map.duration + '</span></div>';
+          html += '<div class="stat-row"><span class="stat-label" style="font-size:10px">' + ls.fastest_map.zone_name + '</span></div>';
+        }
+
+        // Recent map history (last 5)
+        if (ls.map_history && ls.map_history.length > 0) {
+          html += '<div class="separator"></div>';
+          const recent = ls.map_history.slice(0, 5);
+          for (const m of recent) {
+            html += '<div class="map-history-row">';
+            html += '<span class="zone">' + m.zone_name + '</span>';
+            html += '<span class="time">' + m.duration + '</span>';
+            if (m.deaths > 0) html += '<span class="deaths-badge">' + m.deaths + 'd</span>';
+            html += '</div>';
+          }
+        }
+
+        mapEl.innerHTML = html;
+        mapEl.classList.remove('hidden');
+      } else {
+        mapEl.classList.add('hidden');
+      }
+
+      // Boss kill timer (center screen)
+      const bossEl = document.getElementById('boss-timer');
+      if (data.show_boss_timer !== false && ls.current_boss) {
+        const b = ls.current_boss;
+        // Live-count the timer
+        const secs = b.duration_seconds;
+        const bm = Math.floor(secs / 60);
+        const bs = secs % 60;
+        let html = '<div class="boss-name">' + b.boss_name + '</div>';
+        html += '<div class="boss-time">' + String(bm).padStart(2, '0') + ':' + String(bs).padStart(2, '0') + '</div>';
+        if (b.deaths > 0) html += '<div class="boss-deaths-count">' + b.deaths + ' death' + (b.deaths !== 1 ? 's' : '') + '</div>';
+        bossEl.innerHTML = html;
+        bossEl.classList.remove('hidden');
+      } else {
+        bossEl.classList.add('hidden');
+      }
+
+      // Boss kill celebration
+      const killContainer = document.getElementById('boss-kill-container');
+      const newBossKills = ls.boss_kills || 0;
+      if (newBossKills > lastBossKills && lastBossKills > 0) {
+        // Get the last boss from history
+        const lastBoss = ls.boss_history && ls.boss_history.length > 0 ? ls.boss_history[0] : null;
+        const bossName = lastBoss ? lastBoss.boss_name : 'Boss';
+        bossKillDuration = lastBoss ? lastBoss.duration : '';
+        bossKillTime = Date.now();
+        killContainer.innerHTML = '<div class="boss-kill-celebration">' +
+          '<div class="kill-text">' + bossName + ' Defeated!</div>' +
+          (bossKillDuration ? '<div class="kill-time">' + bossKillDuration + '</div>' : '') +
+          '</div>';
+        // Play sound if configured
+        if (data.boss_kill_sound) {
+          try {
+            const audio = new Audio('asset://localhost/' + data.boss_kill_sound.replace(/\\\\/g, '/').replace(/\\\\/g, '/'));
+            audio.volume = 0.6;
+            audio.play().catch(function(){});
+          } catch(e) {}
+        }
+      }
+      lastBossKills = newBossKills;
+      // Clear celebration after 4s
+      if (bossKillTime && Date.now() - bossKillTime > 4000) {
+        killContainer.innerHTML = '';
+        bossKillTime = 0;
+      }
+
+      // Grace verse on death
+      const graceEl = document.getElementById('grace-verse');
+      if (data.show_grace_verses !== false && ls.last_death && ls.last_death.grace_verse) {
+        const verseKey = ls.last_death.grace_ref + ls.last_death.timestamp;
+        if (verseKey !== lastGraceVerse) {
+          lastGraceVerse = verseKey;
+          graceVerseTime = Date.now();
+          graceEl.innerHTML = '<div class="verse-text">"' + ls.last_death.grace_verse + '"</div>' +
+            '<div class="verse-ref">— ' + ls.last_death.grace_ref + '</div>';
+          graceEl.classList.remove('hidden');
+        }
+      }
+      // Fade out grace verse after 12s
+      if (graceVerseTime && Date.now() - graceVerseTime > 12000) {
+        graceEl.classList.add('hidden');
+        graceVerseTime = 0;
+      }
+
+      // Session dashboard (bottom-left)
+      const dashEl = document.getElementById('session-dashboard');
+      if (data.show_session_dash !== false) {
+        let html = '<div class="dash-row">';
+        html += '<div class="dash-item">Maps <span class="dash-val">' + (ls.maps_completed || 0) + '</span></div>';
+        html += '<div class="dash-item">Deaths <span class="dash-val deaths">' + (ls.total_deaths || 0) + '</span></div>';
+        html += '<div class="dash-item">Levels <span class="dash-val">' + (ls.levels_gained || 0) + '</span></div>';
+        html += '<div class="dash-item">Bosses <span class="dash-val bosses">' + (ls.boss_kills || 0) + '</span></div>';
+        html += '<div class="dash-item">Trades <span class="dash-val">' + (ls.trades_completed || 0) + '</span></div>';
+        html += '<div class="dash-item">Time <span class="dash-val">' + (ls.time_played || '0m') + '</span></div>';
+        html += '</div>';
+        dashEl.innerHTML = html;
+        dashEl.classList.remove('hidden');
+      } else {
+        dashEl.classList.add('hidden');
+      }
+    }
 
   } catch (e) {
     // Server not ready yet, retry
@@ -1572,6 +1989,49 @@ poll();
 </html>
 "##;
 
+/// Parse recent Client.txt events and return session stats (deaths, maps, etc.)
+#[tauri::command]
+async fn log_snapshot(
+    log_path: Option<String>,
+    offset: Option<u64>,
+    character_name: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let mut input = serde_json::json!({});
+    if let Some(p) = log_path {
+        input["log_path"] = serde_json::Value::String(p);
+    }
+    if let Some(o) = offset {
+        input["offset"] = serde_json::Value::Number(serde_json::Number::from(o));
+    }
+    if let Some(c) = character_name {
+        input["character_name"] = serde_json::Value::String(c);
+    }
+    let stdin_data = serde_json::to_string(&input)
+        .map_err(|e| format!("Failed to serialize input: {}", e))?;
+
+    let stdout = run_python_command(
+        &["-m", "pop.main", "log_snapshot", "--stdin"],
+        Some(&stdin_data),
+    )?;
+
+    let result: serde_json::Value = serde_json::from_str(&stdout)
+        .map_err(|e| format!("Failed to parse log_snapshot output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))?;
+    Ok(result)
+}
+
+/// Fetch available trade leagues from the PoE trade API
+#[tauri::command]
+async fn fetch_leagues() -> Result<serde_json::Value, String> {
+    let stdout = run_python_command(
+        &["-m", "pop.main", "fetch_leagues"],
+        None,
+    )?;
+
+    let result: serde_json::Value = serde_json::from_str(&stdout)
+        .map_err(|e| format!("Failed to parse fetch_leagues output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))?;
+    Ok(result)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -1579,6 +2039,7 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_dialog::init())
         .manage(OverlayState(Arc::new(RwLock::new(serde_json::json!({})))))
         .manage(OverlayServerRunning(Arc::new(RwLock::new(false))))
         .invoke_handler(tauri::generate_handler![
@@ -1634,6 +2095,10 @@ pub fn run() {
             update_overlay_state,
             start_overlay_server,
             stop_overlay_server,
+            // Log watcher
+            log_snapshot,
+            // Trade utilities
+            fetch_leagues,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

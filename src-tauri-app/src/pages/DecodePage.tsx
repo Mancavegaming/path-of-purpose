@@ -1,5 +1,5 @@
-import { createSignal, createMemo, createEffect, untrack, Show, type Accessor, type Setter } from "solid-js";
-import { decodeBuild, scrapeBuildGuide, resolveTreeUrls, saveBuildData, calculateDps } from "../lib/commands";
+import { createSignal, createMemo, createEffect, untrack, onMount, Show, For, type Accessor, type Setter } from "solid-js";
+import { decodeBuild, scrapeBuildGuide, resolveTreeUrls, saveBuildData, calculateDps, fetchLeagues } from "../lib/commands";
 import type { Build, BuildGuide, CalcResult, Item } from "../lib/types";
 import { guideToBuild, resolveVariantForCalc } from "../lib/buildUtils";
 import BuildSummary from "../components/BuildSummary";
@@ -33,6 +33,25 @@ export default function DecodePage(props: DecodePageProps) {
   const [showSaveInput, setShowSaveInput] = createSignal(false);
   const [saveName, setSaveName] = createSignal("");
   const [saveStatus, setSaveStatus] = createSignal("");
+
+  // Dynamic league list from trade API
+  const [availableLeagues, setAvailableLeagues] = createSignal<string[]>([
+    "Mirage", "Hardcore Mirage", "Standard", "Hardcore",
+  ]);
+  onMount(async () => {
+    try {
+      const leagues = await fetchLeagues();
+      if (leagues.length > 0) {
+        setAvailableLeagues(leagues);
+        // If current selection isn't in the list, default to first
+        if (!leagues.includes(league())) {
+          setLeague(leagues[0]);
+        }
+      }
+    } catch {
+      // Keep fallback defaults
+    }
+  });
 
   // Guide + tier state for item synthesis
   const [sourceGuide, setSourceGuide] = createSignal<BuildGuide | null>(null);
@@ -221,10 +240,9 @@ export default function DecodePage(props: DecodePageProps) {
               value={league()}
               onChange={(e) => setLeague(e.currentTarget.value)}
             >
-              <option value="Mirage">Mirage</option>
-              <option value="Hardcore Mirage">HC Mirage</option>
-              <option value="Standard">Standard</option>
-              <option value="Hardcore">Hardcore</option>
+              <For each={availableLeagues()}>
+                {(l) => <option value={l}>{l}</option>}
+              </For>
             </select>
           </div>
           <Show when={sourceGuide()}>

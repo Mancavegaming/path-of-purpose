@@ -7,6 +7,7 @@
  */
 import { createSignal } from "solid-js";
 import type { Build, CalcResult } from "./types";
+import type { LogSnapshot } from "./commands";
 
 // --- Types ---
 
@@ -31,6 +32,21 @@ const [viewerSuggestions, setViewerSuggestions] = createSignal<ViewerSuggestion[
 const [chatLog, setChatLog] = createSignal<ChatLogEntry[]>([]);
 const [sessionStartTime, setSessionStartTime] = createSignal<number | null>(null);
 const [commandsHandled, setCommandsHandled] = createSignal(0);
+const [logWatcherStats, setLogWatcherStatsSignal] = createSignal<LogSnapshot["stats"] | null>(null);
+const [logWatcherOffset, setLogWatcherOffset] = createSignal<number>(0);
+const [logWatcherPath, setLogWatcherPath] = createSignal<string>("");
+
+// Overlay section toggles — streamer controls what viewers see
+const [overlayShowDps, setOverlayShowDps] = createSignal(true);
+const [overlayShowDeathRecap, setOverlayShowDeathRecap] = createSignal(true);
+const [overlayShowMapStats, setOverlayShowMapStats] = createSignal(true);
+const [overlayShowTradeWhispers, setOverlayShowTradeWhispers] = createSignal(false);
+const [overlayShowBossBar, setOverlayShowBossBar] = createSignal(true);
+const [overlayShowBossTimer, setOverlayShowBossTimer] = createSignal(true);
+const [overlayShowSessionDash, setOverlayShowSessionDash] = createSignal(true);
+const [overlayShowGraceVerses, setOverlayShowGraceVerses] = createSignal(true);
+const [bossKillSoundPath, setBossKillSoundPath] = createSignal<string>("");
+const [bossKillSoundEnabled, setBossKillSoundEnabled] = createSignal(false);
 
 export {
   streamBuild,
@@ -39,6 +55,19 @@ export {
   chatLog,
   sessionStartTime,
   commandsHandled,
+  logWatcherStats,
+  logWatcherOffset,
+  logWatcherPath,
+  overlayShowDps, setOverlayShowDps,
+  overlayShowDeathRecap, setOverlayShowDeathRecap,
+  overlayShowMapStats, setOverlayShowMapStats,
+  overlayShowTradeWhispers, setOverlayShowTradeWhispers,
+  overlayShowBossBar, setOverlayShowBossBar,
+  overlayShowBossTimer, setOverlayShowBossTimer,
+  overlayShowSessionDash, setOverlayShowSessionDash,
+  overlayShowGraceVerses, setOverlayShowGraceVerses,
+  bossKillSoundPath, setBossKillSoundPath,
+  bossKillSoundEnabled, setBossKillSoundEnabled,
 };
 
 /** Called by DecodePage / CharacterPage when DPS is calculated. */
@@ -72,6 +101,12 @@ export function startSession(): void {
 
 export function stopSession(): void {
   setSessionStartTime(null);
+}
+
+export function updateLogWatcherStats(snapshot: LogSnapshot): void {
+  setLogWatcherStatsSignal(snapshot.stats);
+  setLogWatcherOffset(snapshot.offset);
+  if (snapshot.log_path) setLogWatcherPath(snapshot.log_path);
 }
 
 /** Build the JSON payload for the overlay server. */
@@ -129,5 +164,17 @@ export function getOverlayPayload(): Record<string, unknown> {
     viewer_suggestions: viewerSuggestions().slice(-5),
     session_start: sessionStartTime(),
     commands_handled: commandsHandled(),
+    // Death recap / log watcher
+    log_stats: logWatcherStats(),
+    // Overlay section toggles
+    show_dps: overlayShowDps(),
+    show_death_recap: overlayShowDeathRecap(),
+    show_map_stats: overlayShowMapStats(),
+    show_trade_whispers: overlayShowTradeWhispers(),
+    show_boss_bar: overlayShowBossBar(),
+    show_boss_timer: overlayShowBossTimer(),
+    show_session_dash: overlayShowSessionDash(),
+    show_grace_verses: overlayShowGraceVerses(),
+    boss_kill_sound: bossKillSoundEnabled() ? bossKillSoundPath() : "",
   };
 }

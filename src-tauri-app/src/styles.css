@@ -4961,6 +4961,79 @@ button:disabled {
   color: var(--text-primary);
 }
 
+/* Death Recap */
+.stream-death-toggle {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.stream-death-toggle input { cursor: pointer; }
+
+.stream-death-map {
+  background: var(--bg-primary);
+  border-radius: 6px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--accent);
+}
+.stream-death-map-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.stream-death-level {
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.06);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.stream-death-duration {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+.stream-death-count {
+  font-size: 12px;
+  color: #f87171;
+  font-weight: 600;
+}
+.stream-death-recaps {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stream-death-recap-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  padding: 4px 0;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.stream-death-skull { font-size: 14px; }
+.stream-death-killer {
+  color: #f87171;
+  font-weight: 600;
+}
+.stream-death-time {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.stream-death-last {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 8px 0;
+}
+
 /* Suggestions */
 .stream-suggestions {
   display: flex;

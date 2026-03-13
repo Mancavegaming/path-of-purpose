@@ -518,6 +518,92 @@ export async function stopOverlayServer(): Promise<void> {
   await invoke("stop_overlay_server");
 }
 
+export interface MapHistoryEntry {
+  zone_name: string;
+  area_level: number;
+  duration: string;
+  duration_seconds: number;
+  deaths: number;
+}
+
+export interface TradeWhisper {
+  timestamp: string;
+  player: string;
+  item: string;
+  price: string;
+  currency: string;
+  league: string;
+}
+
+export interface LogSnapshot {
+  log_path: string;
+  offset: number;
+  stats: {
+    maps_completed: number;
+    total_deaths: number;
+    levels_gained: number;
+    maps_per_hour: number;
+    avg_map_time: string;
+    deaths_per_hour: number;
+    current_zone: string;
+    current_map: {
+      zone_name: string;
+      area_level: number;
+      duration: string;
+      deaths: number;
+      death_recaps: Array<{ killer: string; timestamp: string; grace_verse: string; grace_ref: string }>;
+    } | null;
+    last_death: {
+      character: string;
+      killer: string;
+      zone: string;
+      timestamp: string;
+      grace_verse: string;
+      grace_ref: string;
+    } | null;
+    map_history: MapHistoryEntry[];
+    fastest_map: { zone_name: string; area_level: number; duration: string; duration_seconds: number } | null;
+    deadliest_map: { zone_name: string; area_level: number; deaths: number } | null;
+    trade_whispers: TradeWhisper[];
+    trades_completed: number;
+    current_boss: {
+      boss_name: string;
+      zone_name: string;
+      duration: string;
+      duration_seconds: number;
+      deaths: number;
+    } | null;
+    boss_kills: number;
+    boss_history: Array<{
+      boss_name: string;
+      zone_name: string;
+      duration: string;
+      duration_seconds: number;
+      deaths: number;
+      killed: boolean;
+    }>;
+    time_played: string;
+  };
+  error?: string;
+}
+
+export async function logSnapshot(
+  logPath?: string,
+  offset?: number,
+  characterName?: string,
+): Promise<LogSnapshot> {
+  return await invoke<LogSnapshot>("log_snapshot", {
+    logPath: logPath || null,
+    offset: offset || null,
+    characterName: characterName || null,
+  });
+}
+
+export async function fetchLeagues(): Promise<string[]> {
+  const result = await invoke<{ leagues: string[] }>("fetch_leagues");
+  return result.leagues;
+}
+
 export async function refineBuildRemote(
   token: string,
   guide: BuildGuide,

@@ -270,8 +270,7 @@ async def _build_guide_aware_query(
             value={"min": min_count},
         ))
 
-    # PoE trade API requires at least one stat group; provide an empty "and" group
-    # if no filters were built (e.g. synthesized items with only stat_priority, no real mods)
+    # Trade API requires at least one stat group
     if not stat_groups:
         stat_groups = [StatGroup(type="and", filters=[])]
 
@@ -310,19 +309,17 @@ async def _build_rare_query(
 
         filters.append(StatFilter(id=entry.id, value=value_spec))
 
-    # Use "count" mode: require at least 60% of the mods to match
-    min_count = max(1, math.floor(len(filters) * 0.6))
-    stat_group = StatGroup(
-        type="count",
-        filters=filters,
-        value={"min": min_count},
-    )
-
-    # PoE trade API requires at least one stat group
+    stats: list[StatGroup] = []
     if filters:
-        stats = [stat_group]
+        # Use "count" mode: require at least 60% of the mods to match
+        min_count = max(1, math.floor(len(filters) * 0.6))
+        stats.append(StatGroup(
+            type="count",
+            filters=filters,
+            value={"min": min_count},
+        ))
     else:
-        stats = [StatGroup(type="and", filters=[])]
+        stats.append(StatGroup(type="and", filters=[]))
 
     query = TradeQuery(
         type=_sanitize_base_type(item.base_type, item.name, item.rarity),
