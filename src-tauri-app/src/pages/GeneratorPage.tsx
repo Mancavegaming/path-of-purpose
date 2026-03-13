@@ -9,10 +9,12 @@ import {
   generatorChatRemote,
   generateBuildRemote,
   refineBuildRemote,
+  resolveTreeUrlsRemote,
   tradeSearch,
   refreshKnowledge,
   checkKnowledge,
   saveBuildGuide,
+  synthesizeItems,
 } from "../lib/commands";
 import { guideToBuild } from "../lib/buildUtils";
 import {
@@ -52,6 +54,8 @@ export default function GeneratorPage(props: GeneratorPageProps) {
   const [showSaveInput, setShowSaveInput] = createSignal(false);
   const [saveStatus, setSaveStatus] = createSignal("");
   const [loginLoading, setLoginLoading] = createSignal(false);
+  const [itemTier, setItemTier] = createSignal<"basic" | "max">("basic");
+  const [tierLoading, setTierLoading] = createSignal(false);
 
   // React to subscription status changes (e.g., after Stripe payment)
   createEffect(() => {
@@ -195,7 +199,7 @@ export default function GeneratorPage(props: GeneratorPageProps) {
         const currentGuide = guide();
         if (currentGuide) {
           setLoading(true);
-          const refined = await refineBuildRemote(
+          let refined = await refineBuildRemote(
             t,
             currentGuide,
             [],
@@ -203,6 +207,11 @@ export default function GeneratorPage(props: GeneratorPageProps) {
             messages(),
             msg,
           );
+          try {
+            refined = await resolveTreeUrlsRemote(t, refined);
+          } catch {
+            // Non-critical
+          }
           setGuide(refined);
           setMessages((prev) => [
             ...prev,
@@ -224,7 +233,13 @@ export default function GeneratorPage(props: GeneratorPageProps) {
     setPhase("generating");
     try {
       const history = messages();
-      const generatedGuide = await generateBuildRemote(t, prefs, history);
+      let generatedGuide = await generateBuildRemote(t, prefs, history);
+      // Resolve passive tree URLs from key_nodes (server does this too, but as fallback)
+      try {
+        generatedGuide = await resolveTreeUrlsRemote(t, generatedGuide);
+      } catch {
+        // Non-critical — server may have already resolved URLs
+      }
       setGuide(generatedGuide);
       await checkPrices(t, generatedGuide, prefs);
     } catch (e) {
@@ -249,21 +264,29 @@ export default function GeneratorPage(props: GeneratorPageProps) {
     }
 
     const prices: Array<{ name: string; price_chaos: number }> = [];
-    const items = endgame.items;
+    const guideItems = endgame.items;
 
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
+    // Synthesize real items for better trade queries
+    let searchItems: Array<{ id: number; slot: string; name: string; base_type: string; rarity: string; level: number; quality: number; sockets: string; implicits: Array<{ text: string; is_implicit: boolean; is_crafted: boolean }>; explicits: Array<{ text: string; is_implicit: boolean; is_crafted: boolean }>; raw_text: string }> = [];
+    try {
+      searchItems = await synthesizeItems(guideItems, "max");
+    } catch {
+      // Fall back to stub items if synthesis unavailable
+    }
+
+    for (let i = 0; i < guideItems.length; i++) {
+      const item = guideItems[i];
       setPriceProgress(
-        `Checking prices... ${i + 1}/${items.length}: ${item.name}`,
+        `Checking prices... ${i + 1}/${guideItems.length}: ${item.name}`,
       );
 
       try {
-        const searchItem = {
+        const searchItem = searchItems[i] || {
           id: 0,
           slot: item.slot,
           name: item.name,
           base_type: item.base_type || "",
-          rarity: "UNIQUE",
+          rarity: "RARE",
           level: 0,
           quality: 0,
           sockets: "",
@@ -287,7 +310,7 @@ export default function GeneratorPage(props: GeneratorPageProps) {
         // Skip items we can't price
       }
 
-      if (i < items.length - 1) {
+      if (i < guideItems.length - 1) {
         await new Promise((r) => setTimeout(r, 1000));
       }
     }
@@ -332,10 +355,15 @@ export default function GeneratorPage(props: GeneratorPageProps) {
     setGuide(finalGuide);
   }
 
-  function handleLoadBuild() {
+  async function handleLoadBuild() {
     const g = guide();
     if (g) {
-      props.onComplete(guideToBuild(g));
+      setTierLoading(true);
+      try {
+        props.onComplete(await guideToBuild(g, itemTier()));
+      } finally {
+        setTierLoading(false);
+      }
     }
   }
 
@@ -501,8 +529,29 @@ export default function GeneratorPage(props: GeneratorPageProps) {
           {/* Actions bar */}
           <div class="generator-actions">
             <Show when={phase() === "complete" && guide()}>
-              <button class="generator-load-btn" onClick={handleLoadBuild}>
-                Load into Build Viewer
+              <div class="tier-selector">
+                <label>Item Tier:</label>
+                <button
+                  class={`tier-btn ${itemTier() === "basic" ? "tier-active" : ""}`}
+                  onClick={() => setItemTier("basic")}
+                >
+                  Budget
+                </button>
+                <button
+                  class={`tier-btn ${itemTier() === "max" ? "tier-active" : ""}`}
+                  onClick={() => setItemTier("max")}
+                >
+                  Endgame
+                </button>
+              </div>
+              <button
+                class="generator-load-btn"
+                onClick={handleLoadBuild}
+                disabled={tierLoading()}
+              >
+                <Show when={tierLoading()} fallback="Load into Build Viewer">
+                  <span class="spinner" /> Loading...
+                </Show>
               </button>
               <Show when={!showSaveInput()}>
                 <button class="generator-save-btn" onClick={handleStartSave}>

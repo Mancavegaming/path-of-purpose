@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Path of Purpose",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "identifier": "com.pathofpurpose.app",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -27,6 +27,9 @@
   "bundle": {
     "active": true,
     "targets": ["nsis"],
+    "externalBin": [
+      "binaries/pop-engine"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -38,7 +41,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDRGOUFCODQyQTcxMkY4OEQKUldTTitCS25RcmlhVHpibFhpQW9aT1hzeTkrdGhiZktUU3VvdFVKTXdKbzNvaUIyY3F2Y3ljVEgK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDZBQThCQjM2M0E2MkJCRkUKUldUK3UySTZOcnVvYWtkWmo3Nk90bkpNN2JVV2V0VndpTjkrUXhyTC8wVnNvTkorVnZ0MXhHQm8K",
       "endpoints": [
         "https://github.com/Mancavegaming/path-of-purpose/releases/latest/download/latest.json"
       ]

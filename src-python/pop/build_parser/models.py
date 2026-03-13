@@ -85,9 +85,34 @@ class Item(BaseModel):
     explicits: list[ItemMod] = Field(default_factory=list)
     raw_text: str = ""
 
+    # Guide-sourced fields (preserved from GuideItem through synthesis)
+    stat_priority: list[str] = Field(default_factory=list)
+    notes: str = ""
+
     @property
     def all_mods(self) -> list[ItemMod]:
         return self.implicits + self.explicits
+
+    @property
+    def socket_count(self) -> int:
+        """Total number of sockets (count of R/G/B/W/A/D letters)."""
+        if not self.sockets:
+            return 0
+        return sum(1 for c in self.sockets.upper() if c in "RGBWAD")
+
+    @property
+    def max_links(self) -> int:
+        """Largest link group size.
+
+        PoB format: ``R-R-R-R-B-G`` — dashes link, spaces separate groups.
+        """
+        if not self.sockets:
+            return 0
+        groups = self.sockets.split()
+        return max(
+            (sum(1 for c in g.upper() if c in "RGBWAD") for g in groups),
+            default=0,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -105,10 +130,14 @@ class PassiveSpec(BaseModel):
     nodes: list[int] = Field(default_factory=list)
     overrides: dict[int, int] = Field(default_factory=dict)
     url: str = ""
+    # AI-generated builds store these instead of real node IDs
+    key_nodes: list[str] = Field(default_factory=list)
+    total_points: int = 0
+    priority: str = ""
 
     @property
     def node_count(self) -> int:
-        return len(self.nodes)
+        return len(self.nodes) if self.nodes else self.total_points
 
 
 # ---------------------------------------------------------------------------
@@ -298,6 +327,8 @@ class LevelBracket(BaseModel):
     items: list[GuideItem] = Field(default_factory=list)
     passive_tree: PassiveTreeSpec | None = None
     notes: str = ""
+    atlas_strategy: str = ""
+    map_warnings: list[str] = Field(default_factory=list)
 
 
 class BuildGuide(BaseModel):

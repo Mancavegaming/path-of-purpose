@@ -46,6 +46,7 @@ class TradeQuery(BaseModel):
     type: str | None = None
     stats: list[StatGroup] = Field(default_factory=list)
     status: dict[str, str] = Field(default_factory=lambda: {"option": "online"})
+    filters: dict | None = None  # e.g. {"weapon_filters": {"filters": {"dps": {"min": 500}}}}
 
 
 class TradeSearchRequest(BaseModel):
@@ -84,6 +85,12 @@ class TradeListing(BaseModel):
     whisper: str = ""
     icon_url: str = ""
     attacks_per_second: float = 0.0
+    dps_change: float | None = None  # % DPS change vs equipped item
+    # Socket info from trade API
+    sockets: list[dict[str, str | int]] = Field(default_factory=list)
+    # e.g. [{"group": 0, "colour": "R"}, {"group": 0, "colour": "G"}, ...]
+    socket_count: int = 0
+    max_links: int = 0
 
 
 class TradeSearchResult(BaseModel):
@@ -93,6 +100,9 @@ class TradeSearchResult(BaseModel):
     listings: list[TradeListing] = Field(default_factory=list)
     query_id: str = ""
     trade_url: str = ""
+    relaxed_level: int = 0  # 0 = exact, 1+ = how many stats were dropped
+    dropped_stats: list[str] = Field(default_factory=list)  # stats that were relaxed
+    result_ids: list[str] = Field(default_factory=list, exclude=True)  # internal: raw IDs from POST
 
 
 # ---------------------------------------------------------------------------

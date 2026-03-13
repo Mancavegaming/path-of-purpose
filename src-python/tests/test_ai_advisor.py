@@ -69,7 +69,7 @@ class TestBuildContextPrompt:
 
     def test_empty_context(self):
         result = _build_context_prompt({})
-        assert "build loaded" in result
+        assert "User's Current Build" in result
 
     def test_selected_item_context(self):
         ctx = {
@@ -84,6 +84,43 @@ class TestBuildContextPrompt:
         assert "Starforge" in result
         assert "Weapon 1" in result
         assert "+400 Physical Damage" in result
+
+    def test_atlas_strategy_context(self):
+        ctx = {
+            "class_name": "Ranger",
+            "bracket_atlas": {
+                "90 Early Maps (T1-T5)": "Spec into Legion nodes for fast monolith clear.",
+                "94 Late Maps (T12-T16)": "Breach farming with scarabs for splinters.",
+            },
+        }
+        result = _build_context_prompt(ctx)
+        assert "Atlas Strategy" in result
+        assert "Legion" in result
+        assert "Breach" in result
+
+    def test_map_warnings_context(self):
+        ctx = {
+            "class_name": "Duelist",
+            "bracket_map_warnings": {
+                "90 Early Maps (T1-T5)": ["Physical Reflect", "No Leech"],
+                "94 Late Maps (T12-T16)": ["Physical Reflect", "No Leech", "-max res"],
+            },
+        }
+        result = _build_context_prompt(ctx)
+        assert "Map Mod Warnings" in result
+        assert "Physical Reflect" in result
+        assert "No Leech" in result
+
+    def test_atlas_and_warnings_empty(self):
+        """Empty atlas/warnings dicts should not produce section headers."""
+        ctx = {
+            "class_name": "Witch",
+            "bracket_atlas": {},
+            "bracket_map_warnings": {},
+        }
+        result = _build_context_prompt(ctx)
+        assert "Atlas Strategy" not in result
+        assert "Map Mod Warnings" not in result
 
     def test_trade_listing_context(self):
         ctx = {
@@ -176,6 +213,50 @@ class TestAdvisorChat:
         call_kwargs = mock_cc.call_args.kwargs
         system = call_kwargs["system"]
         assert "Necromancer" in system
+
+    @pytest.mark.asyncio
+    async def test_knowledge_addendum_injected(self):
+        """Verify that boss/damage/atlas/map knowledge is injected into system prompt."""
+        with patch(
+            "pop.ai.advisor.chat_completion",
+            return_value=("Here's the boss info...", 100),
+        ) as mock_cc:
+            advisor = Advisor()
+            await advisor.chat(
+                message="Can I do Sirus?",
+                api_key="sk-test",
+            )
+
+        call_kwargs = mock_cc.call_args.kwargs
+        system = call_kwargs["system"]
+        # Knowledge addendum should contain boss encounter data
+        assert "Boss & Endgame Encounter Reference" in system
+        assert "Damage Mechanics Reference" in system
+        assert "Atlas Strategy Reference" in system
+        assert "Map Mod Danger Reference" in system
+
+    @pytest.mark.asyncio
+    async def test_atlas_context_in_system_prompt(self):
+        """Verify atlas strategy and map warnings are in the system prompt."""
+        with patch(
+            "pop.ai.advisor.chat_completion",
+            return_value=("Run Legion maps!", 100),
+        ) as mock_cc:
+            advisor = Advisor()
+            await advisor.chat(
+                message="What atlas strategy?",
+                api_key="sk-test",
+                build_context={
+                    "class_name": "Duelist",
+                    "bracket_atlas": {"90 Early Maps": "Spec into Legion for fast clear."},
+                    "bracket_map_warnings": {"90 Early Maps": ["Phys Reflect", "No Leech"]},
+                },
+            )
+
+        call_kwargs = mock_cc.call_args.kwargs
+        system = call_kwargs["system"]
+        assert "Legion" in system
+        assert "Phys Reflect" in system
 
     @pytest.mark.asyncio
     async def test_history_trimming(self):

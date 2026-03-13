@@ -1,6 +1,6 @@
 import { createEffect, createSignal, For, Show } from "solid-js";
 import type { Build, Item, ItemComparison, TradeListing } from "../lib/types";
-import { compareItems } from "../lib/commands";
+import { compareItems, compareBuildDps, type BuildDpsComparison } from "../lib/commands";
 
 interface ItemComparisonPanelProps {
   equippedItem: Item;
@@ -15,15 +15,20 @@ function getWeaponAps(build: Build | null): number {
     (i) => i.slot === "Weapon 1" || i.slot === "Weapon 1 Swap",
   );
   if (!weapon) return 0;
-  // Look for APS in raw_text (PoB format: "Attacks per Second: 1.50")
   const match = weapon.raw_text?.match(/Attacks per Second:\s*([\d.]+)/i);
   if (match) return parseFloat(match[1]);
-  // Fallback: check explicits for attack speed mod and estimate
-  return 1.2; // reasonable default if not found
+  return 1.2;
+}
+
+function formatDps(value: number): string {
+  if (value >= 1_000_000) return (value / 1_000_000).toFixed(2) + "M";
+  if (value >= 1_000) return (value / 1_000).toFixed(1) + "K";
+  return value.toFixed(0);
 }
 
 export default function ItemComparisonPanel(props: ItemComparisonPanelProps) {
   const [comparison, setComparison] = createSignal<ItemComparison | null>(null);
+  const [buildDps, setBuildDps] = createSignal<BuildDpsComparison | null>(null);
   const [loading, setLoading] = createSignal(false);
   const [error, setError] = createSignal("");
 
@@ -35,43 +40,100 @@ export default function ItemComparisonPanel(props: ItemComparisonPanelProps) {
     setLoading(true);
     setError("");
     setComparison(null);
+    setBuildDps(null);
 
     const weaponAps = getWeaponAps(props.build);
 
-    compareItems(
+    // Run both comparisons in parallel
+    const itemPromise = compareItems(
       item as unknown as Record<string, unknown>,
       listing as unknown as Record<string, unknown>,
       item.slot,
       weaponAps,
-    )
-      .then((result) => setComparison(result))
+    );
+
+    const buildPromise = props.build
+      ? compareBuildDps(
+          props.build as unknown as Record<string, unknown>,
+          listing as unknown as Record<string, unknown>,
+          item.slot,
+        )
+      : Promise.resolve(null);
+
+    Promise.all([itemPromise, buildPromise])
+      .then(([itemResult, dpsResult]) => {
+        setComparison(itemResult);
+        setBuildDps(dpsResult);
+      })
       .catch((e) => setError(String(e)))
       .finally(() => setLoading(false));
   });
 
-  const dpsChangeClass = () => {
-    const c = comparison();
-    if (!c || !c.is_weapon) return "";
-    return c.dps_change_pct > 0 ? "stat-better" : c.dps_change_pct < 0 ? "stat-worse" : "";
+  const buildDpsChangeClass = () => {
+    const d = buildDps();
+    if (!d) return "";
+    return d.dps_change > 0 ? "stat-better" : d.dps_change < 0 ? "stat-worse" : "";
   };
 
-  const flatDpsChangeClass = () => {
-    const c = comparison();
-    if (!c) return "";
-    return c.flat_dps_change > 0 ? "stat-better" : c.flat_dps_change < 0 ? "stat-worse" : "";
+  /** Check if a stat_name relates to a guide priority keyword. */
+  const isGuidePriority = (statName: string): boolean => {
+    const priorities = props.equippedItem.stat_priority;
+    if (!priorities?.length) return false;
+    const lower = statName.toLowerCase();
+    return priorities.some((p) => {
+      const pl = p.toLowerCase();
+      return lower.includes(pl) || pl.includes(lower)
+        || (pl === "life" && lower.includes("life"))
+        || (pl.includes("resistance") && lower.includes("resistance"))
+        || (pl.includes("res") && lower.includes("resistance"))
+        || (pl.includes("attack speed") && lower.includes("attack speed"))
+        || (pl.includes("cast speed") && lower.includes("cast speed"))
+        || (pl.includes("crit") && lower.includes("critical"))
+        || (pl.includes("movement") && lower.includes("movement"))
+        || (pl.includes("energy shield") && (lower.includes("energy shield") || lower.includes("es")))
+        || (pl.includes("armour") && lower.includes("armour"))
+        || (pl.includes("evasion") && lower.includes("evasion"));
+    });
   };
+
+  const hasGuidePriorities = () => !!props.equippedItem.stat_priority?.length;
 
   return (
     <div class="comparison-panel">
       <Show when={loading()}>
         <div class="panel-loading">
           <span class="spinner" />
-          Comparing items...
+          Calculating build DPS...
         </div>
       </Show>
 
       <Show when={error()}>
         <div class="error-toast">{error()}</div>
+      </Show>
+
+      {/* Full Build DPS comparison — the main attraction */}
+      <Show when={buildDps()}>
+        {(dps) => (
+          <div class="comparison-build-dps">
+            <div class="comparison-build-dps-title">
+              Build DPS — {dps().skill_name}
+            </div>
+            <div class="comparison-build-dps-grid">
+              <div class="comparison-build-dps-cell">
+                <span class="comparison-build-dps-label">Current</span>
+                <span class="comparison-build-dps-value">{formatDps(dps().baseline_dps)}</span>
+              </div>
+              <div class="comparison-build-dps-cell">
+                <span class="comparison-build-dps-label">With Trade Item</span>
+                <span class="comparison-build-dps-value">{formatDps(dps().swapped_dps)}</span>
+              </div>
+            </div>
+            <div class={`comparison-build-dps-change ${buildDpsChangeClass()}`}>
+              {dps().dps_change > 0 ? "+" : ""}{formatDps(dps().dps_change)} DPS
+              ({dps().dps_change_pct > 0 ? "+" : ""}{dps().dps_change_pct}%)
+            </div>
+          </div>
+        )}
       </Show>
 
       <Show when={comparison()}>
@@ -83,49 +145,23 @@ export default function ItemComparisonPanel(props: ItemComparisonPanelProps) {
               </span>
             </div>
 
-            {/* Weapon DPS comparison — only for actual weapons */}
-            <Show when={comp().is_weapon && comp().equipped_dps && comp().trade_dps
-              && (comp().equipped_dps!.total_dps > 0 || comp().trade_dps!.total_dps > 0)}>
-              <div class="comparison-dps">
-                <div class="comparison-dps-row">
-                  <span class="comparison-dps-label">Equipped DPS</span>
-                  <span class="comparison-dps-value">{comp().equipped_dps!.total_dps}</span>
-                </div>
-                <div class="comparison-dps-row">
-                  <span class="comparison-dps-label">Trade DPS</span>
-                  <span class="comparison-dps-value">{comp().trade_dps!.total_dps}</span>
-                </div>
-                <div class={`comparison-dps-change ${dpsChangeClass()}`}>
-                  {comp().dps_change_pct > 0 ? "+" : ""}{comp().dps_change_pct}% DPS
-                </div>
-              </div>
-            </Show>
-
-            {/* Flat DPS contribution — for non-weapon items (rings, amulets, etc.) */}
-            <Show when={!comp().is_weapon
-              && (comp().equipped_flat_dps > 0 || comp().trade_flat_dps > 0)}>
-              <div class="comparison-dps">
-                <div class="comparison-dps-row">
-                  <span class="comparison-dps-label">Equipped DPS Contrib.</span>
-                  <span class="comparison-dps-value">{comp().equipped_flat_dps}</span>
-                </div>
-                <div class="comparison-dps-row">
-                  <span class="comparison-dps-label">Trade DPS Contrib.</span>
-                  <span class="comparison-dps-value">{comp().trade_flat_dps}</span>
-                </div>
-                <div class={`comparison-dps-change ${flatDpsChangeClass()}`}>
-                  {comp().flat_dps_change > 0 ? "+" : ""}{comp().flat_dps_change} DPS
-                </div>
-              </div>
-            </Show>
-
             {/* Stat deltas */}
             <Show when={comp().stat_deltas.length > 0}>
               <div class="comparison-stats">
+                <Show when={hasGuidePriorities()}>
+                  <div class="comparison-priority-legend">
+                    <span class="priority-dot" /> = guide priority
+                  </div>
+                </Show>
                 <For each={comp().stat_deltas}>
                   {(delta) => (
-                    <div class={`comparison-stat-row ${delta.difference > 0 ? "stat-better" : delta.difference < 0 ? "stat-worse" : ""}`}>
-                      <span class="comparison-stat-name">{delta.stat_name}</span>
+                    <div class={`comparison-stat-row ${delta.difference > 0 ? "stat-better" : delta.difference < 0 ? "stat-worse" : ""} ${isGuidePriority(delta.stat_name) ? "stat-priority" : ""}`}>
+                      <span class="comparison-stat-name">
+                        <Show when={isGuidePriority(delta.stat_name)}>
+                          <span class="priority-dot" />
+                        </Show>
+                        {delta.stat_name}
+                      </span>
                       <span class="comparison-stat-equipped">{delta.equipped_value}</span>
                       <span class="comparison-stat-diff">
                         {delta.difference > 0 ? "+" : ""}{delta.difference}

@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "notes": "Path of Purpose v0.2.0 Beta — Full DPS calculator, build editor, streaming overlay, AI advisor",
+  "pub_date": "2026-03-13T00:00:00Z",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWhWWFFQbDA1RzVDazR5SnFhNE40cEJ3WFVWcDhhOCs5cWw0RHUrdEgzY2hNbFF5b00yMVIvY1Bya3NxVERXcUdhd1N0VVpFdUFnZTg0SXpjM0ZVaGdNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczMzY2Njc0CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMi4wX3g2NC1zZXR1cC5uc2lzLnppcAplVThJQUdRaUErNzJDdndKbXNPSWs1UW1hVnBqZ1NsbjFmeWIrby9xR0cvaVFiWG54bWhob05ucVNzKzhSRGdaa09abDlFWnNVUkhENVRPRVdSc25BQT09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.2.0/Path.of.Purpose_0.2.0_x64-setup.nsis.zip"
+    }
+  }
+}

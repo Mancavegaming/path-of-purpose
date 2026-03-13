@@ -15,7 +15,7 @@ import { relaunch } from "@tauri-apps/plugin-process";
 
 const DISCORD_CLIENT_ID = "1479135178650554510";
 
-export type Page = "build" | "delta" | "generator";
+export type Page = "build" | "delta" | "generator" | "editor" | "character" | "streaming";
 
 interface SidebarProps {
   page: Accessor<Page>;
@@ -127,11 +127,32 @@ export default function Sidebar(props: SidebarProps) {
           Build Generator
         </button>
         <button
+          class={`nav-item ${props.page() === "editor" ? "active" : ""}`}
+          onClick={() => props.setPage("editor")}
+        >
+          <span class="nav-icon">{"\u{1F6E0}"}</span>
+          Build Editor
+        </button>
+        <button
+          class={`nav-item ${props.page() === "character" ? "active" : ""}`}
+          onClick={() => props.setPage("character")}
+        >
+          <span class="nav-icon">{"\u{1F9D1}"}</span>
+          Character Import
+        </button>
+        <button
           class={`nav-item ${props.page() === "delta" ? "active" : ""}`}
           onClick={() => props.setPage("delta")}
         >
           <span class="nav-icon">{"\u{1F50D}"}</span>
           Delta Report
+        </button>
+        <button
+          class={`nav-item ${props.page() === "streaming" ? "active" : ""}`}
+          onClick={() => props.setPage("streaming")}
+        >
+          <span class="nav-icon">{"\u{1F4F9}"}</span>
+          Streaming
         </button>
       </nav>
 

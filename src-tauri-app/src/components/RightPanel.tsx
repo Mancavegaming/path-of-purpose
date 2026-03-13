@@ -1,5 +1,5 @@
 import { createSignal, Show } from "solid-js";
-import type { Build, Item, TradeListing } from "../lib/types";
+import type { Build, CalcResult, Item, TradeListing } from "../lib/types";
 import TradePanel from "./TradePanel";
 import ItemComparisonPanel from "./ItemComparisonPanel";
 import AiAdvisorPanel from "./AiAdvisorPanel";
@@ -8,6 +8,7 @@ interface RightPanelProps {
   selectedItem: Item | null;
   league: string;
   build: Build | null;
+  dpsResult?: CalcResult | null;
 }
 
 export default function RightPanel(props: RightPanelProps) {
@@ -24,6 +25,7 @@ export default function RightPanel(props: RightPanelProps) {
         <TradePanel
           selectedItem={props.selectedItem}
           league={props.league}
+          build={props.build}
           onListingSelect={setSelectedListing}
         />
 
@@ -42,6 +44,7 @@ export default function RightPanel(props: RightPanelProps) {
           build={props.build}
           selectedItem={props.selectedItem}
           selectedListing={selectedListing()}
+          dpsResult={props.dpsResult}
         />
       </div>
     </div>

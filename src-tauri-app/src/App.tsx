@@ -3,6 +3,9 @@ import Sidebar, { type Page } from "./components/Sidebar";
 import DecodePage from "./pages/DecodePage";
 import DeltaPage from "./pages/DeltaPage";
 import GeneratorPage from "./pages/GeneratorPage";
+import EditorPage from "./pages/EditorPage";
+import CharacterPage from "./pages/CharacterPage";
+import StreamingPage from "./pages/StreamingPage";
 import type { Build, BuildGuide } from "./lib/types";
 import {
   listSavedBuilds,
@@ -17,6 +20,7 @@ import "./styles.css";
 function App() {
   const [page, setPage] = createSignal<Page>("build");
   const [loadedBuild, setLoadedBuild] = createSignal<Build | null>(null);
+  const [characterBuild, setCharacterBuild] = createSignal<Build | null>(null);
   const [savedBuilds, setSavedBuilds] = createSignal<SavedBuildEntry[]>([]);
 
   async function refreshSavedBuilds() {
@@ -44,7 +48,7 @@ function App() {
       if (result.kind === "build") {
         setLoadedBuild(result.data as Build);
       } else {
-        setLoadedBuild(guideToBuild(result.data as BuildGuide));
+        setLoadedBuild(await guideToBuild(result.data as BuildGuide));
       }
       setPage("build");
     } catch (e) {
@@ -80,8 +84,30 @@ function App() {
             onSave={refreshSavedBuilds}
           />
         </div>
+        <div style={{ display: page() === "editor" ? "block" : "none" }}>
+          <EditorPage
+            loadedBuild={loadedBuild}
+            setLoadedBuild={setLoadedBuild}
+            onSave={refreshSavedBuilds}
+          />
+        </div>
+        <div style={{ display: page() === "character" ? "block" : "none" }}>
+          <CharacterPage
+            loadedBuild={loadedBuild}
+            setLoadedBuild={setLoadedBuild}
+            onSave={refreshSavedBuilds}
+            onCharacterImported={setCharacterBuild}
+          />
+        </div>
         <div style={{ display: page() === "delta" ? "block" : "none" }}>
-          <DeltaPage />
+          <DeltaPage
+            loadedBuild={loadedBuild}
+            characterBuild={characterBuild}
+            savedBuilds={savedBuilds}
+          />
+        </div>
+        <div style={{ display: page() === "streaming" ? "block" : "none" }}>
+          <StreamingPage />
         </div>
       </main>
     </div>

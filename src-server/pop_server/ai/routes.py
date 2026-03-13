@@ -20,6 +20,7 @@ from pop_server.models import (
     GenerateBuildRequest,
     GeneratorChatRequest,
     RefineBuildRequest,
+    ResolveTreeUrlsRequest,
 )
 
 # Add src-python to sys.path so we can import pop.ai modules directly
@@ -30,6 +31,7 @@ if _src_python not in sys.path:
 from pop.ai.advisor import Advisor  # noqa: E402
 from pop.ai.generator import BuildGenerator  # noqa: E402
 from pop.ai.models import BuildPreferences, ChatMessage  # noqa: E402
+from pop.build_parser.tree_data import resolve_guide_tree_urls  # noqa: E402
 
 router = APIRouter(prefix="/api/ai", tags=["ai"])
 
@@ -105,7 +107,14 @@ async def generate_build(
 
     log_usage(user["id"], "generate_build", 0)
 
-    return guide.model_dump(mode="json")
+    # Resolve passive tree URLs from key_nodes
+    guide_dict = guide.model_dump(mode="json")
+    try:
+        guide_dict = await resolve_guide_tree_urls(guide_dict)
+    except Exception:
+        pass  # Non-critical — guide still works without tree URLs
+
+    return guide_dict
 
 
 @router.post("/refine-build")
@@ -128,4 +137,21 @@ async def refine_build(
 
     log_usage(user["id"], "refine_build", 0)
 
-    return refined.model_dump(mode="json")
+    # Resolve passive tree URLs from key_nodes
+    refined_dict = refined.model_dump(mode="json")
+    try:
+        refined_dict = await resolve_guide_tree_urls(refined_dict)
+    except Exception:
+        pass  # Non-critical
+
+    return refined_dict
+
+
+@router.post("/resolve-tree-urls")
+async def resolve_tree_urls(
+    req: ResolveTreeUrlsRequest, user: dict = Depends(require_subscription)
+):
+    """Resolve passive tree URLs for a BuildGuide's key_nodes."""
+    result = await resolve_guide_tree_urls(req.guide, req.tree_version)
+    log_usage(user["id"], "resolve_tree_urls", 0)
+    return result

@@ -88,6 +88,8 @@ export interface Build {
   pob_version: string;
   build_name: string;
   bracket_notes?: Record<string, string>;
+  bracket_atlas?: Record<string, string>;
+  bracket_map_warnings?: Record<string, string[]>;
 }
 
 // --- Delta Engine models (src-python/pop/delta/models.py) ---
@@ -205,6 +207,8 @@ export interface LevelBracket {
   items: GuideItem[];
   passive_tree?: PassiveTreeSpec | null;
   notes?: string;
+  atlas_strategy?: string;
+  map_warnings?: string[];
 }
 
 export interface BuildGuide {
@@ -230,6 +234,11 @@ export interface TradePrice {
   type: string;
 }
 
+export interface TradeSocket {
+  group: number;
+  colour: string;  // R, G, B, W, A, D
+}
+
 export interface TradeListing {
   id: string;
   item_name: string;
@@ -244,6 +253,10 @@ export interface TradeListing {
   whisper: string;
   icon_url: string;
   attacks_per_second: number;
+  dps_change: number | null;
+  sockets: TradeSocket[];
+  socket_count: number;
+  max_links: number;
 }
 
 export interface TradeSearchResult {
@@ -251,6 +264,8 @@ export interface TradeSearchResult {
   listings: TradeListing[];
   query_id: string;
   trade_url: string;
+  relaxed_level: number;
+  dropped_stats: string[];
 }
 
 // --- Item Comparison models (src-python/pop/trade/dps_estimator.py) ---
@@ -283,6 +298,87 @@ export interface ItemComparison {
   flat_dps_change: number;
   stat_deltas: StatDelta[];
   summary: string;
+}
+
+// --- Damage Calc models (src-python/pop/calc/models.py) ---
+
+export interface TypeDamage {
+  damage_type: string;
+  base: number;
+  after_flat: number;
+  after_conversion: number;
+  after_increased: number;
+  after_more: number;
+  final_hit: number;
+  after_mitigation: number;
+}
+
+export interface DefenceResult {
+  armour: number;
+  evasion: number;
+  energy_shield: number;
+  life: number;
+  block_chance: number;
+  spell_block_chance: number;
+  dodge_chance: number;
+  spell_suppression: number;
+  phys_damage_reduction: number;
+  elemental_resistances: Record<string, number>;
+  chaos_resistance: number;
+}
+
+export interface CalcResult {
+  total_dps: number;
+  hit_damage: number;
+  hits_per_second: number;
+  effective_crit_multi: number;
+  crit_chance: number;
+  hit_chance: number;
+  type_breakdown: TypeDamage[];
+  ignite_dps: number;
+  bleed_dps: number;
+  poison_dps: number;
+  total_dot_dps: number;
+  impale_dps: number;
+  combined_dps: number;
+  enemy_damage_taken_multi: number;
+  skill_name: string;
+  is_attack: boolean;
+  is_totem: boolean;
+  is_trap: boolean;
+  is_mine: boolean;
+  is_minion: boolean;
+  num_totems: number;
+  defence: DefenceResult | null;
+  warnings: string[];
+}
+
+// --- Budget Optimizer models ---
+
+export interface BudgetRecommendation {
+  slot: string;
+  item_name: string;
+  type_line: string;
+  icon_url: string;
+  price_chaos: number;
+  price_currency: string;
+  price_amount: number;
+  dps_gain: number;
+  dps_gain_pct: number;
+  efficiency: number;
+  new_total_dps: number;
+  whisper: string;
+  account_name: string;
+  explicit_mods: string[];
+  implicit_mods: string[];
+}
+
+export interface BudgetOptimizeResult {
+  baseline_dps: number;
+  skill_name: string;
+  slots_searched: number;
+  total_listings_evaluated: number;
+  recommendations: BudgetRecommendation[];
 }
 
 // --- Build Generator models (src-python/pop/ai/models.py) ---

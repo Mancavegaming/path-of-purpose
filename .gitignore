@@ -31,3 +31,5 @@ Desktop.ini
 .env
 .env.*
 *.key
+nuitka-crash-report.xml
+src-server/src-python/

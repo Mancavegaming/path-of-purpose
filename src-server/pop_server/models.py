@@ -34,6 +34,11 @@ class RefineBuildRequest(BaseModel):
     message: str = ""
 
 
+class ResolveTreeUrlsRequest(BaseModel):
+    guide: dict
+    tree_version: str = "3.28.0"
+
+
 class AiChatResponse(BaseModel):
     message: str
     tokens_used: int = 0

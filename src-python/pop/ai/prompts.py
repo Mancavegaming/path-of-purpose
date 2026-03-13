@@ -13,10 +13,17 @@ def build_knowledge_addendum(knowledge: KnowledgeBase) -> str:
 
     Groups gems by level bracket so the AI knows what's available at each stage.
     Includes unique items grouped by slot so the AI recommends real items.
-    Includes balance summary and meta builds for current patch context.
+    Includes balance summary, meta builds, boss encounters, and damage mechanics.
     Uses a very dense format (names only) to minimize token usage.
     """
-    from pop.knowledge.supplements import get_balance_summary, get_meta_builds
+    from pop.knowledge.supplements import (
+        get_atlas_strategy_ref,
+        get_balance_summary,
+        get_boss_encounter_db,
+        get_damage_mechanics_ref,
+        get_map_mod_danger_ref,
+        get_meta_builds,
+    )
 
     lines: list[str] = []
 
@@ -87,13 +94,37 @@ def build_knowledge_addendum(knowledge: KnowledgeBase) -> str:
             if items:
                 lines.append(f"{cls}: {', '.join(items[:40])}")
 
+    # --- Boss encounters ---
+    boss_db = get_boss_encounter_db()
+    if boss_db:
+        lines.append(boss_db)
+
+    # --- Damage mechanics ---
+    dmg_ref = get_damage_mechanics_ref()
+    if dmg_ref:
+        lines.append(dmg_ref)
+
+    # --- Atlas strategy ---
+    atlas_ref = get_atlas_strategy_ref()
+    if atlas_ref:
+        lines.append(atlas_ref)
+
+    # --- Map mod dangers ---
+    map_ref = get_map_mod_danger_ref()
+    if map_ref:
+        lines.append(map_ref)
+
     if not lines:
         return ""
 
     header = f"\n\n--- GAME DATA REFERENCE ({knowledge.version}) ---\n"
     footer = (
         "\n--- END GAME DATA REFERENCE ---\n"
-        "ONLY use gems and uniques listed above. Do NOT invent gem or item names."
+        "ONLY use gems and uniques listed above. Do NOT invent gem or item names.\n"
+        "Use the boss encounter data to set appropriate DPS/defense targets per bracket.\n"
+        "Use the damage mechanics reference to reason about scaling choices.\n"
+        "Use the atlas strategy reference for endgame mapping recommendations.\n"
+        "Use the map mod danger reference to warn about dangerous mods for this build."
     )
     return header + "\n".join(lines) + footer
 
@@ -201,20 +232,30 @@ Generate only the brackets requested. The full bracket list across both phases i
 ## DPS & Scaling Reasoning (APPLY THIS TO EVERY BRACKET)
 Before generating each bracket, reason through:
 1. **Main skill DPS scaling**: What stats scale the main skill best? (e.g. flat phys + attack speed \
-for melee, gem levels + spell damage for casters, DoT multi for ailment builds)
+for melee, gem levels + spell damage for casters, DoT multi for ailment builds). \
+Refer to the Damage Mechanics Reference for conversion chains, more vs increased, and crit breakpoints.
 2. **Support gem priority**: Rank supports by MORE multiplier value. Always pick the highest \
 damage multiplier supports available at that level. Common rankings:
    - Melee: Melee Physical Damage > Multistrike > Brutality/Ruthless > Ancestral Call > Faster Attacks
    - Spells: Spell Echo > Controlled Destruction > Elemental Focus > Added damage > Concentrated Effect
    - DoT: Swift Affliction > Efficacy > Burning Damage > Deadly Ailments > Unbound Ailments
    - Minions: Minion Damage > Feeding Frenzy > Melee Splash > Predator > Multistrike
-3. **Defensive layers**: Each bracket must have appropriate defenses for that stage:
+3. **Defensive layers**: Each bracket must have appropriate defenses for that stage. \
+Refer to the Boss Encounter Reference for DPS thresholds and defensive requirements per boss:
    - Acts 1-4: Life on gear, resistance patching, movement skill
    - Acts 5-10: Cap all elemental resistances (75%), 2.5k+ life, guard skill
    - Maps: 4k+ life, capped res, guard skill + CWDT setup, life flask with bleed removal
    - Endgame: 5k+ life, layered defenses (armour/evasion/block/suppress + guard + endurance charges)
+   - **Chaos resistance**: Target 0% by maps, +30%+ for pinnacle bosses (Al-Hezmin, Arakaali)
+   - **Spell suppression**: 100% for endgame if Dex-based build (50% less spell damage taken)
 4. **Aura efficiency**: Select auras that give the most DPS per mana reserved. Include \
-an Enlighten Support plan for endgame if running 3+ auras.
+an Enlighten Support plan for endgame if running 3+ auras. Refer to the Aura Efficiency table.
+5. **Boss readiness**: Set DPS milestone targets per bracket using the Boss Encounter Reference. \
+Ensure the build can handle the bosses at that stage (e.g. 2M+ DPS for Sirus, 3M+ for Maven). \
+Recommend clear speed mechanics (chain/pierce/explosions) for mapping brackets.
+6. **Damage conversion**: If the build uses conversion (phys→ele), plan the full conversion chain \
+and recommend appropriate penetration/exposure sources. Conversion benefits from BOTH original \
+and converted damage type modifiers — this is a key scaling multiplier.
 
 ## Gem Group Rules
 - **gem_groups**: Gem setups assigned to gear slots (Body Armour, Helmet, Gloves, Boots, Weapon 1, Weapon 2)
@@ -238,6 +279,21 @@ at least one aura/herald, a guard skill (Molten Shell/Steelskin), and a curse or
 Storm Prison, Axiom Perpetuum for casters; Lycosidae, The Princess, Prismatic Eclipse for melee).
   - **Rares**: Specify base type + 3-4 key mods with numeric targets \
 (e.g. "Astral Plate: +100 life, 40%+ fire/cold/lightning res, 1500+ armour")
+  - **IMPORTANT**: Use ONLY real PoE 1 base types. Common endgame bases by slot:
+    - **Swords**: Jewelled Foil, Corsair Sword, Eternal Sword, Tiger Hook, Vaal Rapier
+    - **Axes**: Siege Axe, Vaal Hatchet, Royal Axe, Despot Axe, Infernal Axe
+    - **Maces**: Behemoth Mace, Karui Maul, Piledriver, Gavel
+    - **Daggers**: Imperial Skean, Sai, Platinum Kris, Ambusher
+    - **Claws**: Gemini Claw, Imperial Claw, Vaal Claw, Terror Claw
+    - **Bows**: Thicket Bow, Harbinger Bow, Imperial Bow, Spine Bow
+    - **Wands**: Imbued Wand, Opal Wand, Prophecy Wand, Tornado Wand
+    - **Sceptres**: Void Sceptre, Platinum Sceptre, Opal Sceptre, Crystal Sceptre
+    - **Staves**: Eclipse Staff, Judgement Staff, Lathi
+    - **Helmets**: Royal Burgonet, Lion Pelt, Hubris Circlet, Bone Helmet
+    - **Body Armour**: Astral Plate, Zodiac Leather, Vaal Regalia, Assassin's Garb
+    - **Gloves**: Titan Gauntlets, Slink Gloves, Sorcerer Gloves, Gripped Gloves
+    - **Boots**: Titan Greaves, Slink Boots, Sorcerer Boots, Two-Toned Boots
+    - **Shields**: Pinnacle Tower Shield, Lacquered Buckler, Titanium Spirit Shield
   - Slots: Helmet, Body Armour, Gloves, Boots, Weapon 1, Weapon 2, Amulet, Ring 1, Ring 2, Belt, \
 Flask 1-5
   - **stat_priority**: 3-5 key stats ranked by importance (e.g. ["life", "elemental resistances", \
@@ -252,18 +308,62 @@ Each bracket MUST include a **passive_tree** object with:
 - **total_points**: Approximate passive points spent at this level \
 (roughly equal to character level minus 2, e.g. level 30 ≈ 28 points)
 - **key_nodes**: 4-8 notable passive nodes the player should have allocated by this bracket. \
-Use real PoE 1 notable passive node names (e.g. "Resolute Technique", "Elemental Overload", \
-"Avatar of Fire", "Iron Reflexes", "Acrobatics", "Mind Over Matter", "Unwavering Stance", \
-"Point Blank", "Runebinder", "Zealot's Oath", etc.). \
-Include keystones, notable life/damage clusters, and ascendancy notables when relevant.
+Use real PoE 1 notable passive node names. Include keystones, notable damage clusters, \
+life clusters, and ascendancy notables when relevant.
 - **priority**: A short priority string showing what to path toward \
 (e.g. "Life > Sword damage > Crit multi" or "Minion damage > Life > Aura effect")
 - **url**: Leave as empty string "" (the app generates tree links separately)
 
+## CRITICAL: Match Passives to Weapon Type
+NEVER recommend passives for a weapon type the build does NOT use. \
+The passive tree has SPECIFIC clusters for each weapon type. Use ONLY the matching ones:
+
+**Claw notables**: Claws of the Falcon, Claws of the Magpie, Soul Raker, Claws of the Pride, \
+Claws of the Hawk, Nightstalker, Bloodsiphon, Shadow's Reach
+**Sword notables**: Blade of Cunning, Blade Master, Fatal Blade, Razor's Edge, Bravery, \
+Versatile Combatant, Dismembering, Red Storm, Dancing Steel
+**Axe notables**: Butchery, Slaughter, Splitting Strikes, Cleaving, Bone Breaker, Dismember
+**Mace notables**: Skull Cracking, Blunt Trauma, Smashing Strikes, Heavy Hitter, Bone Breaker
+**Dagger notables**: Flaying, Adder's Touch, Toxic Strikes, Nightstalker, Bloodthirst
+**Bow notables**: King of the Hill, Ballistic Mastery, Fury Bolts, Master Fletcher, Heavy Draw, \
+Aspect of the Eagle, Lethality, Point Blank (keystone)
+**Wand notables**: Wandslinger, Nimbleness, Crackling Speed, Wand Damage clusters
+**Staff notables**: Counterweight, Whirling Barrier, Serpent Stance, Staff Crit clusters
+
+**Universal melee**: Martial Experience, Destroyer, Blade Barrier, Born to Fight, \
+Art of the Gladiator, Bravery, Swift Skewering
+**Universal caster**: Arcane Focus, Cruel Preparation, Heart of Thunder/Ice/Flame, \
+Deep Wisdom, Annihilation
+**Life clusters**: Constitution, Discipline and Training, Heart of the Warrior, \
+Purity of Flesh, Herbalism, Blood Siphon, Thick Skin
+**Keystones**: Resolute Technique (no miss/no crit — melee), Iron Reflexes (eva→armour), \
+Acrobatics (dodge), Mind Over Matter (mana as EHP), Elemental Overload (crit→ele), \
+Avatar of Fire (all→fire), Point Blank (proj close range), Ancestral Bond (totems), \
+Unwavering Stance (no stun), Zealot's Oath (regen→ES), Vaal Pact (leech), \
+Iron Will (str→spell), Ghost Reaver (leech→ES)
+
+## Tree Geography (path from class start to relevant clusters)
+- **Marauder** (top-left): Strength, life, armour, fire, melee phys, maces/axes/swords. \
+Nearest keystones: Resolute Technique, Unwavering Stance, Iron Reflexes, Vaal Pact
+- **Ranger** (bottom-right): Dexterity, evasion, bows, claws, daggers, projectiles, attack speed. \
+Nearest keystones: Acrobatics, Point Blank, Phase Acrobatics, Iron Reflexes
+- **Witch** (top-right): Intelligence, energy shield, spells, minions, chaos/cold/lightning. \
+Nearest keystones: Chaos Inoculation, Zealot's Oath, Elemental Overload, Pain Attunement
+- **Duelist** (bottom-left): Str/Dex, swords/axes, attack leech, block, armour/evasion. \
+Nearest keystones: Resolute Technique, Vaal Pact, Iron Reflexes
+- **Templar** (top-center): Str/Int, elemental damage, auras, armour/ES, maces/staves. \
+Nearest keystones: Elemental Overload, Mind Over Matter, Unwavering Stance, Avatar of Fire
+- **Shadow** (right): Dex/Int, crit, traps/mines, claws/daggers, chaos/poison, evasion/ES. \
+Nearest keystones: Acrobatics, Ghost Reaver, Chaos Inoculation
+- **Scion** (center): Access to all areas but longer pathing. Versatile.
+
+IMPORTANT: When the user picks claws, recommend CLAW notables, NOT bow notables. \
+When they pick bows, recommend BOW notables. Match the weapon type EXACTLY.
+
 Passive tree progression guidelines:
-- **1-12**: 10-12 points — path toward first keystone or major damage cluster
+- **1-12**: 10-12 points — path toward first keystone or major damage cluster near class start
 - **12-24**: ~22 points — grab first keystone + nearby life nodes
-- **24-36**: ~34 points — second damage cluster + more life
+- **24-36**: ~34 points — weapon-specific damage cluster + more life
 - **36-50**: ~48 points — connect to second keystone or jewel sockets
 - **50-60**: ~58 points — fill out damage + first ascendancy notables (after Normal lab)
 - **60-70**: ~68 points — second ascendancy (Cruel lab) + more life/damage
@@ -271,19 +371,38 @@ Passive tree progression guidelines:
 - **80-90**: ~88 points — fourth ascendancy (Uber lab) + fill remaining damage
 - **90-100**: ~98 points — jewel sockets, cluster jewels, final optimization
 
-## Bracket Notes (MUST be detailed, 4-6 sentences)
+## Bracket Notes (MUST be detailed, 5-7 sentences)
 Each bracket's **notes** field MUST include ALL of the following:
 1. **Skill rotation**: Exact skill usage order for clearing AND bossing \
 (e.g. "Clearing: Shield Charge into packs → Bladestorm. Bossing: Blood Stance → Bladestorm → \
 Berserk when available. Keep Blood and Sand in Sand Stance for clear, Blood for bosses.")
-2. **DPS milestones**: Expected tooltip DPS range or qualitative benchmark \
-(e.g. "Should hit ~50k tooltip DPS with a 5L. If below 30k, prioritize weapon upgrade.")
+2. **DPS milestones**: Expected tooltip DPS range from the Boss Encounter Reference \
+(e.g. "Should hit ~50k tooltip DPS with a 5L. If below 30k, prioritize weapon upgrade. \
+Need 2M+ for Sirus attempt.")
 3. **Stat targets**: Specific numeric goals \
-(e.g. "Aim for: 3.5k life, 75/75/75 res, 30% spell suppression, 1500 armour")
+(e.g. "Aim for: 3.5k life, 75/75/75 res, 30% spell suppression, 1500 armour, 0% chaos res")
 4. **Gear transition**: What to upgrade and why \
 (e.g. "Replace Tabula with 5L rare chest for life+res. Buy a 350+ pDPS weapon.")
 5. **Passive tree focus**: Key nodes to path toward at this level range \
 (e.g. "Rush Resolute Technique → pick up life wheel near Marauder start")
+6. **Boss strategy**: For map+ brackets, mention which pinnacle bosses are attainable at this gear level \
+and what defenses/DPS are needed (e.g. "Ready for Sirus A5 — dodge die beam, bring chaos res. \
+Not ready for Maven yet — need 3M+ DPS.")
+7. **Atlas & mapping**: For map+ brackets, recommend an atlas passive strategy from the Atlas Strategy \
+Reference that fits the build's playstyle (e.g. "Spec into Legion nodes — your AoE clear shreds \
+monoliths. Run alch+vaal, avoid ele reflect and no-leech maps."). Include which map mods to AVOID \
+and which are safe/profitable for this build (from the Map Mod Danger Reference).
+
+## Atlas & Map Mod Fields (REQUIRED for map+ brackets only)
+For brackets "90 Early Maps" and above, include these additional fields:
+- **atlas_strategy**: 2-4 sentences recommending an atlas passive strategy for this build \
+(e.g. "Spec into Legion nodes — your AoE clear shreds monoliths. Pair with Legion scarabs \
+for maximum splinter drops. Consider Singular Focus keystone to target-farm your best layout.")
+- **map_warnings**: Array of map mod strings this build CANNOT or SHOULD NOT run \
+(e.g. ["Elemental Reflect", "No Leech", "-max res"]). Use the Map Mod Danger Reference. \
+Include both "cannot run" and "dangerous" mods relevant to this specific build.
+
+For leveling brackets (pre-maps), leave atlas_strategy as "" and map_warnings as [].
 
 CRITICAL: Output compact JSON — no indentation, no extra whitespace. Wrap in ```json block.
 
@@ -294,13 +413,15 @@ Schema:
 "notes":"Clearing: Cleave through packs, Leap Slam to move. Rush to Merveil. \
 Stat targets: 300+ life, any linked gear. Pick up all +life nodes near start. \
 Buy 3L from vendor if needed — BBR for Cleave+Ruthless+Onslaught.",\
+"atlas_strategy":"","map_warnings":[],\
 "passive_tree":{"total_points":12,"key_nodes":["Resolute Technique","Born to Fight",\
 "Butchery","Art of the Gladiator"],"priority":"Life > Melee damage > Attack speed","url":""},\
 "gem_groups":[{"slot":"Body Armour","gems":[{"name":"Cleave","icon_url":"","is_support":false},\
 {"name":"Ruthless Support","icon_url":"","is_support":true},\
 {"name":"Onslaught Support","icon_url":"","is_support":true}]}],\
 "items":[{"slot":"Weapon 1","name":"Rusted Sword","base_type":"Rusted Sword","icon_url":"",\
-"stat_priority":["physical damage","attack speed","added physical"],"notes":"Highest pDPS 1H you can find"}]}]}
+"stat_priority":["physical damage","attack speed","added physical"],\
+"notes":"Highest pDPS 1H you can find"}]}]}
 ```
 
 ## Quality Checklist (verify before outputting)
@@ -311,8 +432,17 @@ Buy 3L from vendor if needed — BBR for Cleave+Ruthless+Onslaught.",\
 - [ ] Resistances are addressed in every bracket (uniques or rares that cap res)
 - [ ] Flask plan includes life flask + utility flasks from Act 6 onward
 - [ ] No invented gem or unique names — only real PoE 1 items
-- [ ] Bracket notes include skill rotation, stat targets, and transition advice
+- [ ] Bracket notes include skill rotation, stat targets, transition advice, and boss strategy (maps+)
 - [ ] Defensive layers scale appropriately (life flask → CWDT → guard → endurance charges)
+- [ ] DPS milestones match the Boss Encounter Reference thresholds for that bracket
+- [ ] Chaos resistance addressed by maps (0%), endgame (+30%)
+- [ ] Clear speed mechanics included for mapping brackets (chain/pierce/fork/explosions + move speed)
+- [ ] Damage conversion chain is planned if build uses phys→ele conversion
+- [ ] Penetration/exposure sources included for endgame (support gems, curses, exposure skills)
+- [ ] Map+ brackets have atlas_strategy field with 2-4 sentences on atlas passive recommendations
+- [ ] Map+ brackets have map_warnings array listing dangerous/impossible mods for this build
+- [ ] Endgame brackets mention Voidstone progression and map juicing in atlas_strategy
+- [ ] Leveling brackets have empty atlas_strategy ("") and empty map_warnings ([])
 """
 
 REFINEMENT_SYSTEM_PROMPT = """\

@@ -192,7 +192,7 @@ def diff_gear(
     char_items: dict[str, EquippedItem],
 ) -> GearDelta:
     """
-    Compare all gear slots between guide and character.
+    Compare all gear slots between guide and character (API path).
 
     Args:
         guide_items: PoB items keyed by slot name.
@@ -224,3 +224,90 @@ def diff_gear(
         slot_deltas=deltas,
         overall_match_pct=round(overall, 1),
     )
+
+
+def diff_slot_builds(
+    slot_name: str,
+    guide_item: PobItem | None,
+    char_item: PobItem | None,
+) -> SlotDelta:
+    """Compare a single gear slot when both sides are Build Item objects."""
+    if guide_item is None:
+        return SlotDelta(slot=slot_name, has_item=True, match_pct=100.0)
+
+    guide_name = guide_item.name or guide_item.base_type
+    guide_mods = guide_item.all_mods
+
+    if char_item is None:
+        return SlotDelta(
+            slot=slot_name,
+            guide_item_name=guide_name,
+            character_item_name="(empty)",
+            has_item=False,
+            missing_mods=[
+                ModGap(
+                    mod_text=m.text,
+                    is_implicit=m.is_implicit,
+                    importance=_mod_importance(m.text),
+                )
+                for m in guide_mods
+            ],
+            matched_mods=0,
+            total_guide_mods=len(guide_mods),
+            match_pct=0.0,
+            priority_score=100.0,
+        )
+
+    char_name = char_item.name or char_item.base_type
+    char_mods_text = [m.text for m in char_item.all_mods]
+
+    used: set[int] = set()
+    missing: list[ModGap] = []
+    matched = 0
+
+    for pob_mod in guide_mods:
+        idx, _score = _find_best_match(pob_mod.text, char_mods_text, used)
+        if idx >= 0:
+            used.add(idx)
+            matched += 1
+        else:
+            missing.append(ModGap(
+                mod_text=pob_mod.text,
+                is_implicit=pob_mod.is_implicit,
+                importance=_mod_importance(pob_mod.text),
+            ))
+
+    total = len(guide_mods)
+    match_pct = (matched / total * 100) if total > 0 else 100.0
+    priority_score = (
+        sum(m.importance for m in missing) / len(missing) * (100 - match_pct)
+        if missing else 0.0
+    )
+
+    return SlotDelta(
+        slot=slot_name,
+        guide_item_name=guide_name,
+        character_item_name=char_name,
+        has_item=True,
+        missing_mods=missing,
+        matched_mods=matched,
+        total_guide_mods=total,
+        match_pct=round(match_pct, 1),
+        priority_score=round(priority_score, 1),
+    )
+
+
+def diff_gear_builds(
+    guide_items: dict[str, PobItem],
+    char_items: dict[str, PobItem],
+) -> GearDelta:
+    """Compare all gear slots when both sides are Build Item objects."""
+    compare_slots = sorted(s for s in guide_items if guide_items[s] is not None)
+
+    deltas: list[SlotDelta] = []
+    for slot in compare_slots:
+        delta = diff_slot_builds(slot, guide_items.get(slot), char_items.get(slot))
+        deltas.append(delta)
+
+    overall = sum(d.match_pct for d in deltas) / len(deltas) if deltas else 100.0
+    return GearDelta(slot_deltas=deltas, overall_match_pct=round(overall, 1))

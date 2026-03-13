@@ -499,13 +499,28 @@ def _parse_item_text(raw: str) -> Item:
             item.level = _int(line.split(":", 1)[1].strip())
             continue
 
+        # Parse sockets line (e.g. "Sockets: R-R-R-R-B-G")
+        if line.startswith("Sockets:"):
+            item.sockets = line.split(":", 1)[1].strip()
+            continue
+
         # Skip metadata lines that shouldn't be displayed
-        if line.startswith(("Unique ID:", "Item Level:", "Sockets:",
+        # Catch all *BasePercentile variants (EvasionBasePercentile, etc.)
+        if "BasePercentile:" in line:
+            continue
+        if line.startswith(("Unique ID:", "Item Level:",
                            "Selected Variant:", "Variant:", "Has Alt Variant",
                            "Has Variant", "Crafted:", "Prefix:", "Suffix:",
                            "ArmourData:", "Evasion:", "EnergyShield:",
-                           "Ward:", "Block:", "BasePercentile:",
-                           "CraftedQuality:")):
+                           "Ward:", "Block:",
+                           "CraftedQuality:",
+                           "Armour:", "MovementPenalty:",
+                           "PhysicalDamage:", "ElementalDamage:",
+                           "CriticalStrikeChance:", "AttacksPerSecond:",
+                           "Range:", "Shaper Item", "Elder Item",
+                           "Crusader Item", "Hunter Item",
+                           "Redeemer Item", "Warlord Item",
+                           "Synthesised Item", "Fractured Item")):
             continue
 
         # Implicits count marker
@@ -542,9 +557,11 @@ def _parse_item_text(raw: str) -> Item:
         ))
 
     # Assign name and base type from header lines
+    # PoB format: line 1 = item name (for named items), line 2 = base type
+    # For magic/normal items there's only 1 line (the base type)
     if len(name_lines) >= 2:
         item.name = name_lines[0]
-        item.base_type = name_lines[1]
+        item.base_type = name_lines[-1]  # last line is always the base type
     elif len(name_lines) == 1:
         item.base_type = name_lines[0]
 
@@ -579,17 +596,31 @@ def _parse_config(root: etree._Element) -> BuildConfig:
 
 def _strip_crafted(line: str) -> tuple[bool, str]:
     """
-    Detect and strip PoB crafted mod markers.
+    Detect and strip PoB mod tag prefixes.
 
-    PoB marks crafted mods either as:
-    - {crafted}Mod text here    (tag prefix)
-    - {Mod text here}           (whole line wrapped)
+    PoB can prefix mods with multiple tags like:
+    - {crafted}Mod text here
+    - {tags:attack,speed}{crafted}{range:0.5}(8-10)% increased Attack Speed
+    - {Mod text here}           (whole line wrapped — treated as crafted)
+
+    Strips ALL {key:value} and {keyword} prefixes, returning (is_crafted, clean_text).
     """
-    if line.startswith("{crafted}"):
-        return True, line[9:]  # len("{crafted}") == 9
-    if line.startswith("{") and line.endswith("}"):
+    import re
+
+    is_crafted = "{crafted}" in line
+
+    # Strip all {tag} prefixes (tags, crafted, range, variant, etc.)
+    clean = re.sub(r"\{[^}]*\}", "", line).strip()
+
+    # Handle case where whole line was wrapped in {} with no other content
+    if not clean and line.startswith("{") and line.endswith("}"):
         return True, line[1:-1]
-    return False, line
+
+    # Convert PoB range format "(min-max)" to just the max value
+    # e.g. "(8-10)% increased Attack Speed" → "10% increased Attack Speed"
+    clean = re.sub(r"\((\d+)-(\d+)\)", lambda m: m.group(2), clean)
+
+    return is_crafted, clean if clean else line
 
 
 def _int(value: str) -> int:

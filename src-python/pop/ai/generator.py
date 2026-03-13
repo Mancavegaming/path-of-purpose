@@ -24,11 +24,166 @@ from pop.ai.prompts import (
     build_knowledge_lite,
 )
 from pop.knowledge.cache import load_knowledge
+from pop.knowledge.models import KnowledgeBase
 from pop.build_parser.models import BuildGuide
 
 logger = logging.getLogger(__name__)
 
 MAX_HISTORY = 20
+
+
+def _build_valid_gem_names(kb: KnowledgeBase | None = None) -> set[str]:
+    """Build a set of all valid PoE 1 gem names.
+
+    Uses the knowledge base as the primary source (refreshed from RePoE),
+    with fallback to the calc engine's gem_data module.
+    """
+    names: set[str] = set()
+
+    # Primary: knowledge base gems
+    if kb and kb.gems:
+        for g in kb.gems:
+            names.add(g.name)
+
+    # Fallback: calc engine's hardcoded gem database
+    try:
+        from pop.calc.gem_data import _ACTIVE_GEMS, _SUPPORT_GEMS
+        names.update(_ACTIVE_GEMS.keys())
+        names.update(_SUPPORT_GEMS.keys())
+    except ImportError:
+        pass
+
+    return names
+
+
+def _validate_guide_gems(guide: BuildGuide, kb: KnowledgeBase | None = None) -> BuildGuide:
+    """Remove invalid/hallucinated gem names from a generated build guide.
+
+    Checks every gem in every bracket against the known gem database.
+    Unknown gems are removed and logged as warnings.
+    """
+    valid_names = _build_valid_gem_names(kb)
+    if not valid_names:
+        logger.warning("No valid gem names loaded — skipping gem validation")
+        return guide
+
+    removed: list[str] = []
+
+    for bracket in guide.brackets:
+        for group in bracket.gem_groups:
+            kept = []
+            for gem in group.gems:
+                if _is_valid_gem(gem.name, valid_names):
+                    kept.append(gem)
+                else:
+                    removed.append(f"{gem.name} (bracket: {bracket.title}, slot: {group.slot})")
+            group.gems = kept
+
+    if removed:
+        logger.warning(
+            "Removed %d invalid/hallucinated gem(s) from generated build: %s",
+            len(removed), "; ".join(removed),
+        )
+
+    return guide
+
+
+def _is_valid_gem(name: str, valid_names: set[str]) -> bool:
+    """Check if a gem name is valid, with common suffix normalization."""
+    if name in valid_names:
+        return True
+    # Try adding/removing " Support" suffix
+    if name.endswith(" Support"):
+        base = name[: -len(" Support")]
+        if base in valid_names:
+            return True
+    else:
+        if f"{name} Support" in valid_names:
+            return True
+    # Vaal variants: "Vaal X" where "X" is valid
+    if name.startswith("Vaal ") and name[5:] in valid_names:
+        return True
+    return False
+
+
+# ---------------------------------------------------------------------------
+# Item validation — fix hallucinated base types and unique names
+# ---------------------------------------------------------------------------
+
+def _build_valid_base_types() -> tuple[set[str], set[str]]:
+    """Build sets of valid weapon base types and armour base types."""
+    weapon_bases: set[str] = set()
+    armour_bases: set[str] = set()
+    try:
+        from pop.calc.synthetic_items import _WEAPON_BASES, _ARMOUR_BASES
+        weapon_bases.update(_WEAPON_BASES.keys())
+        for slot_bases in _ARMOUR_BASES.values():
+            armour_bases.update(slot_bases.keys())
+    except ImportError:
+        pass
+    return weapon_bases, armour_bases
+
+
+def _build_valid_unique_names(kb: KnowledgeBase | None = None) -> set[str]:
+    """Build a set of all valid unique item names."""
+    names: set[str] = set()
+    if kb and kb.uniques:
+        for u in kb.uniques:
+            name = u.name if hasattr(u, "name") else str(u)
+            names.add(name)
+    try:
+        from pop.calc.unique_db import list_uniques
+        for u in list_uniques():
+            names.add(u if isinstance(u, str) else u.name)
+    except ImportError:
+        pass
+    return names
+
+
+def _validate_guide_items(guide: BuildGuide, kb: KnowledgeBase | None = None) -> BuildGuide:
+    """Fix invalid/hallucinated item base types and unique names in a generated build guide.
+
+    - Clears invalid base_type so synthetic_items.py picks a correct one
+    - Logs warnings for any corrections made
+    """
+    weapon_bases, armour_bases = _build_valid_base_types()
+    unique_names = _build_valid_unique_names(kb)
+    if not weapon_bases and not armour_bases:
+        return guide
+
+    fixed: list[str] = []
+
+    for bracket in guide.brackets:
+        for item in bracket.items:
+            bt = item.base_type
+            if not bt:
+                continue
+
+            is_weapon = item.slot in ("Weapon 1", "Weapon 2")
+
+            # Check if this looks like a unique item (name matches a known unique)
+            if item.name and item.name in unique_names:
+                continue  # Unique — trust the base type from the DB
+
+            # Validate base type
+            if is_weapon:
+                if bt not in weapon_bases:
+                    fixed.append(f"{bt} → auto (slot: {item.slot}, bracket: {bracket.title})")
+                    item.base_type = ""
+            else:
+                if bt and bt not in armour_bases:
+                    # Also allow jewelry/flask names that aren't in armour bases
+                    # (e.g., "Diamond Ring", "Leather Belt" are in _ARMOUR_BASES under their slot)
+                    fixed.append(f"{bt} → auto (slot: {item.slot}, bracket: {bracket.title})")
+                    item.base_type = ""
+
+    if fixed:
+        logger.warning(
+            "Fixed %d invalid item base type(s): %s",
+            len(fixed), "; ".join(fixed),
+        )
+
+    return guide
 
 
 def _sanitize_text(text: str) -> str:
@@ -173,6 +328,9 @@ class BuildGenerator:
                 guide = await self._generate_two_phase(
                     provider, api_key, system, pref_block, history,
                 )
+                # Validate gem names and item base types — remove hallucinated data
+                guide = _validate_guide_gems(guide, kb)
+                guide = _validate_guide_items(guide, kb)
                 return guide
             except Exception as exc:
                 last_error = exc
@@ -312,4 +470,9 @@ class BuildGenerator:
         )
 
         data = _extract_json(text)
-        return BuildGuide(**data)
+        guide = BuildGuide(**data)
+        # Validate gem names and item base types — remove hallucinated data
+        kb = load_knowledge()
+        guide = _validate_guide_gems(guide, kb)
+        guide = _validate_guide_items(guide, kb)
+        return guide

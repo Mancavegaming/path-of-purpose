@@ -7,7 +7,7 @@ The build_parser models represent the *guide build* side.
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 # ---------------------------------------------------------------------------
@@ -60,6 +60,40 @@ class ItemProperty(BaseModel):
     values: list[list[str | int]] = Field(default_factory=list)
 
 
+class SocketedGem(BaseModel):
+    """A gem socketed inside an item, from the PoE API get-items response."""
+
+    name: str = ""
+    type_line: str = Field(default="", alias="typeLine")
+    support: bool = False  # True for support gems
+    socket: int = 0  # Index into the parent item's sockets array
+    colour: str = ""  # S for skill, D for support
+    properties: list[ItemProperty] = Field(default_factory=list)
+    icon: str = ""
+
+    model_config = {"populate_by_name": True}
+
+    @property
+    def gem_level(self) -> int:
+        for prop in self.properties:
+            if prop.name == "Level":
+                try:
+                    return int(str(prop.values[0][0]).replace(" (Max)", ""))
+                except (IndexError, ValueError):
+                    pass
+        return 20
+
+    @property
+    def gem_quality(self) -> int:
+        for prop in self.properties:
+            if prop.name == "Quality":
+                try:
+                    return int(str(prop.values[0][0]).strip("+%"))
+                except (IndexError, ValueError):
+                    pass
+        return 0
+
+
 class EquippedItem(BaseModel):
     """An item equipped on a character, from the PoE API."""
 
@@ -71,6 +105,16 @@ class EquippedItem(BaseModel):
     ilvl: int = 0
     rarity: int = 0  # 0=normal, 1=magic, 2=rare, 3=unique
 
+    @field_validator("rarity", mode="before")
+    @classmethod
+    def _coerce_rarity(cls, v: object) -> int:
+        if isinstance(v, str):
+            return {"Normal": 0, "Magic": 1, "Rare": 2, "Unique": 3}.get(v, 0)
+        return int(v) if v is not None else 0
+    x: int = 0  # Position (used for flask slot numbering)
+    icon: str = ""
+    frame_type: int = Field(default=0, alias="frameType")
+
     # Mods
     implicit_mods: list[str] = Field(default_factory=list, alias="implicitMods")
     explicit_mods: list[str] = Field(default_factory=list, alias="explicitMods")
@@ -78,8 +122,9 @@ class EquippedItem(BaseModel):
     enchant_mods: list[str] = Field(default_factory=list, alias="enchantMods")
     fractured_mods: list[str] = Field(default_factory=list, alias="fracturedMods")
 
-    # Sockets
+    # Sockets & socketed gems
     sockets: list[ItemSocket] = Field(default_factory=list)
+    socketed_items: list[SocketedGem] = Field(default_factory=list, alias="socketedItems")
 
     # Properties (display)
     properties: list[ItemProperty] = Field(default_factory=list)
@@ -119,8 +164,9 @@ class EquippedItem(BaseModel):
             "Ring": "Ring 1",
             "Ring2": "Ring 2",
             "Belt": "Belt",
-            "Flask": "Flask 1",
         }
+        if self.inventory_id == "Flask":
+            return f"Flask {self.x + 1}"
         return mapping.get(self.inventory_id, self.inventory_id)
 
 
