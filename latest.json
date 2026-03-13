@@ -1,11 +1,11 @@
 {
-  "version": "0.2.1",
-  "notes": "Simplified Twitch login — no app registration needed",
+  "version": "0.2.2",
+  "notes": "Twitch OAuth login with registered app — no more invalid client error",
   "pub_date": "2026-03-13T00:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXQ4Q3IrYWhnUFdxMlhwbExPb3NiYzI3QlMxTWVaYWN3WW1zNlJyVEdjNFJNMlBwa2xOenFsc0dtOExIVzN4WFBPc0NHcC9raURUR3c4VU5TMVQvZEFNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczNDE5ODgxCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMi4xX3g2NC1zZXR1cC5uc2lzLnppcApEaDNiTjZvdHROT3Y0dmljQ0R5ejhOTFF6V0IycDZ1ZFBSVDFraHluQUVxNFFwMGxGQXBua1dFNHRqUkEwZHZndEY5eldMZVpRZkZkemFoamtPemRDZz09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.2.1/Path.of.Purpose_0.2.1_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYW5QVldianJ4MXpobDRPbUZtWGpKeEcrdUhRUktSVVg0b2h1SktPdGtJbFBXSVh4dEhzdnI0VmZyK0FQYUJ5eEZXakJ5cktxaU9RSEptQVo5d0lDUlFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczNDI2NzIxCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMi4yX3g2NC1zZXR1cC5uc2lzLnppcAozYWZuSE1UNDVEME5xUFVOTEVLZFRoWWxxNzR3TWJFb3lZM2QyQmNLclNmMEdHb0JBb0xYVXVucXVXNitBUExjeEIzdzBJb3Q0c3NXSjRqcThZWkVDZz09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.2.2/Path.of.Purpose_0.2.2_x64-setup.nsis.zip"
     }
   }
 }

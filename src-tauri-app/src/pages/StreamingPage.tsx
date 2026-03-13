@@ -1,5 +1,9 @@
 import { createSignal, createEffect, onCleanup, For, Show } from "solid-js";
+import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-shell";
+
+const TWITCH_CLIENT_ID = "nxcpw276lnupq2pty6tuj9hwtthhxl";
+const TWITCH_REDIRECT_URI = "http://localhost:8460/callback";
 import {
   loadTwitchToken,
   storeTwitchToken,
@@ -98,41 +102,53 @@ export default function StreamingPage() {
     if (overlayTimer) clearInterval(overlayTimer);
   });
 
-  async function handleGetToken() {
-    await open("https://twitchapps.com/tmi/");
-  }
-
-  async function handleSaveToken() {
-    const token = twitchToken().replace(/^oauth:/i, "").trim();
-    if (!token) {
-      setAuthError("Please paste your token from the Twitch page.");
-      return;
-    }
-
+  async function handleTwitchLogin() {
     setAuthLoading(true);
     setAuthError("");
 
     try {
+      const scopes = "chat:read chat:edit";
+      const authUrl =
+        `https://id.twitch.tv/oauth2/authorize` +
+        `?client_id=${TWITCH_CLIENT_ID}` +
+        `&redirect_uri=${encodeURIComponent(TWITCH_REDIRECT_URI)}` +
+        `&response_type=token` +
+        `&scope=${encodeURIComponent(scopes)}`;
+
+      // Start the local callback listener (Rust-side, port 8460)
+      const callbackPromise = invoke<string>("listen_for_twitch_callback");
+
+      // Open the browser
+      await open(authUrl);
+
+      // Wait for the callback
+      const tokenData = await callbackPromise;
+
+      if (!tokenData) {
+        setAuthError("No token received from Twitch. Try again.");
+        return;
+      }
+
       // Validate the token and get the username
       const validateResp = await fetch("https://id.twitch.tv/oauth2/validate", {
-        headers: { Authorization: `OAuth ${token}` },
+        headers: { Authorization: `OAuth ${tokenData}` },
       });
 
       if (!validateResp.ok) {
-        setAuthError("Invalid token. Please try getting a new one.");
+        setAuthError("Token validation failed. Try logging in again.");
         return;
       }
 
       const validateData = await validateResp.json();
       const username = validateData.login || "";
 
-      setTwitchToken(token);
+      setTwitchToken(tokenData);
       setTwitchUsername(username);
       setTwitchChannel(username);
 
-      await storeTwitchToken(token, username, username);
+      await storeTwitchToken(tokenData, username, username);
     } catch (e) {
-      setAuthError(`Token validation failed: ${String(e)}`);
+      setAuthError(`Twitch login failed: ${String(e)}`);
     } finally {
       setAuthLoading(false);
     }
@@ -250,32 +266,15 @@ export default function StreamingPage() {
                   fallback={
                     <div class="stream-login-prompt">
                       <p class="stream-hint">
-                        Connect your Twitch account to enable the chat bot.
-                        Click the button below to get a chat token from Twitch, then paste it here.
+                        Login with your Twitch account to connect the chat bot.
+                        This uses Twitch's official OAuth — your password is never shared.
                       </p>
                       <button
                         class="twitch-login-btn"
-                        onClick={handleGetToken}
+                        onClick={handleTwitchLogin}
+                        disabled={authLoading()}
                       >
-                        Get Twitch Chat Token
-                      </button>
-                      <div class="stream-field" style={{ "margin-top": "12px" }}>
-                        <label>Paste your token</label>
-                        <input
-                          type="password"
-                          placeholder="oauth:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                          value={twitchToken()}
-                          onInput={(e) => setTwitchToken(e.currentTarget.value)}
-                          class="stream-input"
-                        />
-                      </div>
-                      <button
-                        class="dps-calc-btn"
-                        onClick={handleSaveToken}
-                        disabled={authLoading() || !twitchToken()}
-                        style={{ "margin-top": "8px" }}
-                      >
-                        {authLoading() ? "Validating..." : "Connect"}
+                        {authLoading() ? "Logging in..." : "Login with Twitch"}
                       </button>
                     </div>
                   }
