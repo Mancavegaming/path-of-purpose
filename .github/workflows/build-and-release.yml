@@ -1,0 +1,96 @@
+name: Build, Sign & Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps + Nuitka
+        run: |
+          cd src-python
+          pip install -e ".[dev]"
+          pip install nuitka
+
+      - name: Build Python sidecar with Nuitka
+        run: |
+          cd src-python
+          python -m nuitka --standalone --output-dir=build --include-package=pop pop/main.py
+          cp build/main.dist/main.exe ../src-tauri-app/src-tauri/binaries/pop-engine-x86_64-pc-windows-msvc.exe
+
+      - name: Install Azure Trusted Signing CLI
+        run: |
+          dotnet tool install --global trusted-signing-cli
+
+      - name: Install frontend deps
+        run: |
+          cd src-tauri-app
+          npm ci
+
+      - name: Build and sign Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_SIGNING_ENDPOINT: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
+          AZURE_SIGNING_ACCOUNT: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
+          AZURE_SIGNING_PROFILE: ${{ secrets.AZURE_SIGNING_PROFILE }}
+        with:
+          projectPath: src-tauri-app
+          tagName: ${{ github.ref_name }}
+          releaseName: '${{ github.ref_name }}'
+          releaseBody: 'See the assets below to download and install.'
+          releaseDraft: false
+          prerelease: true
+
+      - name: Generate latest.json for updater
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          SIG=$(cat "src-tauri-app/src-tauri/target/release/bundle/nsis/Path of Purpose_${VERSION}_x64-setup.nsis.zip.sig")
+          cat > latest.json <<ENDJSON
+          {
+            "version": "${VERSION}",
+            "notes": "Path of Purpose v${VERSION}",
+            "pub_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "platforms": {
+              "windows-x86_64": {
+                "signature": "${SIG}",
+                "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/${GITHUB_REF_NAME}/Path.of.Purpose_${VERSION}_x64-setup.nsis.zip"
+              }
+            }
+          }
+          ENDJSON
+
+      - name: Upload latest.json to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ github.ref_name }} latest.json --clobber
