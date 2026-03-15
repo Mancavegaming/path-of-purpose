@@ -11,7 +11,7 @@
 - **Frontend**: Tauri v2 (Rust shell) + SolidJS + TypeScript
 - **Backend**: Python sidecar spawned by Tauri via stdio JSON-RPC 2.0
 - **Server**: Optional remote API (src-server/) for hosted AI features
-- **Packaging**: Nuitka standalone folder mode (not PyInstaller — AV false positives)
+- **Packaging**: Nuitka onefile mode (not PyInstaller — AV false positives)
 - **Database**: SQLite (local, via stdlib sqlite3)
 - **AI**: Poe.com OpenAI-compatible API (`api.poe.com/v1`, `openai` SDK)
 - **Auth**: Discord OAuth for user accounts + Patreon for subscriptions
@@ -148,11 +148,11 @@ path-of-purpose/
 
 ## Build & Release
 ```bash
-# Build Python sidecar with Nuitka
-cd src-python && python -m nuitka --standalone --output-dir=build --include-package=pop pop/main.py
+# Build Python sidecar with Nuitka (--onefile bundles python311.dll inside the exe)
+cd src-python && python -m nuitka --onefile --output-dir=build --include-package=pop --assume-yes-for-downloads pop/main.py
 
 # Copy sidecar to Tauri binaries
-cp build/main.dist/main.exe src-tauri-app/src-tauri/binaries/pop-engine-x86_64-pc-windows-msvc.exe
+cp build/main.exe src-tauri-app/src-tauri/binaries/pop-engine-x86_64-pc-windows-msvc.exe
 
 # Build signed Tauri installer (requires signing key)
 cd src-tauri-app && \

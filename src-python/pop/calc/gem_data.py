@@ -27,6 +27,7 @@ class ActiveGemStats:
     base_cast_time: float = 1.0
     damage_effectiveness: float = 1.0
     attack_speed_multiplier: float = 1.0
+    skill_hit_multiplier: float = 1.0  # effective hits per attack (KB explosions, etc.)
 
 @dataclass
 class SupportGemEffect:
@@ -70,7 +71,8 @@ _a("Blade Flurry", tags=["attack", "melee", "area", "channelling", "physical"],
    is_attack=True, base_crit=6.0, attack_speed_multiplier=1.6, damage_effectiveness=0.47)
 
 _a("Molten Strike", tags=["attack", "melee", "area", "projectile", "fire"],
-   is_attack=True, base_crit=5.0, attack_speed_multiplier=0.95, damage_effectiveness=1.3)
+   is_attack=True, base_crit=5.0, attack_speed_multiplier=0.95, damage_effectiveness=1.3,
+   skill_hit_multiplier=2.5)  # melee hit + 3 proj at 50% overlap on single target
 
 _a("Flicker Strike", tags=["attack", "melee", "physical"],
    is_attack=True, base_crit=5.0, attack_speed_multiplier=1.2, damage_effectiveness=1.42)
@@ -221,7 +223,8 @@ _a("Ethereal Knives", tags=["spell", "projectile", "physical"],
 
 _a("Blade Vortex", tags=["spell", "area", "physical"],
    is_spell=True, base_damage={DamageType.PHYSICAL: 161.0}, base_crit=6.0,
-   base_cast_time=0.5, damage_effectiveness=0.45)
+   base_cast_time=0.5, damage_effectiveness=0.45,
+   skill_hit_multiplier=10.0)  # 10 blade stacks, each hits independently
 
 _a("Bladefall", tags=["spell", "area", "physical"],
    is_spell=True, base_damage={DamageType.PHYSICAL: 977.0}, base_crit=5.0,
@@ -236,7 +239,8 @@ _a("Blade Blast", tags=["spell", "area", "physical"],
 # -------------------------------------------------------------------
 
 _a("Tornado Shot", tags=["attack", "projectile"],
-   is_attack=True, base_crit=5.0, attack_speed_multiplier=1.0, damage_effectiveness=1.1)
+   is_attack=True, base_crit=5.0, attack_speed_multiplier=1.0, damage_effectiveness=1.1,
+   skill_hit_multiplier=2.0)  # secondary arrows overlap on single target
 
 _a("Lightning Arrow", tags=["attack", "projectile", "area", "lightning"],
    is_attack=True, base_crit=5.0, attack_speed_multiplier=1.0, damage_effectiveness=1.04)
@@ -248,7 +252,8 @@ _a("Barrage", tags=["attack", "projectile"],
    is_attack=True, base_crit=5.0, attack_speed_multiplier=1.0, damage_effectiveness=0.476)
 
 _a("Kinetic Blast", tags=["attack", "projectile", "area"],
-   is_attack=True, base_crit=5.0, attack_speed_multiplier=1.0, damage_effectiveness=0.63)
+   is_attack=True, base_crit=5.0, attack_speed_multiplier=1.0, damage_effectiveness=0.63,
+   skill_hit_multiplier=5.0)  # PoB: 4 base explosions + 1 from quality 20 (0.05/qual)
 
 _a("Rain of Arrows", tags=["attack", "projectile", "area"],
    is_attack=True, base_crit=5.0, attack_speed_multiplier=1.0, damage_effectiveness=0.73)
@@ -281,7 +286,8 @@ _a("Siege Ballista", tags=["attack", "projectile", "totem"],
    is_attack=True, base_crit=5.0, attack_speed_multiplier=0.8, damage_effectiveness=1.0)
 
 _a("Blast Rain", tags=["attack", "projectile", "area", "fire"],
-   is_attack=True, base_crit=5.0, attack_speed_multiplier=1.0, damage_effectiveness=0.55)
+   is_attack=True, base_crit=5.0, attack_speed_multiplier=1.0, damage_effectiveness=0.55,
+   skill_hit_multiplier=4.0)  # 4 overlapping blasts on single target
 
 _a("Explosive Arrow", tags=["attack", "projectile", "area", "fire"],
    is_attack=True, base_crit=5.0, attack_speed_multiplier=1.0, damage_effectiveness=0.55)
@@ -313,7 +319,8 @@ _a("Spark", tags=["spell", "projectile", "lightning"],
 
 _a("Ball Lightning", tags=["spell", "projectile", "lightning", "area"],
    is_spell=True, base_damage={DamageType.LIGHTNING: 94.5}, base_crit=5.0,
-   base_cast_time=0.75, damage_effectiveness=0.5)
+   base_cast_time=0.75, damage_effectiveness=0.5,
+   skill_hit_multiplier=5.0)  # ~5 ticks per pass on single target
 
 _a("Storm Brand", tags=["spell", "lightning", "area", "brand"],
    is_spell=True, base_damage={DamageType.LIGHTNING: 327.0}, base_crit=5.0,
@@ -371,7 +378,8 @@ _a("Flame Surge", tags=["spell", "fire", "area"],
 
 _a("Firestorm", tags=["spell", "fire", "area"],
    is_spell=True, base_damage={DamageType.FIRE: 200.0}, base_crit=5.0,
-   base_cast_time=0.9, damage_effectiveness=0.45)
+   base_cast_time=0.9, damage_effectiveness=0.45,
+   skill_hit_multiplier=3.0)  # ~3 impacts overlap on single target
 
 _a("Magma Orb", tags=["spell", "fire", "projectile", "area"],
    is_spell=True, base_damage={DamageType.FIRE: 760.0}, base_crit=5.0,
@@ -1091,7 +1099,9 @@ _s("Elemental Focus Support", modifiers=[
 _s("Trinity Support", modifiers=[
     _mod("more_elemental_damage", 33,
          damage_types=[DamageType.FIRE, DamageType.COLD, DamageType.LIGHTNING],
-         source="gem:Trinity Support")])
+         source="gem:Trinity Support")],
+    penetration={DamageType.FIRE: 18.0, DamageType.COLD: 18.0, DamageType.LIGHTNING: 18.0})
+    # 18% ele pen at level 20 with max resonance (configResonanceCount: 50)
 
 _s("Inspiration Support", modifiers=[
     _mod("more_elemental_damage", 39,

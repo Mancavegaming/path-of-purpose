@@ -169,7 +169,7 @@ def _xml_to_build(root: etree._Element) -> Build:
 
     build = Build(
         class_name=build_el.get("className", ""),
-        ascendancy_name=build_el.get("ascClassName", ""),
+        ascendancy_name=build_el.get("ascendClassName", build_el.get("ascClassName", "")),
         level=_int(build_el.get("level", "1")),
         main_socket_group=_int(build_el.get("mainSocketGroup", "0")),
         pob_version=root.get("version", ""),
@@ -178,6 +178,12 @@ def _xml_to_build(root: etree._Element) -> Build:
 
     # Parse each section
     build.passive_specs = _parse_passive_specs(root)
+
+    # Parse active passive spec index from <Tree activeSpec="N"> (1-based)
+    tree_el = root.find("Tree")
+    if tree_el is not None:
+        active_spec_str = tree_el.get("activeSpec", "1")
+        build.active_spec_index = _int(active_spec_str) - 1  # 1-based → 0-based
 
     skill_sets, active_skill_set, flat_skills = _parse_skills(root)
     build.skill_sets = skill_sets
@@ -231,6 +237,25 @@ def _parse_passive_specs(root: etree._Element) -> list[PassiveSpec]:
             override_id = _int(override_el.get("overrideNodeId", "0"))
             if node_id and override_id:
                 spec.overrides[node_id] = override_id
+
+        # Parse jewel sockets: <Sockets><Socket nodeId="X" itemId="Y"/></Sockets>
+        sockets_el = spec_el.find("Sockets")
+        if sockets_el is not None:
+            for socket_el in sockets_el.findall("Socket"):
+                node_id = _int(socket_el.get("nodeId", "0"))
+                item_id = _int(socket_el.get("itemId", "0"))
+                if node_id and item_id:
+                    spec.jewel_sockets[node_id] = item_id
+
+        # Parse overrides (tattoos, runegrafts, conquered mods)
+        # <Overrides><Override nodeId="X">stat text</Override></Overrides>
+        overrides_el = spec_el.find("Overrides")
+        if overrides_el is not None:
+            for ov_el in overrides_el.findall("Override"):
+                node_id = _int(ov_el.get("nodeId", "0"))
+                override_text = (ov_el.text or "").strip()
+                if node_id and override_text:
+                    spec.node_overrides[node_id] = override_text
 
         specs.append(spec)
 
@@ -574,17 +599,40 @@ def _parse_item_text(raw: str) -> Item:
 
 
 def _parse_config(root: etree._Element) -> BuildConfig:
-    """Parse <Config> element containing build configuration toggles."""
+    """Parse <Config> element containing build configuration toggles.
+
+    PoB stores config inputs either directly under <Config> or nested inside
+    a <ConfigSet> child (newer format with multiple config sets).
+    """
     config_el = root.find("Config")
     if config_el is None:
         return BuildConfig()
 
     entries: dict[str, str] = {}
-    for input_el in config_el.findall("Input"):
-        name = input_el.get("name", "")
-        value = input_el.get("string", input_el.get("number", input_el.get("boolean", "")))
-        if name:
-            entries[name] = value
+
+    def _collect_inputs(parent: etree._Element) -> None:
+        for input_el in parent.findall("Input"):
+            name = input_el.get("name", "")
+            value = input_el.get("string", input_el.get("number", input_el.get("boolean", "")))
+            if name:
+                entries[name] = value
+
+    # Try direct <Input> children first (older PoB format)
+    _collect_inputs(config_el)
+
+    # If no inputs found, check for <ConfigSet> children (newer format)
+    if not entries:
+        active_set = config_el.get("activeConfigSet", "1")
+        for config_set_el in config_el.findall("ConfigSet"):
+            if config_set_el.get("id", "") == active_set:
+                _collect_inputs(config_set_el)
+                break
+        # Fall back to first ConfigSet if active one not found
+        if not entries:
+            for config_set_el in config_el.findall("ConfigSet"):
+                _collect_inputs(config_set_el)
+                if entries:
+                    break
 
     return BuildConfig(entries=entries)
 

@@ -129,6 +129,8 @@ class PassiveSpec(BaseModel):
     ascendancy_id: int = 0
     nodes: list[int] = Field(default_factory=list)
     overrides: dict[int, int] = Field(default_factory=dict)
+    jewel_sockets: dict[int, int] = Field(default_factory=dict)  # nodeId → itemId
+    node_overrides: dict[int, str] = Field(default_factory=dict)  # nodeId → override stat text
     url: str = ""
     # AI-generated builds store these instead of real node IDs
     key_nodes: list[str] = Field(default_factory=list)
@@ -244,12 +246,18 @@ class Build(BaseModel):
     active_skill_set: int = 0
     active_item_set: int = 0
 
+    # Active spec index (0-based, from PoB's <Tree activeSpec="N">)
+    active_spec_index: int = 0
+
     # Metadata
     pob_version: str = ""
     build_name: str = ""
 
     @property
     def active_passive_spec(self) -> PassiveSpec | None:
+        idx = self.active_spec_index
+        if 0 <= idx < len(self.passive_specs):
+            return self.passive_specs[idx]
         return self.passive_specs[0] if self.passive_specs else None
 
     @property

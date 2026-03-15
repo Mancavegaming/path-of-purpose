@@ -173,6 +173,9 @@ _an("Impact", "Slayer",
 # Ranger — Deadeye
 # ===================================================================
 
+_an("Focal Point", "Deadeye",
+    special={"mark_effect_increased": 75.0})
+
 _an("Gathering Winds", "Deadeye",
     special={"tailwind": True},
     increased_speed=10.0)
@@ -181,10 +184,10 @@ _an("Ricochet", "Deadeye",
     special={"chain_plus_1": True})
 
 _an("Endless Munitions", "Deadeye",
-    special={"additional_projectile": 1})
+    special={"additional_projectile": 2})
 
 _an("Far Shot", "Deadeye",
-    modifiers=[_mod("more_projectile_damage_far", 30)])
+    modifiers=[_mod("more_damage_with_hits", 30)])
 
 # ===================================================================
 # Ranger — Raider

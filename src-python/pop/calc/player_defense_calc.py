@@ -16,10 +16,9 @@ from __future__ import annotations
 from pop.calc.mod_parser import ParsedMods
 from pop.calc.models import CalcConfig, DefenceResult
 
-# Base life per class (PoE1 values — Marauder/Templar highest, Shadow/Ranger lowest)
-# Simplified: use average base of 12 life per level + 50 base
+# PoB formula: Life BASE = 38 + life_per_level × level  (PoB CalcSetup.lua line 477)
 _BASE_LIFE_PER_LEVEL = 12.0
-_BASE_LIFE_START = 50.0
+_BASE_LIFE_START = 38.0
 
 
 def calc_player_defences(
@@ -38,10 +37,9 @@ def calc_player_defences(
     result = DefenceResult()
 
     # --- Life ---
-    # Base life from level (approximate: 50 + 12 * level)
-    base_life = _BASE_LIFE_START + _BASE_LIFE_PER_LEVEL * config.enemy_level
-    # Use a reasonable player level estimate (typically ~90 for endgame)
-    # config.enemy_level is the enemy, but we use it as a proxy for player level
+    # PoB: Life BASE = 38 + 12 * player_level (CalcSetup.lua line 477)
+    player_level = getattr(config, "player_level", 0) or config.enemy_level
+    base_life = _BASE_LIFE_START + _BASE_LIFE_PER_LEVEL * player_level
     flat_life = parsed.flat_life
     total_base_life = base_life + flat_life
     inc_life = parsed.increased_life

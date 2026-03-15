@@ -59,30 +59,59 @@ def _get_nodes() -> dict[int, dict]:
     return _nodes_cache
 
 
-def get_node_stats(node_ids: list[int]) -> ParsedMods:
+def get_node_stats(
+    node_ids: list[int],
+    node_overrides: dict[int, str] | None = None,
+) -> ParsedMods:
     """Extract all damage-relevant stats from a set of allocated passive nodes.
+
+    Ascendancy notables are skipped here — they are handled by
+    ascendancy_effects.py via get_ascendancy_node_names() to avoid
+    double-counting complex mechanics.
+
+    If node_overrides is provided (tattoos, runegrafts, conquered mods),
+    the override text replaces the base node stats entirely.
 
     Args:
         node_ids: List of allocated passive tree node IDs.
+        node_overrides: Optional dict mapping nodeId → override stat text.
 
     Returns:
         ParsedMods with all modifiers from the passive tree.
     """
     nodes = _get_nodes()
+    overrides = node_overrides or {}
     result = ParsedMods()
     resolved_count = 0
 
     for nid in node_ids:
+        # Check for override (tattoo/runegraft) first
+        override_text = overrides.get(nid)
+        if override_text:
+            stat_texts = [
+                line.strip() for line in override_text.splitlines()
+                if line.strip() and not line.strip().startswith("Limited to")
+            ]
+            if stat_texts:
+                parsed = parse_mods(stat_texts, source=f"override:{nid}")
+                result.merge(parsed)
+                resolved_count += 1
+            continue
+
         node = nodes.get(nid)
         if node is None:
+            continue
+
+        # Skip ascendancy notables — handled by ascendancy_effects.py
+        if node.get("ascendancyName") and node.get("isNotable"):
             continue
 
         stats = node.get("stats", [])
         if not stats:
             continue
 
-        # Filter to strings only
-        stat_texts = [s for s in stats if isinstance(s, str)]
+        # Split multi-line stats and rejoin wrapped lines
+        stat_texts = _split_stat_lines(stats)
         if not stat_texts:
             continue
 
@@ -95,6 +124,54 @@ def get_node_stats(node_ids: list[int]) -> ParsedMods:
         resolved_count, len(node_ids),
     )
     return result
+
+
+def _split_stat_lines(stats: list) -> list[str]:
+    """Split multi-line stat strings, rejoining wrapped lines.
+
+    Tree node stats can contain '\\n' that either separates two stats
+    or wraps a single stat across lines. If the continuation starts with
+    a lowercase letter, it's a wrapped line — rejoin it.
+    """
+    lines: list[str] = []
+    for s in stats:
+        if not isinstance(s, str):
+            continue
+        parts = s.split("\n")
+        merged = parts[0].strip()
+        for part in parts[1:]:
+            part = part.strip()
+            if not part:
+                continue
+            # Continuation line if starts with lowercase (e.g. "to 30% more...")
+            if part[0].islower():
+                merged = merged.rstrip(",") + " " + part
+            else:
+                if merged:
+                    lines.append(merged)
+                merged = part
+        if merged:
+            lines.append(merged)
+    return lines
+
+
+def get_ascendancy_node_names(node_ids: list[int]) -> list[str]:
+    """Identify allocated ascendancy notable names from node IDs.
+
+    Looks up each node ID in the tree cache and returns the names of
+    any ascendancy notable passives found.
+    """
+    nodes = _get_nodes()
+    names: list[str] = []
+    for nid in node_ids:
+        node = nodes.get(nid)
+        if node is None:
+            continue
+        if node.get("ascendancyName") and node.get("isNotable"):
+            name = node.get("name", "")
+            if name:
+                names.append(name)
+    return names
 
 
 def get_node_stat_texts(node_ids: list[int]) -> list[str]:

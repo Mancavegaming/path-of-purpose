@@ -57,8 +57,11 @@ def collect_all_mods(
     warnings: list[str] = []
     cfg = config or CalcConfig()
 
-    # 1. Item mods
+    # 1. Item mods (equipped gear)
     _collect_item_mods(build, all_parsed)
+
+    # 1b. Tree-socketed jewel mods
+    _collect_jewel_mods(build, all_parsed, warnings)
 
     # 2. Support gem mods
     _collect_support_mods(main_group, all_parsed, warnings, use_repoe)
@@ -96,6 +99,9 @@ def collect_all_mods(
     # 8. Keystone effects from passive tree or config
     _collect_keystone_effects(build, all_parsed, warnings)
 
+    # 9. Custom mods from PoB config (e.g. "+200% to all elemental resistances")
+    _collect_custom_mods(build, all_parsed)
+
     return all_parsed, warnings
 
 
@@ -122,6 +128,165 @@ def _collect_item_mods(build: Build, out: ParsedMods) -> None:
             ]
 
         out.merge(parsed)
+
+
+def _collect_jewel_mods(
+    build: Build,
+    out: ParsedMods,
+    warnings: list[str],
+) -> None:
+    """Extract modifiers from jewels socketed in the passive tree.
+
+    Each tree socket maps a node ID to an item ID. The same jewel can appear
+    in multiple sockets (e.g. Abyss jewels), and its mods apply once per socket.
+    Cluster jewels apply their small passive grants + named notable effects.
+    """
+    spec = build.active_passive_spec
+    if not spec or not spec.jewel_sockets:
+        return
+
+    items_by_id = {item.id: item for item in build.items}
+
+    for node_id, item_id in spec.jewel_sockets.items():
+        item = items_by_id.get(item_id)
+        if not item:
+            continue
+
+        bt = (item.base_type or "").lower()
+
+        # Cluster jewels: apply small passive grants + named notables
+        if "cluster" in bt:
+            _apply_cluster_jewel(item, out, warnings)
+            continue
+
+        # Skip unique radius jewels with complex mechanics (Lethal Pride, etc.)
+        if any(kw in (item.name or "").lower() for kw in
+               ("lethal pride", "brutal restraint", "militant faith",
+                "elegant hubris", "glorious vanity")):
+            continue
+
+        mod_texts = [m.text for m in item.all_mods]
+        if not mod_texts:
+            continue
+
+        parsed = parse_mods(mod_texts, source=f"jewel:{item_id}@{node_id}")
+        out.merge(parsed)
+
+
+# Cluster jewel notable effects (from poewiki.net / poedb.tw)
+_CLUSTER_NOTABLES: dict[str, list[str]] = {
+    # Elemental damage cluster notables
+    "Sadist": [
+        "15% increased Elemental Damage",  # if chilled recently
+        "25% increased Elemental Damage",  # if shocked recently
+        "20% increased Elemental Damage",  # if ignited recently
+    ],
+    "Storm Drinker": [
+        "Damage Penetrates 8% Lightning Resistance",
+    ],
+    "Widespread Destruction": [
+        "20% increased Elemental Damage",
+    ],
+    "Prismatic Heart": [
+        "30% increased Elemental Damage",
+        "+10% to all Elemental Resistances",
+    ],
+    "Doryani's Lesson": [
+        "20% increased Elemental Damage",
+    ],
+    "Disorienting Display": [
+        "20% increased Elemental Damage",
+        "10% chance to Blind Enemies on Hit with Elemental Damage",
+    ],
+    # Wand damage cluster notables
+    "Martial Prowess": [
+        "20% increased Attack Damage",
+        "6% increased Attack Speed",
+        "15% increased Global Accuracy Rating",
+    ],
+    "Opportunistic Fusilade": [
+        "35% increased Damage",  # simplified from wand-conditional
+        "50% increased Critical Strike Chance",
+    ],
+    "Storm's Hand": [
+        "Gain 10% of Physical Damage as Extra Lightning Damage",
+    ],
+    # Crit cluster notables
+    "Precise Commander": [
+        "30% increased Critical Strike Chance",
+        "+25% to Critical Strike Multiplier",
+    ],
+    "Quick Getaway": [
+        "5% increased Attack Speed",
+        "5% increased Cast Speed",
+    ],
+    "Basics of Pain": [
+        "25% increased Critical Strike Chance",
+        "+10% to Critical Strike Multiplier",
+    ],
+    # Attack damage notables
+    "Feed the Fury": [
+        "30% increased Damage while Leeching",
+        "15% increased Attack Speed while Leeching",
+    ],
+    "Fuel the Fight": [
+        "8% increased Attack Speed",
+    ],
+    # Projectile notables
+    "Aerodynamics": [
+        "10% increased Projectile Speed",
+        "20% increased Projectile Damage",
+    ],
+    "Eye to Eye": [
+        "30% increased Projectile Damage",
+    ],
+    "Repeater": [
+        "25% increased Projectile Damage",
+        "4% increased Attack Speed",
+    ],
+    "Shrieking Bolts": [
+        "25% increased Projectile Damage",
+    ],
+}
+
+
+def _apply_cluster_jewel(item: Item, out: ParsedMods, warnings: list[str]) -> None:
+    """Apply cluster jewel small passive grants and named notable effects."""
+    import re
+
+    for mod in item.all_mods:
+        text = mod.text
+
+        # Small passive grants: "Added Small Passive Skills grant: X"
+        m = re.search(r"Added Small Passive Skills grant:\s*(.+)", text, re.IGNORECASE)
+        if m:
+            grant_text = m.group(1).strip()
+            # Count how many small passives (total - 2 sockets - notables)
+            total_passives = 0
+            notable_count = 0
+            for mod2 in item.all_mods:
+                m2 = re.search(r"Adds (\d+) Passive Skills", mod2.text)
+                if m2:
+                    total_passives = int(m2.group(1))
+                if re.search(r"Added Passive Skill is \w", mod2.text):
+                    notable_count += 1
+            socket_count = sum(1 for m2 in item.all_mods
+                              if "Jewel Socket" in m2.text)
+            small_count = max(1, total_passives - socket_count - notable_count)
+            # Apply the grant X times
+            grant_mods = parse_mods([grant_text] * small_count, source="cluster:small")
+            out.merge(grant_mods)
+            continue
+
+        # Named notables: "1 Added Passive Skill is <Name>"
+        m = re.search(r"Added Passive Skill is (.+)", text, re.IGNORECASE)
+        if m:
+            notable_name = m.group(1).strip()
+            notable_mods = _CLUSTER_NOTABLES.get(notable_name)
+            if notable_mods:
+                parsed = parse_mods(notable_mods, source=f"cluster:{notable_name}")
+                out.merge(parsed)
+            continue
 
 
 def _collect_support_mods(
@@ -278,7 +443,7 @@ def _collect_tree_stats(
     if spec.nodes:
         try:
             from pop.calc.tree_stats import get_node_stats
-            tree_mods = get_node_stats(spec.nodes)
+            tree_mods = get_node_stats(spec.nodes, spec.node_overrides)
             out.merge(tree_mods)
             logger.debug("Collected stats from %d passive nodes", len(spec.nodes))
             return
@@ -425,11 +590,17 @@ def _collect_ascendancy_effects(
 ) -> None:
     """Collect ascendancy node effects from allocated passive nodes.
 
-    Ascendancy nodes are only applied if they appear in the build's
-    allocated_ascendancy_nodes list (set by PoB imports or AI builds).
+    Identifies ascendancy notables from the passive tree spec's node IDs,
+    then applies their hardcoded effects from ascendancy_effects.py.
     """
-    # Get explicitly allocated ascendancy node names
-    allocated_names: list[str] = getattr(build, "allocated_ascendancy_nodes", None) or []
+    # Detect allocated ascendancy notables from the tree spec
+    spec = build.active_passive_spec
+    if spec and spec.nodes:
+        from pop.calc.tree_stats import get_ascendancy_node_names
+        allocated_names = get_ascendancy_node_names(spec.nodes)
+    else:
+        allocated_names = []
+
     if not allocated_names:
         return
 
@@ -504,3 +675,27 @@ def _collect_keystone_effects(
             for key, val in flags.items():
                 out.special_flags[key] = val
             logger.debug("Applied keystone: %s", ks_name)
+
+
+def _collect_custom_mods(build: Build, out: ParsedMods) -> None:
+    """Parse PoB custom mods from the build config entries.
+
+    PoB custom mods use ///text/// as inline comments that are displayed
+    but not part of the mod itself. Strip these before parsing.
+    """
+    import re
+
+    custom_text = build.config.entries.get("customMods", "")
+    if not custom_text:
+        return
+
+    lines = []
+    for line in custom_text.replace("\\n", "\n").splitlines():
+        # Strip PoB inline comments: ///comment text///
+        line = re.sub(r"///[^/]*///", "", line).strip()
+        if line:
+            lines.append(line)
+
+    if lines:
+        custom_parsed = parse_mods(lines, source="custom")
+        out.merge(custom_parsed)

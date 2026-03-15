@@ -98,6 +98,7 @@ def calculate_dps(
     # Step 1: Resolve config
     tree_ver = build.passive_specs[0].tree_version if build.passive_specs else ""
     config = config_overrides or read_config(build.config, tree_ver)
+    config.player_level = build.level  # player level for base life calculation
 
     # Step 1b: Apply map mods if specified
     map_less_damage = 0.0
@@ -206,12 +207,23 @@ def calculate_dps(
             pool.flat_added[dtype] = total_flat
 
     pool.increased_mods = _filter_mods_by_skill_type(all_parsed.increased, is_attack, is_spell)
-    pool.more_mods = _filter_mods_by_skill_type(all_parsed.more, is_attack, is_spell)
+    filtered_more = _filter_mods_by_skill_type(all_parsed.more, is_attack, is_spell)
+
+    # Separate "more crit damage" mods — these add to crit multiplier, not damage
+    crit_multi_from_more = 0.0
+    damage_more_mods = []
+    for mod in filtered_more:
+        if mod.stat == "more_crit_damage":
+            crit_multi_from_more += mod.value
+        else:
+            damage_more_mods.append(mod)
+    pool.more_mods = damage_more_mods
+
     pool.conversions = all_parsed.conversions
     pool.increased_crit = all_parsed.increased_crit
     if is_spell:
         pool.increased_crit += all_parsed.increased_crit_spells
-    pool.crit_multiplier = 150.0 + all_parsed.crit_multi
+    pool.crit_multiplier = 150.0 + all_parsed.crit_multi + crit_multi_from_more
     pool.increased_speed = (
         all_parsed.increased_attack_speed if is_attack else all_parsed.increased_cast_speed
     )
@@ -221,7 +233,29 @@ def calculate_dps(
     pool.penetration = dict(all_parsed.penetration)
     pool.exposure = dict(all_parsed.exposure)
 
+    # Apply max charge bonuses from tree/gear before charge calculations
+    power_bonus = int(all_parsed.special_flags.get("max_power_charges_bonus", 0))
+    frenzy_bonus = int(all_parsed.special_flags.get("max_frenzy_charges_bonus", 0))
+    if power_bonus and config.use_power_charges:
+        config.power_charges += power_bonus
+    if frenzy_bonus and config.use_frenzy_charges:
+        config.frenzy_charges += frenzy_bonus
+
     _apply_charge_bonuses(pool, config)
+
+    # Per-charge damage bonuses (e.g. "10% increased Wand Damage per Power Charge")
+    for charge_type in ("power", "frenzy", "endurance"):
+        dmg_per = float(all_parsed.special_flags.get(f"damage_per_{charge_type}_charge", 0.0))
+        if dmg_per > 0:
+            use_flag = getattr(config, f"use_{charge_type}_charges", False)
+            count = getattr(config, f"{charge_type}_charges", 0)
+            if use_flag and count > 0:
+                pool.increased_mods.append(Modifier(
+                    stat=f"increased_damage_per_{charge_type}_charge",
+                    value=dmg_per * count,
+                    mod_type="increased",
+                    source=f"charges:{charge_type}",
+                ))
 
     # Apply ascendancy base crit bonus (e.g. Assassin's Deadly Infusion: +2% base)
     base_crit_bonus = float(all_parsed.special_flags.get("base_crit_bonus", 0.0))
@@ -252,6 +286,57 @@ def calculate_dps(
             stat="more_spell_damage_low_life", value=30.0,
             mod_type="more", source="keystone:Pain Attunement",
         ))
+
+    # --- Buff effects from ascendancy/config ---
+    # Tailwind: 8% increased action speed (PoB: m_floor(8 * (1 + inc/100)))
+    # Gale Force: 10% increased tailwind effect per stack
+    if all_parsed.special_flags.get("tailwind"):
+        gale_force = 0
+        gf_str = build.config.entries.get("multiplierGaleForce", "") if build else ""
+        if gf_str:
+            try:
+                gale_force = int(gf_str)
+            except ValueError:
+                pass
+        base_tailwind = 8.0  # nerfed from 10 to 8 in 3.19
+        tailwind_effect_inc = gale_force * 10.0  # 10% increased effect per stack
+        import math
+        effective_tailwind = math.floor(base_tailwind * (1.0 + tailwind_effect_inc / 100.0))
+        pool.more_speed.append(effective_tailwind)
+
+    # Onslaught: 20% increased attack/cast/movement speed
+    # Silver Flask (Cinderswallow Urn) base grants Onslaught during effect
+    has_onslaught = config.onslaught or all_parsed.special_flags.get("onslaught_permanent")
+    if not has_onslaught and config.use_flasks:
+        # Check if any flask is a Silver Flask (grants Onslaught during effect)
+        items_by_slot = build.items_by_slot() if build else {}
+        for slot_name, item in items_by_slot.items():
+            if "Flask" in slot_name and "silver" in (item.base_type or "").lower():
+                has_onslaught = True
+                break
+    if has_onslaught:
+        pool.increased_speed += 20.0
+
+    # Action Speed from gear (boots, etc.) — multiplicative like tailwind
+    action_speed_inc = float(all_parsed.special_flags.get("action_speed_inc", 0.0))
+    if action_speed_inc > 0:
+        pool.more_speed.append(action_speed_inc)
+
+    # Rage: each stack gives 1% increased attack damage + 1% increased attack speed
+    rage_str = build.config.entries.get("multiplierRage", "") if build else ""
+    if rage_str:
+        try:
+            rage_stacks = int(rage_str)
+            if rage_stacks > 0 and is_attack:
+                pool.increased_speed += rage_stacks * 1.0  # 1% attack speed per stack
+                pool.increased_mods.append(Modifier(
+                    stat="increased_attack_damage",
+                    value=rage_stacks * 1.0,  # 1% attack damage per stack
+                    mod_type="increased",
+                    source="rage",
+                ))
+        except ValueError:
+            pass
 
     # =======================================================================
     # PoB-aligned damage calculation
@@ -349,6 +434,12 @@ def calculate_dps(
     damage_taken_inc += config.shock_value  # Shock (all types)
     damage_taken_inc += all_parsed.enemy_increased_damage_taken_generic  # Bottled Faith etc.
 
+    # Yoke of Suffering: "Enemies take X% increased Damage per ailment type"
+    dmg_per_ailment = float(all_parsed.special_flags.get("enemy_damage_per_ailment", 0.0))
+    if dmg_per_ailment > 0:
+        ailment_count = _count_active_ailments(build)
+        damage_taken_inc += dmg_per_ailment * ailment_count
+
     # Per-type contributions (applied uniformly to total for simplicity)
     # Vulnerability: physical damage taken
     vuln_phys = all_parsed.enemy_increased_damage_taken.get(DamageType.PHYSICAL, 0.0)
@@ -437,6 +528,16 @@ def calculate_dps(
     if point_blank and is_projectile:
         avg_hit *= 1.30
 
+    # Double Damage: X% chance to deal double damage → avg multiplier
+    dd_chance = min(all_parsed.double_damage_chance / 100.0, 1.0)
+    if dd_chance > 0:
+        avg_hit *= (1.0 + dd_chance)  # avg = base × (1 + chance × 1.0 extra)
+
+    # Sniper's Mark: enemies take X% more projectile damage (scaled by mark effect)
+    snipers_mark_multi = _calc_sniper_mark_multi(build, all_parsed, is_projectile)
+    if snipers_mark_multi > 1.0:
+        avg_hit *= snipers_mark_multi
+
     # Step 11: Hit chance — attacks need accuracy, spells always hit
     if resolute_technique:
         hit_chance = 1.0  # RT always hits
@@ -459,6 +560,11 @@ def calculate_dps(
 
     # Step 13: Final DPS — PoB: TotalDPS = AverageDamage × Speed
     total_dps = avg_damage * hits_per_second
+
+    # Step 13a: Skill-specific hit multiplier (e.g. KB explosions)
+    skill_hit_multi = gem_stats.skill_hit_multiplier if gem_stats else 1.0
+    if skill_hit_multi != 1.0:
+        total_dps *= skill_hit_multi
 
     # Map mod: "Players deal X% less Damage"
     if map_less_damage > 0:
@@ -607,8 +713,12 @@ def _extract_weapon_damage(weapon: Item) -> dict[DamageType, float]:
             avg = (float(m.group(2)) + float(m.group(3))) / 2.0
             result[dtype] = result.get(dtype, 0.0) + avg
     if not result:
+        # Get local "Adds X to Y" mods
         result = _extract_weapon_damage_from_mods(weapon)
-    # Fall back to base type lookup if still empty
+        # Also add base physical damage from the weapon base type
+        base_phys = _extract_weapon_damage_from_base(weapon)
+        for dtype, val in base_phys.items():
+            result[dtype] = result.get(dtype, 0.0) + val
     if not result:
         result = _extract_weapon_damage_from_base(weapon)
     return result
@@ -655,19 +765,45 @@ def _extract_weapon_damage_from_base(weapon: Item) -> dict[DamageType, float]:
     return {}
 
 
+_RE_LOCAL_APS = re.compile(r"(\d+)%\s+increased Attack Speed", re.IGNORECASE)
+_RE_LOCAL_CRIT = re.compile(r"(\d+)%\s+increased Critical Strike Chance", re.IGNORECASE)
+
+
+def _get_local_inc_aps(weapon: Item) -> float:
+    """Sum local '% increased Attack Speed' mods on the weapon."""
+    total = 0.0
+    for mod in weapon.all_mods:
+        m = _RE_LOCAL_APS.search(mod.text)
+        if m:
+            total += float(m.group(1))
+    return total
+
+
+def _get_local_inc_crit(weapon: Item) -> float:
+    """Sum local '% increased Critical Strike Chance' mods on the weapon."""
+    total = 0.0
+    for mod in weapon.all_mods:
+        m = _RE_LOCAL_CRIT.search(mod.text)
+        if m:
+            total += float(m.group(1))
+    return total
+
+
 def _extract_weapon_aps(weapon: Item) -> float:
     if weapon.raw_text:
         m = _RE_WEAPON_APS.search(weapon.raw_text)
         if m:
             return float(m.group(1))
-    # Fall back to base type
+    # Fall back to base type + local mods
     bt = getattr(weapon, "base_type", "") or ""
     if bt:
         try:
             from pop.calc.synthetic_items import _WEAPON_BASES
             entry = _WEAPON_BASES.get(bt)
             if entry:
-                return entry[3]  # aps
+                base_aps = entry[3]
+                local_inc = _get_local_inc_aps(weapon)
+                return base_aps * (1.0 + local_inc / 100.0)
         except ImportError:
             pass
     return 1.2
@@ -678,17 +814,72 @@ def _extract_weapon_crit(weapon: Item) -> float:
         m = _RE_WEAPON_CRIT.search(weapon.raw_text)
         if m:
             return float(m.group(1))
-    # Fall back to base type
+    # Fall back to base type + local mods
     bt = getattr(weapon, "base_type", "") or ""
     if bt:
         try:
             from pop.calc.synthetic_items import _WEAPON_BASES
             entry = _WEAPON_BASES.get(bt)
             if entry:
-                return entry[4]  # crit
+                base_crit = entry[4]
+                local_inc = _get_local_inc_crit(weapon)
+                return base_crit * (1.0 + local_inc / 100.0)
         except ImportError:
             pass
     return 5.0
+
+
+def _count_active_ailments(build: Build) -> int:
+    """Count how many ailment types are active on the enemy from config."""
+    entries = build.config.entries if build else {}
+    count = 0
+    ailment_keys = [
+        "conditionEnemyShocked",
+        "conditionEnemyIgnited",
+        "conditionEnemyChilled",
+        "conditionEnemyBleeding",
+        "conditionEnemyPoisoned",
+    ]
+    for key in ailment_keys:
+        if entries.get(key, "").lower() in ("true", "1", "yes"):
+            count += 1
+    return count
+
+
+def _calc_sniper_mark_multi(
+    build: Build, all_parsed: object, is_projectile: bool,
+) -> float:
+    """Calculate Sniper's Mark damage multiplier.
+
+    Sniper's Mark makes enemies take ~35% more damage from projectile hits.
+    Focal Point (Deadeye) increases mark effect by 75%.
+    """
+    if not is_projectile:
+        return 1.0
+
+    # Check if Sniper's Mark is in any non-main skill group
+    has_snipers_mark = False
+    for sg in build.skill_groups:
+        for gem in sg.gems:
+            if "sniper" in gem.name.lower() and "mark" in gem.name.lower() and gem.is_enabled:
+                has_snipers_mark = True
+                break
+
+    if not has_snipers_mark:
+        return 1.0
+
+    # Base Sniper's Mark: enemies take 35% more projectile damage (level 20)
+    base_mark_damage = 35.0
+
+    # Focal Point: 75% increased mark effect
+    mark_effect_inc = float(all_parsed.special_flags.get("mark_effect_increased", 0.0))
+    # Also check if Focal Point is applied (it sets 75% in modifiers)
+    for mod in getattr(all_parsed, "increased", []):
+        if mod.stat == "increased_mark_effect":
+            mark_effect_inc += mod.value
+
+    effective = base_mark_damage * (1.0 + mark_effect_inc / 100.0)
+    return 1.0 + effective / 100.0
 
 
 def _guess_is_attack(gem: Gem, group: SkillGroup) -> bool:

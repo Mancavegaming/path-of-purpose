@@ -13,13 +13,14 @@ from pop.calc.models import BOSS_PRESETS, CalcConfig, DamageType
 
 # PoB config key → CalcConfig field mapping
 _BOOL_KEYS: dict[str, str] = {
-    "enemyIsBoss": "enemy_is_boss",
     "usePowerCharges": "use_power_charges",
     "useFrenzyCharges": "use_frenzy_charges",
     "buffOnslaught": "onslaught",
     "useCurses": "use_curses",
     "useFlasks": "use_flasks",
     "useEnduranceCharges": "use_endurance_charges",
+    "conditionEnemyShocked": "enemy_is_shocked",
+    "conditionEnemyChilled": "enemy_is_chilled",
     "enemyCondition_Shocked": "enemy_is_shocked",
     "enemyCondition_Chilled": "enemy_is_chilled",
     "enemyCondition_Intimidated": "enemy_is_intimidated",
@@ -43,6 +44,7 @@ _FLOAT_KEYS: dict[str, str] = {
     "enemyArmour": "enemy_armour",
     "enemyEvasion": "enemy_evasion",
     "shockValue": "shock_value",
+    "conditionShockEffect": "shock_value",
 }
 
 
@@ -55,6 +57,11 @@ def read_config(build_config: BuildConfig, tree_version: str = "") -> CalcConfig
     """
     cfg = CalcConfig()
     entries = build_config.entries
+
+    # Handle enemyIsBoss which is a string value ("Boss", "Shaper", etc.) not a boolean
+    boss_val = entries.get("enemyIsBoss", "")
+    if boss_val and boss_val.lower() not in ("false", "0", "no", ""):
+        cfg.enemy_is_boss = True
 
     for pob_key, field_name in _BOOL_KEYS.items():
         val = entries.get(pob_key, "").lower()
@@ -82,6 +89,14 @@ def read_config(build_config: BuildConfig, tree_version: str = "") -> CalcConfig
     # Default shock to 15% if shocked but no value specified
     if cfg.enemy_is_shocked and cfg.shock_value == 0.0:
         cfg.shock_value = 15.0
+
+    # Default charge counts when enabled but not specified (PoE default max is 3)
+    if cfg.use_power_charges and cfg.power_charges == 0:
+        cfg.power_charges = 3
+    if cfg.use_frenzy_charges and cfg.frenzy_charges == 0:
+        cfg.frenzy_charges = 3
+    if cfg.use_endurance_charges and cfg.endurance_charges == 0:
+        cfg.endurance_charges = 3
 
     # Clamp wither stacks 0-15
     cfg.wither_stacks = max(0, min(cfg.wither_stacks, 15))

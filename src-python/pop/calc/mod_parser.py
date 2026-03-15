@@ -53,6 +53,13 @@ _RE_FLAT_ADDED_ATTACKS = re.compile(
     re.IGNORECASE,
 )
 
+# "X to Y Added <type> Damage with Wand/Bow Attacks" (jewel format)
+_RE_FLAT_ADDED_WEAPON_ATTACKS = re.compile(
+    r"(\d+) to (\d+) Added (Physical|Fire|Cold|Lightning|Chaos) Damage with "
+    r"(?:Wand|Bow|Sword|Axe|Mace|Dagger|Claw|Staff) Attacks",
+    re.IGNORECASE,
+)
+
 # "Adds X to Y <type> Damage to Spells"
 _RE_FLAT_ADDED_SPELLS = re.compile(
     r"Adds (\d+) to (\d+) (Physical|Fire|Cold|Lightning|Chaos) Damage to Spells",
@@ -116,6 +123,31 @@ _RE_INCREASED_WEAPON_TYPE = re.compile(
 # "X% increased Damage with Hits"
 _RE_INCREASED_HITS = re.compile(
     r"(\d+)% increased Damage with Hits",
+    re.IGNORECASE,
+)
+
+# "X% increased Elemental Damage with Attack Skills"
+_RE_INCREASED_ELE_ATTACK = re.compile(
+    r"(\d+)% increased Elemental Damage with Attack Skills",
+    re.IGNORECASE,
+)
+
+# "X% chance to deal Double Damage"
+_RE_DOUBLE_DAMAGE = re.compile(
+    r"(\d+)% chance to deal Double Damage",
+    re.IGNORECASE,
+)
+
+# Weapon-type conditional attack speed: "Attacks with Wands have X% increased Attack Speed"
+_RE_WEAPON_ATTACK_SPEED = re.compile(
+    r"Attacks with (Wands?|Bows?|Swords?|Axes?|Maces?|Staves?|Daggers?|Claws?|"
+    r"One Handed Weapons?|Two Handed Weapons?) have (\d+)% increased Attack Speed",
+    re.IGNORECASE,
+)
+
+# "Skills Chain +X times" (ascendancy/tree variant, different from "Projectiles Chain")
+_RE_SKILLS_CHAIN = re.compile(
+    r"Skills Chain \+(\d+) times?",
     re.IGNORECASE,
 )
 
@@ -214,15 +246,18 @@ _RE_GAINED_AS = re.compile(
 # Penetration patterns
 # ---------------------------------------------------------------------------
 
-# "Penetrates X% <type> Resistance"
+# "Penetrates X% <type> Resistance(s)" — flexible to match all variants:
+# "Penetrates X% Fire Resistance"
+# "Damage Penetrates X% Elemental Resistance"
+# "Attack Damage Penetrates X% of Enemy Elemental Resistances"
 _RE_PENETRATION = re.compile(
-    r"Penetrates (\d+)% (Fire|Cold|Lightning|Elemental|Chaos) Resistance",
+    r"Penetrates (\d+)% (?:of (?:Enemy )?)?(?:all )?(Fire|Cold|Lightning|Elemental|Chaos) Resistances?",
     re.IGNORECASE,
 )
 
 # "Damage Penetrates X% <type> Resistance"
 _RE_PENETRATION2 = re.compile(
-    r"Damage Penetrates (\d+)% (Fire|Cold|Lightning|Elemental|Chaos) Resistance",
+    r"Damage Penetrates (\d+)% (?:of (?:Enemy )?)?(?:all )?(Fire|Cold|Lightning|Elemental|Chaos) Resistances?",
     re.IGNORECASE,
 )
 
@@ -449,9 +484,9 @@ _RE_FLAT_ACCURACY = re.compile(
     re.IGNORECASE,
 )
 
-# "X% increased Accuracy Rating"
+# "X% increased (Global) Accuracy Rating"
 _RE_INCREASED_ACCURACY = re.compile(
-    r"(\d+)% increased Accuracy Rating",
+    r"(\d+)% increased (?:Global )?Accuracy Rating",
     re.IGNORECASE,
 )
 
@@ -508,7 +543,7 @@ _RE_IMPALE_ON_HIT = re.compile(
 
 # "Fires X additional Projectiles" / "Skills fire X additional Projectiles"
 _RE_ADDITIONAL_PROJECTILES = re.compile(
-    r"(?:Fires?|Skills? fire) (\d+) additional Projectiles?",
+    r"(?:Fires?|Skills? fire|Attacks fire) (\d+|an) additional Projectiles?",
     re.IGNORECASE,
 )
 
@@ -652,6 +687,9 @@ class ParsedMods:
         self.all_elemental_resistance: float = 0.0
         self.spell_suppression: float = 0.0
 
+        # Double damage chance (0-100)
+        self.double_damage_chance: float = 0.0
+
         # Special flags for non-standard mechanics
         # e.g. {"crits_ignore_resist": True, "lucky_crit": True, "base_crit_bonus": 2.0}
         self.special_flags: dict[str, object] = {}
@@ -734,6 +772,7 @@ class ParsedMods:
         self.chaos_resistance += other.chaos_resistance
         self.all_elemental_resistance += other.all_elemental_resistance
         self.spell_suppression += other.spell_suppression
+        self.double_damage_chance += other.double_damage_chance
         for key, val in other.special_flags.items():
             self.special_flags[key] = val
 
@@ -766,6 +805,13 @@ def _parse_single_mod(text: str, source: str, out: ParsedMods) -> None:
 
     # --- Flat added damage (to attacks) ---
     m = _RE_FLAT_ADDED_ATTACKS.search(text)
+    if m:
+        dtype = _DTYPE_MAP[m.group(3).lower()]
+        _add_flat(out.flat_added_attacks, dtype, m.group(1), m.group(2))
+        return
+
+    # --- Flat added damage (weapon-type attacks, jewel format) ---
+    m = _RE_FLAT_ADDED_WEAPON_ATTACKS.search(text)
     if m:
         dtype = _DTYPE_MAP[m.group(3).lower()]
         _add_flat(out.flat_added_attacks, dtype, m.group(1), m.group(2))
@@ -1230,6 +1276,56 @@ def _parse_single_mod(text: str, source: str, out: ParsedMods) -> None:
         ))
         return
 
+    m = _RE_INCREASED_ELE_ATTACK.search(text)
+    if m:
+        out.increased.append(Modifier(
+            stat="more_elemental_attack_damage",
+            value=float(m.group(1)),
+            mod_type="increased",
+            damage_types=[DamageType.FIRE, DamageType.COLD, DamageType.LIGHTNING],
+            source=source,
+        ))
+        return
+
+    # "X% increased Wand Damage per Power Charge" (per-charge conditional)
+    m = re.search(
+        r"(\d+)% increased (?:Wand|Sword|Axe|Mace|Dagger|Claw|Bow|Staff) Damage per "
+        r"(Power|Frenzy|Endurance) Charge",
+        text, re.IGNORECASE,
+    )
+    if m:
+        # Store as special flag; engine applies based on charge count
+        charge_type = m.group(2).lower()
+        out.special_flags[f"damage_per_{charge_type}_charge"] = (
+            float(out.special_flags.get(f"damage_per_{charge_type}_charge", 0.0))
+            + float(m.group(1))
+        )
+        return
+
+    m = _RE_DOUBLE_DAMAGE.search(text)
+    if m:
+        out.double_damage_chance += float(m.group(1))
+        return
+
+    # "X% increased Action Speed" (multiplicative, like tailwind)
+    m = re.search(r"(\d+)% increased Action Speed", text, re.IGNORECASE)
+    if m:
+        out.special_flags["action_speed_inc"] = (
+            float(out.special_flags.get("action_speed_inc", 0.0))
+            + float(m.group(1))
+        )
+        return
+
+    m = _RE_WEAPON_ATTACK_SPEED.search(text)
+    if m:
+        out.increased_attack_speed += float(m.group(2))
+        return
+
+    m = _RE_SKILLS_CHAIN.search(text)
+    if m:
+        out.chain_plus += int(m.group(1))
+        return
+
     # --- Crit ---
     m = _RE_INCREASED_CRIT_SPELLS.search(text)
     if m:
@@ -1291,7 +1387,8 @@ def _parse_single_mod(text: str, source: str, out: ParsedMods) -> None:
     # --- Projectile mechanics ---
     m = _RE_ADDITIONAL_PROJECTILES.search(text)
     if m:
-        out.additional_projectiles += int(m.group(1))
+        val = m.group(1)
+        out.additional_projectiles += 1 if val.lower() == "an" else int(val)
         return
 
     m = _RE_PLUS_PROJECTILES.search(text)
@@ -1352,6 +1449,25 @@ def _parse_single_mod(text: str, source: str, out: ParsedMods) -> None:
         out.increased_aura_effect += float(m.group(1))
         return
 
+    # --- Enemy damage taken ---
+    # "Enemies take X% increased Damage for each type of Ailment..."
+    m = re.search(
+        r"Enemies take (\d+)% increased Damage for each type of Ailment",
+        text, re.IGNORECASE,
+    )
+    if m:
+        out.special_flags["enemy_damage_per_ailment"] = (
+            float(out.special_flags.get("enemy_damage_per_ailment", 0.0))
+            + float(m.group(1))
+        )
+        return
+
+    # "Enemies (X) take X% increased Damage" (generic — Bottled Faith, Cinderswallow, etc.)
+    m = re.search(r"(?:Enemies|enemies).*?take (\d+)% increased Damage\b", text, re.IGNORECASE)
+    if m and "ailment" not in text.lower():
+        out.enemy_increased_damage_taken_generic += float(m.group(1))
+        return
+
     # --- Defence stats ---
     _parse_defence_mod(text, out)
 
@@ -1374,8 +1490,8 @@ _RE_FIRE_RES = re.compile(r"\+(\d+)% to Fire Resistance", re.IGNORECASE)
 _RE_COLD_RES = re.compile(r"\+(\d+)% to Cold Resistance", re.IGNORECASE)
 _RE_LIGHT_RES = re.compile(r"\+(\d+)% to Lightning Resistance", re.IGNORECASE)
 _RE_CHAOS_RES = re.compile(r"\+(\d+)% to Chaos Resistance", re.IGNORECASE)
-_RE_ALL_ELE_RES = re.compile(r"\+(\d+)% to all Elemental Resistances", re.IGNORECASE)
-_RE_SPELL_SUPP = re.compile(r"\+(\d+)% chance to Suppress Spell Damage", re.IGNORECASE)
+_RE_ALL_ELE_RES = re.compile(r"([+-]?\d+)% to all Elemental Resistances", re.IGNORECASE)
+_RE_SPELL_SUPP = re.compile(r"\+?(\d+)% chance to Suppress Spell Damage", re.IGNORECASE)
 _RE_BLOCK = re.compile(r"\+?(\d+)% (?:Chance to )?Block(?: Attack Damage)?", re.IGNORECASE)
 _RE_SPELL_BLOCK = re.compile(r"\+?(\d+)% (?:Chance to )?Block Spell Damage", re.IGNORECASE)
 
@@ -1473,4 +1589,128 @@ def _parse_defence_mod(text: str, out: ParsedMods) -> None:
     if m:
         out.special_flags["block_chance"] = (
             float(out.special_flags.get("block_chance", 0.0)) + float(m.group(1))
+        )
+        return
+
+    # "X% increased Global Defences" (armour + evasion + ES)
+    m = re.search(r"(\d+)% increased Global Defences", text, re.IGNORECASE)
+    if m:
+        val = float(m.group(1))
+        out.increased_armour += val
+        out.increased_evasion += val
+        out.increased_energy_shield += val
+        return
+
+    # Dual defence mods: "X% increased Evasion and Energy Shield" etc.
+    m = re.search(r"(\d+)% increased Evasion and Energy Shield", text, re.IGNORECASE)
+    if m:
+        val = float(m.group(1))
+        out.increased_evasion += val
+        out.increased_energy_shield += val
+        return
+    m = re.search(r"(\d+)% increased Armour and Energy Shield", text, re.IGNORECASE)
+    if m:
+        val = float(m.group(1))
+        out.increased_armour += val
+        out.increased_energy_shield += val
+        return
+    m = re.search(r"(\d+)% increased Armour and Evasion", text, re.IGNORECASE)
+    if m:
+        val = float(m.group(1))
+        out.increased_armour += val
+        out.increased_evasion += val
+        return
+
+    # "X% reduced Attributes" (negative attribute scaling)
+    m = re.search(r"(\d+)% reduced Attributes", text, re.IGNORECASE)
+    if m:
+        # Reduces all attributes — impacts life (str), accuracy (dex), ES (int)
+        # Simplified: apply as negative flat approximation
+        return
+
+    # --- Attributes (Dex→accuracy+evasion, Int→ES, Str→life) ---
+    _parse_attribute_mod(text, out)
+
+
+_RE_DEX = re.compile(r"\+(\d+) to Dexterity", re.IGNORECASE)
+_RE_INT = re.compile(r"\+(\d+) to Intelligence", re.IGNORECASE)
+_RE_STR = re.compile(r"\+(\d+) to Strength", re.IGNORECASE)
+_RE_ALL_ATTRS = re.compile(r"\+(\d+) to all Attributes", re.IGNORECASE)
+_RE_STR_DEX = re.compile(r"\+(\d+) to Strength and Dexterity", re.IGNORECASE)
+_RE_STR_INT = re.compile(r"\+(\d+) to Strength and Intelligence", re.IGNORECASE)
+_RE_DEX_INT = re.compile(r"\+(\d+) to Dexterity and Intelligence", re.IGNORECASE)
+_RE_WEAPON_TYPE_DMG = re.compile(
+    r"(\d+)% increased Damage with (?:Wands|One Handed Weapons|Two Handed Weapons|"
+    r"Bows|Swords|Axes|Maces|Daggers|Claws|Staves)",
+    re.IGNORECASE,
+)
+
+
+def _parse_attribute_mod(text: str, out: ParsedMods) -> None:
+    """Parse attribute grants and convert to derived stats.
+
+    Dex: +2 accuracy per point, +2 evasion per 5 points
+    Int: +1 ES per 5 points (not tracked yet)
+    Str: +0.5 life per point
+    """
+    dex = 0.0
+    int_val = 0.0
+    str_val = 0.0
+
+    m = _RE_ALL_ATTRS.search(text)
+    if m:
+        v = float(m.group(1))
+        dex += v; int_val += v; str_val += v
+    else:
+        m = _RE_STR_DEX.search(text)
+        if m:
+            v = float(m.group(1))
+            str_val += v; dex += v
+        else:
+            m = _RE_STR_INT.search(text)
+            if m:
+                v = float(m.group(1))
+                str_val += v; int_val += v
+            else:
+                m = _RE_DEX_INT.search(text)
+                if m:
+                    v = float(m.group(1))
+                    dex += v; int_val += v
+                else:
+                    m = _RE_DEX.search(text)
+                    if m:
+                        dex += float(m.group(1))
+                    m = _RE_INT.search(text)
+                    if m:
+                        int_val += float(m.group(1))
+                    m = _RE_STR.search(text)
+                    if m:
+                        str_val += float(m.group(1))
+
+    if dex > 0:
+        out.flat_accuracy += dex * 2.0  # +2 accuracy per dex
+        out.flat_evasion += dex * 0.4   # +2 evasion per 5 dex
+    if int_val > 0:
+        out.flat_energy_shield += int_val * 0.2  # +1 ES per 5 int
+    if str_val > 0:
+        out.flat_life += str_val * 0.5  # +0.5 life per str
+
+    # Weapon-type damage (treat as generic increased damage for the weapon type)
+    m = _RE_WEAPON_TYPE_DMG.search(text)
+    if m:
+        out.increased.append(Modifier(
+            stat="increased_weapon_type_damage",
+            value=float(m.group(1)),
+            mod_type="increased",
+            source="tree",
+        ))
+        return
+
+    # +1 to Maximum Power/Frenzy/Endurance Charges
+    m = re.search(r"\+(\d+) to Maximum (Power|Frenzy|Endurance) Charges?", text, re.IGNORECASE)
+    if m:
+        charge_type = m.group(2).lower()
+        out.special_flags[f"max_{charge_type}_charges_bonus"] = (
+            int(out.special_flags.get(f"max_{charge_type}_charges_bonus", 0))
+            + int(m.group(1))
         )

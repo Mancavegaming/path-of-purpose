@@ -186,6 +186,9 @@ class StatPool(BaseModel):
 class CalcConfig(BaseModel):
     """Resolved configuration toggles for the calculation."""
 
+    # Player
+    player_level: int = 90  # character level for base life/mana calculations
+
     # Enemy
     enemy_is_boss: bool = False
     enemy_level: int = 84
