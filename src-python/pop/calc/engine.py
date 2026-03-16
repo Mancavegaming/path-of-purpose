@@ -95,9 +95,18 @@ def calculate_dps(
     """
     warnings: list[str] = []
 
-    # Step 1: Resolve config
+    # Step 1: Resolve config — always read build's PoB config first,
+    # then let UI overrides take precedence for explicitly-set fields.
     tree_ver = build.passive_specs[0].tree_version if build.passive_specs else ""
-    config = config_overrides or read_config(build.config, tree_ver)
+    config = read_config(build.config, tree_ver)
+    if config_overrides:
+        # Merge: UI overrides only replace non-default fields
+        defaults = CalcConfig()
+        for field_name in config_overrides.model_fields:
+            override_val = getattr(config_overrides, field_name)
+            default_val = getattr(defaults, field_name)
+            if override_val != default_val:
+                setattr(config, field_name, override_val)
     config.player_level = build.level  # player level for base life calculation
 
     # Step 1b: Apply map mods if specified
