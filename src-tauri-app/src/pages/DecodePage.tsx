@@ -98,7 +98,9 @@ export default function DecodePage(props: DecodePageProps) {
 
     try {
       const resolved = resolveVariantForCalc(b, activeVariant(), selectedSkillIndex());
-      const result = await calculateDps(resolved, undefined, calcConfig() as unknown as Record<string, unknown>);
+      // Don't pass frontend config — let engine read PoB build config directly.
+      // The ConfigBar only shows defaults; user tweaks are rare.
+      const result = await calculateDps(resolved);
       setDpsResult(result);
       setStreamBuild(displayBuild(), result);
     } catch (e) {
@@ -108,13 +110,8 @@ export default function DecodePage(props: DecodePageProps) {
     }
   }
 
-  // Auto-recalculate DPS when config changes (only if DPS was already calculated)
-  createEffect(() => {
-    void calcConfig(); // track config changes
-    if (untrack(() => dpsResult() && displayBuild() && !dpsLoading())) {
-      handleCalcDps();
-    }
-  });
+  // Auto-recalculate is disabled — PoB config is used automatically.
+  // User can manually click "Calculate DPS" after changing variant tabs.
 
   async function handleLoad() {
     const raw = input().trim();

@@ -356,7 +356,7 @@ export default function EditorPage(props: EditorPageProps) {
     setDpsError("");
     try {
       const resolved = resolveVariantForCalc(build(), activeVariant(), selectedSkillIndex());
-      const result = await calculateDps(resolved, undefined, calcConfig() as unknown as Record<string, unknown>);
+      const result = await calculateDps(resolved);
       setDpsResult(result);
     } catch (e) {
       setDpsError(String(e));

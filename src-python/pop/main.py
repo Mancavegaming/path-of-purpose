@@ -1420,7 +1420,8 @@ def cmd_calc_dps(args: argparse.Namespace) -> None:
     log_path = os.path.join(tempfile.gettempdir(), "pop_calc_debug.log")
     try:
         spec = build.active_passive_spec
-        with open(log_path, "w") as _log:
+        with open(log_path, "a") as _log:
+            _log.write(f"\n\n{'='*60}\n")
             _log.write(f"ascendancy={build.ascendancy_name}\n")
             _log.write(f"level={build.level}\n")
             _log.write(f"active_spec_index={build.active_spec_index}\n")
@@ -1453,9 +1454,11 @@ def cmd_calc_dps(args: argparse.Namespace) -> None:
 
     # Append result to log
     try:
+        import datetime
         with open(log_path, "a") as _log:
-            _log.write(f"\n=== RESULT ===\n")
-            _log.write(f"dps={result.total_dps}\n")
+            _log.write(f"\n=== RESULT at {datetime.datetime.now().isoformat()} ===\n")
+            _log.write(f"total_dps={result.total_dps}\n")
+            _log.write(f"combined_dps={result.combined_dps}\n")
             _log.write(f"speed={result.hits_per_second}\n")
             _log.write(f"crit={result.crit_chance}%\n")
             _log.write(f"crit_multi={result.effective_crit_multi}\n")

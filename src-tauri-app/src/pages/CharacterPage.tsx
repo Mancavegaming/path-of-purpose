@@ -142,7 +142,7 @@ export default function CharacterPage(props: CharacterPageProps) {
 
     try {
       const resolved = resolveVariantForCalc(b, 0, selectedSkillIndex());
-      const result = await calculateDps(resolved, undefined, calcConfig() as unknown as Record<string, unknown>);
+      const result = await calculateDps(resolved);
       setDpsResult(result);
       setStreamBuild(displayBuild(), result);
     } catch (e) {
