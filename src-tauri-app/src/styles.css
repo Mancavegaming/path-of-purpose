@@ -3071,6 +3071,29 @@ button:disabled {
 
 /* Sidebar user section */
 
+/* ===== FILTER GENERATOR ===== */
+.filter-generator { margin-top: 12px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.filter-generator-header { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: var(--bg-card); border: none; cursor: pointer; color: var(--text-primary); font-size: 1rem; font-weight: 600; }
+.filter-generator-header:hover { background: var(--bg-hover, #1a1a2e); }
+.filter-toggle { font-size: 0.8rem; opacity: 0.6; }
+.filter-generator-body { padding: 12px 16px; background: var(--bg-primary); }
+.filter-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.filter-label { font-size: 0.85rem; color: var(--text-secondary); min-width: 80px; }
+.filter-radio-group { display: flex; gap: 12px; }
+.filter-radio { display: flex; align-items: center; gap: 4px; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; text-transform: capitalize; }
+.filter-radio input { accent-color: var(--accent); }
+.filter-checkbox { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer; }
+.filter-checkbox input { accent-color: var(--accent); }
+.filter-actions { display: flex; gap: 8px; margin: 12px 0; }
+.filter-generate-btn { padding: 8px 20px; background: var(--accent); color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+.filter-generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.filter-install-btn { padding: 8px 16px; background: #2a7a2a; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+.filter-copy-btn { padding: 8px 16px; background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
+.filter-error { color: #f44; font-size: 0.85rem; margin: 6px 0; }
+.filter-success { color: #4f4; font-size: 0.85rem; margin: 6px 0; }
+.filter-preview-label { font-size: 0.8rem; color: var(--text-secondary); margin-top: 8px; }
+.filter-preview { background: #0a0a15; border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-size: 0.75rem; line-height: 1.4; color: #aaa; max-height: 300px; overflow-y: auto; white-space: pre; font-family: monospace; }
+
 .sidebar-version {
   padding: 4px 12px 8px;
   text-align: right;

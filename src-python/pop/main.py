@@ -1470,6 +1470,33 @@ def cmd_calc_dps(args: argparse.Namespace) -> None:
     print(json.dumps(result.model_dump(mode="json"), indent=2))
 
 
+def cmd_generate_filter(args: argparse.Namespace) -> None:
+    """Generate a loot filter from a build."""
+    import sys
+    from pop.build_parser.models import Build
+    from pop.filter.models import FilterConfig
+    from pop.filter.generator import generate_filter
+
+    raw = _safe_stdin_read()
+    if not raw:
+        print("No input provided. Send JSON with 'build' key.", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        print(f"Invalid JSON: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    build = Build(**data["build"])
+    config_data = data.get("config")
+    config = FilterConfig(**config_data) if config_data else None
+
+    filter_text = generate_filter(build, config)
+    name = config.filter_name if config else "PathOfPurpose"
+    print(json.dumps({"filter_text": filter_text, "filter_name": name}))
+
+
 def cmd_calc_all_dps(args: argparse.Namespace) -> None:
     """Calculate DPS for all skill groups in a build."""
     import sys
@@ -1791,6 +1818,11 @@ def main() -> None:
     p_calc_all = subparsers.add_parser("calc_all_dps", help="Calculate DPS for all skills in a build")
     p_calc_all.add_argument("--stdin", action="store_true", default=True)
     p_calc_all.set_defaults(func=cmd_calc_all_dps)
+
+    # --- generate_filter ---
+    p_filter = subparsers.add_parser("generate_filter", help="Generate a loot filter from a build")
+    p_filter.add_argument("--stdin", action="store_true", default=True)
+    p_filter.set_defaults(func=cmd_generate_filter)
 
     # --- list_public_characters ---
     p_chars = subparsers.add_parser("list_public_characters", help="List characters on a public PoE account")

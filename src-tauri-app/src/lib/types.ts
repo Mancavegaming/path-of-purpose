@@ -408,3 +408,20 @@ export interface ChatResponse {
   conversation_id: string;
   tokens_used: number;
 }
+
+// --- Loot Filter models ---
+
+export type FilterStrictness = "leveling" | "mapping" | "endgame" | "ultra_strict";
+
+export interface FilterConfig {
+  strictness: FilterStrictness;
+  show_resist_fillers: boolean;
+  show_cluster_jewels: boolean;
+  show_leveling_gems: boolean;
+  filter_name: string;
+}
+
+export interface FilterResult {
+  filter_text: string;
+  filter_name: string;
+}

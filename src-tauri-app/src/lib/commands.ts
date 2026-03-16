@@ -13,6 +13,8 @@ import type {
   Item,
   ItemComparison,
   TradeSearchResult,
+  FilterConfig,
+  FilterResult,
 } from "./types";
 
 export async function decodeBuild(code: string): Promise<Build> {
@@ -38,6 +40,26 @@ export async function calculateAllDps(
   return await invoke<CalcResult[]>("calculate_all_dps", {
     build,
     config: config ?? null,
+  });
+}
+
+export async function generateFilter(
+  build: Build,
+  config?: Partial<FilterConfig>,
+): Promise<FilterResult> {
+  return await invoke<FilterResult>("generate_filter", {
+    build,
+    config: config ?? null,
+  });
+}
+
+export async function saveFilterFile(
+  filterText: string,
+  filterName: string,
+): Promise<string> {
+  return await invoke<string>("save_filter_file", {
+    filterText,
+    filterName,
   });
 }
 

@@ -1050,6 +1050,56 @@ async fn calculate_dps(
         .map_err(|e| format!("Failed to parse calc result: {}", e))
 }
 
+/// Generate a loot filter for a build via the Python engine.
+#[tauri::command]
+async fn generate_filter(
+    build: serde_json::Value,
+    config: Option<serde_json::Value>,
+) -> Result<serde_json::Value, String> {
+    let mut input = serde_json::json!({ "build": build });
+    if let Some(cfg) = config {
+        input["config"] = cfg;
+    }
+    let stdin_data = serde_json::to_string(&input)
+        .map_err(|e| format!("Failed to serialize input: {}", e))?;
+
+    let stdout = run_python_command(
+        &["-m", "pop.main", "generate_filter", "--stdin"],
+        Some(&stdin_data),
+    )?;
+
+    serde_json::from_str::<serde_json::Value>(&stdout)
+        .map_err(|e| format!("Failed to parse filter result: {}", e))
+}
+
+/// Save a generated filter to the PoE filter directory.
+#[tauri::command]
+async fn save_filter_file(
+    filter_text: String,
+    filter_name: String,
+) -> Result<String, String> {
+    let home = std::env::var("USERPROFILE")
+        .map_err(|_| "Could not determine USERPROFILE".to_string())?;
+    let poe_dir = PathBuf::from(&home)
+        .join("Documents")
+        .join("My Games")
+        .join("Path of Exile");
+
+    if !poe_dir.exists() {
+        fs::create_dir_all(&poe_dir)
+            .map_err(|e| format!("Failed to create filter directory: {}", e))?;
+    }
+
+    let safe_name = filter_name.replace(|c: char| !c.is_alphanumeric() && c != '_' && c != '-', "_");
+    let filename = format!("{}.filter", safe_name);
+    let path = poe_dir.join(&filename);
+
+    fs::write(&path, &filter_text)
+        .map_err(|e| format!("Failed to write filter file: {}", e))?;
+
+    Ok(path.to_string_lossy().to_string())
+}
+
 /// List all known gem names (active + support) from the gem database.
 #[tauri::command]
 async fn list_gem_names() -> Result<serde_json::Value, String> {
@@ -2070,6 +2120,8 @@ pub fn run() {
             calculate_dps,
             calculate_all_dps,
             list_gem_names,
+            generate_filter,
+            save_filter_file,
             list_public_characters,
             import_character,
             // Remote API commands

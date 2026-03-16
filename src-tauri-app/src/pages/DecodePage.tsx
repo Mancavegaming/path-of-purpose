@@ -12,6 +12,7 @@ import BudgetOptimizer from "../components/BudgetOptimizer";
 import SkillSelector from "../components/SkillSelector";
 import { setStreamBuild } from "../lib/streamStore";
 import ConfigBar, { type CalcConfigState, DEFAULT_CONFIG } from "../components/ConfigBar";
+import FilterGenerator from "../components/FilterGenerator";
 
 function isMobalyticsUrl(input: string): boolean {
   return /mobalytics\.gg/i.test(input);
@@ -353,6 +354,8 @@ export default function DecodePage(props: DecodePageProps) {
             league={league()}
             config={calcConfig() as unknown as Record<string, unknown>}
           />
+
+          <FilterGenerator build={displayBuild()!} />
         </Show>
       </Show>
 
