@@ -1406,12 +1406,30 @@ def cmd_calc_dps(args: argparse.Namespace) -> None:
     skill_index = data.get("skill_index")
     config_data = data.get("config")
 
+    # Debug: log what we received to stderr
+    import sys as _sys
+    spec = build.active_passive_spec
+    _sys.stderr.write(f"[calc_dps] ascendancy={build.ascendancy_name}, "
+                      f"active_spec_index={build.active_spec_index}, "
+                      f"specs={len(build.passive_specs)}, "
+                      f"active_spec={spec.title if spec else 'None'} "
+                      f"({len(spec.nodes) if spec else 0} nodes), "
+                      f"jewel_sockets={len(spec.jewel_sockets) if spec else 0}, "
+                      f"node_overrides={len(spec.node_overrides) if spec else 0}, "
+                      f"config_entries={len(build.config.entries)}, "
+                      f"config_override={'yes' if config_data else 'no'}\n")
+    if config_data:
+        _sys.stderr.write(f"[calc_dps] config_data keys: {list(config_data.keys())}\n")
+
     # Override main skill if requested
     if skill_index is not None:
         build.main_socket_group = int(skill_index) + 1  # 1-based in PoB
 
     config = CalcConfig(**config_data) if config_data else None
     result = calculate_dps(build, config_overrides=config)
+
+    _sys.stderr.write(f"[calc_dps] RESULT: dps={result.total_dps}, speed={result.hits_per_second}, "
+                      f"crit={result.crit_chance}%, multi={result.effective_crit_multi}\n")
     print(json.dumps(result.model_dump(mode="json"), indent=2))
 
 
