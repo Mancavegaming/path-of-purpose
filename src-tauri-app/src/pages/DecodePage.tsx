@@ -354,8 +354,6 @@ export default function DecodePage(props: DecodePageProps) {
             league={league()}
             config={calcConfig() as unknown as Record<string, unknown>}
           />
-
-          <FilterGenerator build={displayBuild()!} />
         </Show>
       </Show>
 

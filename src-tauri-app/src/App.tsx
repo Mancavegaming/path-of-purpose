@@ -6,6 +6,7 @@ import GeneratorPage from "./pages/GeneratorPage";
 import EditorPage from "./pages/EditorPage";
 import CharacterPage from "./pages/CharacterPage";
 import StreamingPage from "./pages/StreamingPage";
+import FilterPage from "./pages/FilterPage";
 import type { Build, BuildGuide } from "./lib/types";
 import {
   listSavedBuilds,
@@ -105,6 +106,9 @@ function App() {
             characterBuild={characterBuild}
             savedBuilds={savedBuilds}
           />
+        </div>
+        <div style={{ display: page() === "filter" ? "block" : "none" }}>
+          <FilterPage loadedBuild={loadedBuild} />
         </div>
         <div style={{ display: page() === "streaming" ? "block" : "none" }}>
           <StreamingPage />
