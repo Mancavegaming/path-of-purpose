@@ -146,6 +146,10 @@ export default function DecodePage(props: DecodePageProps) {
         // PoB code, pobb.in URL, or any other URL → decodeBuild handles all
         const result: Build = await decodeBuild(raw);
         setBuild(result);
+        // Default to PoB's active variant (skill/item set)
+        if (result.active_skill_set !== undefined) {
+          setActiveVariant(result.active_skill_set);
+        }
       }
       // Initialize skill selector to main skill after decode
       setTimeout(initSkillIndex, 0);

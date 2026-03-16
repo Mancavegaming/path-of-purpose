@@ -216,6 +216,7 @@ export function resolveVariantForCalc(
     skill_groups: skills,
     items,
     passive_specs: passiveSpecs,
+    active_spec_index: 0, // resolved spec is always at index 0 now
     main_socket_group: (skillIndex ?? 0) + 1, // 1-based for Python
   };
 }
