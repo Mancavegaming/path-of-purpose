@@ -1,4 +1,4 @@
-import { createSignal, For, Show } from "solid-js";
+import { createSignal, onMount, For, Show } from "solid-js";
 import type { Accessor, Setter } from "solid-js";
 import type { SavedBuildEntry } from "../lib/commands";
 import {
@@ -12,6 +12,7 @@ import {
 } from "../lib/auth";
 import { check } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
+import { getVersion } from "@tauri-apps/api/app";
 
 const DISCORD_CLIENT_ID = "1479135178650554510";
 
@@ -29,6 +30,15 @@ export default function Sidebar(props: SidebarProps) {
   const [updateStatus, setUpdateStatus] = createSignal("");
   const [updating, setUpdating] = createSignal(false);
   const [loginError, setLoginError] = createSignal<string | null>(null);
+  const [appVersion, setAppVersion] = createSignal("");
+
+  onMount(async () => {
+    try {
+      setAppVersion(await getVersion());
+    } catch {
+      setAppVersion("unknown");
+    }
+  });
 
   async function handleCheckForUpdates() {
     setUpdating(true);
@@ -263,6 +273,9 @@ export default function Sidebar(props: SidebarProps) {
           </div>
         </Show>
       </div>
+
+      {/* Version label */}
+      <div class="sidebar-version">v{appVersion()}</div>
     </aside>
   );
 }

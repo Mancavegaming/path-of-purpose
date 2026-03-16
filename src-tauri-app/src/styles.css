@@ -3071,6 +3071,14 @@ button:disabled {
 
 /* Sidebar user section */
 
+.sidebar-version {
+  padding: 4px 12px 8px;
+  text-align: right;
+  font-size: 0.7rem;
+  color: var(--text-muted, #555);
+  opacity: 0.6;
+}
+
 .sidebar-user-section {
   margin-top: auto;
   padding: 12px;
