@@ -148,8 +148,15 @@ path-of-purpose/
 
 ## Build & Release
 ```bash
-# Build Python sidecar with Nuitka (--onefile bundles python311.dll inside the exe)
-cd src-python && python -m nuitka --onefile --output-dir=build --include-package=pop --assume-yes-for-downloads pop/main.py
+# Build Python sidecar with Nuitka (--onefile, MUST include data dirs)
+cd src-python && python -m nuitka --onefile --output-dir=build \
+  --include-package=pop \
+  --include-data-dir=pop/knowledge/cache=pop/knowledge/cache \
+  --include-data-dir=pop/gamedata/cache=pop/gamedata/cache \
+  --assume-yes-for-downloads pop/main.py
+
+# VERIFY sidecar works before copying (must show DPS > 10000 for any real build)
+echo '{"build":{"class_name":"","ascendancy_name":"","level":1,"main_socket_group":0,"active_spec_index":0,"passive_specs":[],"skill_groups":[],"items":[],"config":{"entries":{}},"skill_sets":[],"item_sets":[],"active_skill_set":0,"active_item_set":0,"pob_version":"","build_name":""}}' | build/main.exe calc_dps --stdin
 
 # Copy sidecar to Tauri binaries
 cp build/main.exe src-tauri-app/src-tauri/binaries/pop-engine-x86_64-pc-windows-msvc.exe
