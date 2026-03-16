@@ -7,6 +7,15 @@ Phase 2+: JSON-RPC 2.0 server over stdio for Tauri IPC.
 
 from __future__ import annotations
 
+# Debug: log every invocation to a temp file
+import os as _os, sys as _sys, tempfile as _tf
+_debug_log = _os.path.join(_tf.gettempdir(), "pop_engine_debug.log")
+try:
+    with open(_debug_log, "a") as _f:
+        _f.write(f"[POP] invoked: argv={_sys.argv} cwd={_os.getcwd()}\n")
+except Exception:
+    pass
+
 import argparse
 import asyncio
 import json
@@ -1406,9 +1415,9 @@ def cmd_calc_dps(args: argparse.Namespace) -> None:
     skill_index = data.get("skill_index")
     config_data = data.get("config")
 
-    # Debug: write to log file on desktop
-    import os, traceback
-    log_path = os.path.join(os.path.expanduser("~"), "Desktop", "pop_calc_debug.log")
+    # Debug: write to log file in temp dir (guaranteed writable)
+    import os, tempfile, traceback
+    log_path = os.path.join(tempfile.gettempdir(), "pop_calc_debug.log")
     try:
         spec = build.active_passive_spec
         with open(log_path, "w") as _log:

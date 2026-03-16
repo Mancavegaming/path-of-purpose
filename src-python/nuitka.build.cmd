@@ -7,6 +7,8 @@ python -m nuitka ^
     --onefile ^
     --output-dir=build ^
     --include-package=pop ^
+    --include-data-dir=pop/knowledge/cache=pop/knowledge/cache ^
+    --include-data-dir=pop/gamedata/cache=pop/gamedata/cache ^
     --enable-plugin=anti-bloat ^
     --assume-yes-for-downloads ^
     --windows-console-mode=disable ^
