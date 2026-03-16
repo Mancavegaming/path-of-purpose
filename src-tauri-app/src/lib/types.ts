@@ -35,6 +35,8 @@ export interface PassiveSpec {
   ascendancy_id: number;
   nodes: number[];
   overrides: Record<number, number>;
+  jewel_sockets: Record<number, number>;
+  node_overrides: Record<number, string>;
   url: string;
   key_nodes?: string[];
   total_points?: number;
@@ -77,6 +79,7 @@ export interface Build {
   ascendancy_name: string;
   level: number;
   main_socket_group: number;
+  active_spec_index: number;
   passive_specs: PassiveSpec[];
   skill_groups: SkillGroup[];
   items: Item[];
