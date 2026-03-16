@@ -1326,6 +1326,83 @@ def _parse_single_mod(text: str, source: str, out: ParsedMods) -> None:
         out.chain_plus += int(m.group(1))
         return
 
+    # --- Common tree stat patterns ---
+    # "X% increased Attack and Cast Speed"
+    m = re.search(r"(\d+)% increased Attack and Cast Speed", text, re.IGNORECASE)
+    if m:
+        val = float(m.group(1))
+        out.increased_attack_speed += val
+        out.increased_cast_speed += val
+        return
+
+    # Weapon-type ailment damage: "Attacks with X deal Y% increased Damage with Ailments"
+    m = re.search(
+        r"(?:Attacks with|Mace or Sceptre Attacks deal|Sword Attacks deal|Axe Attacks deal|"
+        r"Claw Attacks deal|Dagger Attacks deal|Staff Attacks deal|Bow Attacks deal|"
+        r"Wand Attacks deal) (\d+)% increased Damage with (?:Ailments|Hits and Ailments)",
+        text, re.IGNORECASE,
+    )
+    if not m:
+        m = re.search(
+            r"Attacks with (?:Two Handed )?(?:Melee )?Weapons deal (\d+)% increased Damage "
+            r"with (?:Ailments|Hits and Ailments)",
+            text, re.IGNORECASE,
+        )
+    if m:
+        out.increased.append(Modifier(
+            stat="increased_ailment_damage", value=float(m.group(1)),
+            mod_type="increased", source=source,
+        ))
+        return
+
+    # "X% increased Damage Over Time with Bow Skills" / "X% increased Damage Over Time"
+    m = re.search(r"(\d+)% increased Damage Over Time(?:\b| with)", text, re.IGNORECASE)
+    if m:
+        out.increased_dot.append(Modifier(
+            stat="increased_dot", value=float(m.group(1)),
+            mod_type="increased", source=source,
+        ))
+        return
+
+    # "+X% to all maximum Elemental Resistances"
+    m = re.search(r"\+(\d+)% to all maximum Elemental Resistances", text, re.IGNORECASE)
+    if m:
+        out.special_flags["max_ele_resist_bonus"] = (
+            float(out.special_flags.get("max_ele_resist_bonus", 0.0)) + float(m.group(1))
+        )
+        return
+
+    # "X% increased Totem Placement speed"
+    m = re.search(r"(\d+)% increased Totem Placement [Ss]peed", text, re.IGNORECASE)
+    if m:
+        return  # tracked but not a direct DPS stat
+
+    # "X% increased Warcry Buff Effect"
+    m = re.search(r"(\d+)% increased Warcry Buff Effect", text, re.IGNORECASE)
+    if m:
+        return  # tracked but not a direct DPS stat
+
+    # "X% increased Skill Effect Duration"
+    m = re.search(r"(\d+)% increased Skill Effect Duration", text, re.IGNORECASE)
+    if m:
+        return  # tracked but not a direct DPS stat
+
+    # "Attacks have X% chance to Ignite/Bleed/Poison"
+    m = re.search(r"Attacks have (\d+)% chance to (?:cause )?(?:Ignite|Ignited)", text, re.IGNORECASE)
+    if m:
+        out.chance_to_ignite += float(m.group(1))
+        return
+    m = re.search(r"Attacks have (\d+)% chance to (?:cause )?Bleed", text, re.IGNORECASE)
+    if m:
+        out.chance_to_bleed += float(m.group(1))
+        return
+
+    # "X% chance to Impale Enemies on Hit with Attacks"
+    m = re.search(r"(\d+)% chance to Impale", text, re.IGNORECASE)
+    if m:
+        out.impale_chance += float(m.group(1))
+        return
+
     # --- Crit ---
     m = _RE_INCREASED_CRIT_SPELLS.search(text)
     if m:
