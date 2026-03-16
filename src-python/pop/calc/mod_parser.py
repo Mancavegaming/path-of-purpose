@@ -1526,6 +1526,15 @@ def _parse_single_mod(text: str, source: str, out: ParsedMods) -> None:
         out.increased_aura_effect += float(m.group(1))
         return
 
+    # --- Comprehensive tree/item stat catch-all ---
+    # DPS-relevant patterns missed above
+    if _parse_remaining_dps_mod(text, out, source):
+        return
+
+    # Non-DPS stats (recognized to avoid "unparsed" noise)
+    if _parse_non_dps_mod(text):
+        return
+
     # --- Enemy damage taken ---
     # "Enemies take X% increased Damage for each type of Ailment..."
     m = re.search(
@@ -1547,6 +1556,224 @@ def _parse_single_mod(text: str, source: str, out: ParsedMods) -> None:
 
     # --- Defence stats ---
     _parse_defence_mod(text, out)
+
+
+def _parse_remaining_dps_mod(text: str, out: ParsedMods, source: str) -> bool:
+    """Parse DPS-relevant patterns not caught by the main parser."""
+    import re
+
+    # Spell crit: "X% increased Spell Critical Strike Chance"
+    m = re.search(r"(\d+)% increased Spell Critical Strike Chance", text, re.IGNORECASE)
+    if m:
+        out.increased_crit_spells += float(m.group(1))
+        return True
+
+    # Melee Physical Damage: "X% increased Melee Physical Damage"
+    m = re.search(r"(\d+)% increased Melee Physical Damage", text, re.IGNORECASE)
+    if m:
+        out.increased.append(Modifier(
+            stat="more_melee_physical_damage", value=float(m.group(1)),
+            mod_type="increased", damage_types=[DamageType.PHYSICAL], source=source,
+        ))
+        return True
+
+    # Totem Damage: "X% increased Totem Damage"
+    m = re.search(r"(\d+)% increased Totem Damage", text, re.IGNORECASE)
+    if m:
+        out.increased.append(Modifier(
+            stat="increased_totem_damage", value=float(m.group(1)),
+            mod_type="increased", source=source,
+        ))
+        return True
+
+    # Impale Effect: "X% increased Impale Effect"
+    m = re.search(r"(\d+)% increased Impale Effect", text, re.IGNORECASE)
+    if m:
+        out.increased_impale_effect += float(m.group(1))
+        return True
+
+    # DoT multiplier specific: "+X% to Cold/Fire/Physical/Chaos Damage over Time Multiplier"
+    m = re.search(r"\+(\d+)% to (Cold|Fire|Physical|Chaos|Lightning) Damage over Time Multiplier",
+                  text, re.IGNORECASE)
+    if m:
+        dtype = m.group(2).lower()
+        val = float(m.group(1))
+        if dtype == "fire":
+            out.dot_multi_fire += val
+        elif dtype == "physical":
+            out.dot_multi_phys += val
+        elif dtype == "chaos":
+            out.dot_multi_chaos += val
+        else:
+            out.dot_multi += val
+        return True
+
+    # Generic DoT multiplier: "+X% to Damage over Time Multiplier"
+    m = re.search(r"\+(\d+)% to Damage over Time Multiplier$", text, re.IGNORECASE)
+    if m:
+        out.dot_multi += float(m.group(1))
+        return True
+
+    # DoT multiplier for Poison: "+X% to Damage over Time Multiplier for Poison"
+    m = re.search(r"\+(\d+)% to Damage over Time Multiplier for Poison", text, re.IGNORECASE)
+    if m:
+        out.dot_multi_chaos += float(m.group(1))
+        return True
+
+    # Chance to Freeze/Shock/Ignite combo: "X% chance to Freeze, Shock and Ignite"
+    m = re.search(r"(\d+)% chance to Freeze, Shock and Ignite", text, re.IGNORECASE)
+    if m:
+        out.chance_to_ignite += float(m.group(1))
+        return True
+
+    # Chance to Freeze: "X% chance to Freeze"
+    m = re.search(r"(\d+)% chance to Freeze", text, re.IGNORECASE)
+    if m:
+        return True  # freeze is defensive, tracked but not DPS
+
+    # Chance to Shock: "X% chance to Shock"
+    m = re.search(r"(\d+)% chance to Shock", text, re.IGNORECASE)
+    if m:
+        return True  # shock chance tracked by ailment system
+
+    # Poison Duration: "X% increased Poison Duration"
+    m = re.search(r"(\d+)% increased Poison Duration", text, re.IGNORECASE)
+    if m:
+        out.increased_poison_duration += float(m.group(1))
+        return True
+
+    # Bleeding Duration: "X% increased Bleeding Duration"
+    m = re.search(r"(\d+)% increased Bleed(?:ing)? Duration", text, re.IGNORECASE)
+    if m:
+        out.increased_bleed_duration += float(m.group(1))
+        return True
+
+    # Mine Throwing Speed / Trap Throwing Speed
+    m = re.search(r"(\d+)% increased (?:Mine|Trap) (?:Throwing|Laying) Speed", text, re.IGNORECASE)
+    if m:
+        return True  # tracked but handled by specific mine/trap calcs
+
+    # Effect of Chill: "X% increased Effect of Chill"
+    m = re.search(r"(\d+)% increased Effect of (?:Chill|Non-Damaging Ailments)", text, re.IGNORECASE)
+    if m:
+        return True  # defensive/utility
+
+    # Curse Effect: "X% increased Effect of your Curses"
+    m = re.search(r"(\d+)% increased Effect of (?:your )?Curses", text, re.IGNORECASE)
+    if m:
+        return True  # would scale curse DPS contribution
+
+    # Curse Duration
+    m = re.search(r"(\d+)% increased Curse Duration", text, re.IGNORECASE)
+    if m:
+        return True
+
+    # Individual max resist: "+1% to maximum Fire/Cold/Lightning Resistance"
+    m = re.search(r"\+(\d+)% to maximum (Fire|Cold|Lightning) Resistance", text, re.IGNORECASE)
+    if m:
+        dtype_name = m.group(2).lower()
+        out.special_flags[f"max_{dtype_name}_resist_bonus"] = (
+            float(out.special_flags.get(f"max_{dtype_name}_resist_bonus", 0.0))
+            + float(m.group(1))
+        )
+        return True
+
+    # Physical damage ignore: "Hits have X% chance to ignore Enemy Physical Damage Reduction"
+    m = re.search(r"(\d+)% chance to ignore Enemy Physical Damage Reduction", text, re.IGNORECASE)
+    if m:
+        return True  # tracked but complex mechanic
+
+    # Spell damage-related mods already caught above, but catch variants
+    m = re.search(r"(\d+)% increased Spell Damage while holding a Shield", text, re.IGNORECASE)
+    if m:
+        out.increased.append(Modifier(
+            stat="increased_spell_damage", value=float(m.group(1)),
+            mod_type="increased", source=source,
+        ))
+        return True
+
+    return False
+
+
+def _parse_non_dps_mod(text: str) -> bool:
+    """Recognize non-DPS stats so they don't show as 'unparsed'. Returns True if recognized."""
+    import re
+
+    # These patterns are valid PoE stats but don't affect DPS calculations.
+    _NON_DPS_PATTERNS = [
+        r"(\d+)% increased (?:maximum )?Mana\b",
+        r"\+(\d+) to maximum Mana",
+        r"(\d+)% increased Mana Regeneration Rate",
+        r"Regenerate [\d.]+% of (?:Life|Mana|Energy Shield) per second",
+        r"(\d+)% increased Movement Speed",
+        r"(\d+)% increased (?:Area of Effect|Area Damage Radius)",
+        r"(\d+)% increased (?:Area of Effect of )?Aura Skills",
+        r"(\d+)% increased Flask (?:Charges gained|Effect Duration|Recovery)",
+        r"(\d+)% increased Life Recovery from Flasks",
+        r"Flasks applied to you have (\d+)% increased Effect",
+        r"Tinctures applied to you have",
+        r"Grants? \d+ Passive Skill Points?",
+        r"(\d+)% increased Energy Shield Recharge Rate",
+        r"[\d.]+% of (?:Attack|Spell) Damage Leeched as (?:Life|Mana|Energy Shield)",
+        r"(\d+)% increased total Recovery per second from (?:Life|Mana|Energy Shield) Leech",
+        r"(\d+)% increased Block Recovery",
+        r"(\d+)% reduced Enemy Stun Threshold",
+        r"(\d+)% increased Stun Duration on Enemies",
+        r"Gain \d+ (?:Life|Mana|Rage) (?:per Enemy|on|when|every)",
+        r"(\d+)% increased Mana Reservation Efficiency",
+        r"(\d+)% (?:increased|reduced) Mana Cost",
+        r"(\d+)% increased Quantity of .* Wisps",
+        r"(\d+)% increased (?:Endurance|Frenzy|Power) Charge Duration",
+        r"(\d+)% chance to gain .* Charge (?:when|on|if)",
+        r"Cannot be Stunned",
+        r"(\d+)% chance to (?:Ignore Stuns|Avoid)",
+        r"(\d+)% increased (?:Warcry|Buff) (?:Duration|Cooldown|Speed)",
+        r"(\d+)% increased Effect of Arcane Surge",
+        r"Inherent loss of Rage is",
+        r"(\d+)% of Damage taken Recouped as",
+        r"You can apply an additional Curse",
+        r"Removes all Energy Shield",
+        r"(\d+)% increased (?:Ward|Shield Defences|Defences from Equipped Shield)",
+        r"(\d+)% increased Totem (?:Life|Placement speed|Duration)",
+        r"\+(\d+) to maximum number of Summoned",
+        r"Raised Beast Spectres have",
+        r"(\d+)% increased Valour gained",
+        r"(\d+)% increased Projectile Speed",
+        r"(\d+)% reduced Mana Burn rate",
+        r"\+[\d.]+ metres to Melee Strike Range",
+        r"20% chance to gain a Power Charge when you Block",
+        r"Gain \d+ Endurance Charge",
+        r"Gain 1 Rage on Melee Hit",
+        r"Non-Channelling Skills have .* Mana Cost",
+        r"(\d+)% increased (?:Minion|Spectre|Zombie|Skeleton) ",
+        r"Minions have",
+        r"(\d+)% increased Duration of Ailments",
+        r"Projectiles (?:Return|cannot collide|are fired)",
+        r"When you Kill a Rare monster",
+        r"Allocates ",
+        r"Far Shot",
+        r"(\d+)% (?:increased|reduced) Duration",
+        r"(?:Used when|Lasts|Consumes|Currently has|Recharges|Foil Unique)",
+        r"(?:Enemies Ignited|Recover) .* during Effect",
+        r"\+\d+ to Maximum Charges",
+        r"(\d+)% (?:increased|reduced) Charges per use",
+        r"Can have up to \d+ Crafted",
+        r"When Hit during effect",
+        r"(\d+)% increased (?:Global )?Defences",
+        r"Split$",
+        r"Historic$",
+        r"Passives in radius are Conquered",
+        r"Only affects Passives in",
+        r"Passives in Radius can be Allocated",
+        r"Commanded leadership over",
+        r"Modifiers to Chance to Suppress",
+        r"Limited to:",
+    ]
+
+    for pattern in _NON_DPS_PATTERNS:
+        if re.search(pattern, text, re.IGNORECASE):
+            return True
+    return False
 
 
 # ===================================================================

@@ -89,11 +89,14 @@ def calc_player_defences(
     chaos_total = parsed.chaos_resistance
 
     # Cap at 75% + max resist bonuses from tree/gear
-    max_ele_cap = 75.0 + float(parsed.special_flags.get("max_ele_resist_bonus", 0.0))
+    max_all = float(parsed.special_flags.get("max_ele_resist_bonus", 0.0))
+    fire_cap = 75.0 + max_all + float(parsed.special_flags.get("max_fire_resist_bonus", 0.0))
+    cold_cap = 75.0 + max_all + float(parsed.special_flags.get("max_cold_resist_bonus", 0.0))
+    light_cap = 75.0 + max_all + float(parsed.special_flags.get("max_lightning_resist_bonus", 0.0))
     result.elemental_resistances = {
-        "fire": min(fire_total, max_ele_cap),
-        "cold": min(cold_total, max_ele_cap),
-        "lightning": min(light_total, max_ele_cap),
+        "fire": min(fire_total, fire_cap),
+        "cold": min(cold_total, cold_cap),
+        "lightning": min(light_total, light_cap),
     }
     result.chaos_resistance = min(chaos_total, 75.0)
 
