@@ -1,11 +1,11 @@
 {
-  "version": "0.7.3",
-  "notes": "v0.7.3: Fix overlay ghost window on dismiss",
-  "pub_date": "2026-03-17T19:16:33Z",
+  "version": "0.7.4",
+  "notes": "v0.7.4: Fix trade URL + overlay fixes",
+  "pub_date": "2026-03-17T21:30:06Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYW41RHIwL3c3SndQOEdJWnhwRktqamxQb2dZWjhEdTRLcEtqV0RVOVVZZmJocWUwMFR3QWN3aW5LakZ1NVBVaHJIZHErcWJHeEE5aFJxcENKbzFSUEFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczNzc0OTQ0CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuNy4zX3g2NC1zZXR1cC5uc2lzLnppcAozaDdBTU50SmV5by85czNLZE55REVNaVIza3IrN1p4VjFrR1BLK3Bsemxlb3BsSzhtVVNqWnpOTXoyTWNuSE05N0tvT2RlSmNXK1dJc3QrajZqK0pEdz09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.7.3/Path.of.Purpose_0.7.3_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWhRSFpNOTlGeVZ1eXQ1U0JoY09WS0NoZUE3NHVZWlhROTIrM2l2RWR2VDJPSnh4blhRUEdINmZqTitTRGh0RmtyK1pWbXljeTNoR3dNY29YSmt0ZndRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczNzgyNTIzCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuNy40X3g2NC1zZXR1cC5uc2lzLnppcApIZ29NTmpQb0hjREJVM0FDMWV3aXZvUm1IL3VvdHMvRXcwdkltM1h6VGUveDBlenBBNnQzNVhnWnJCS1h5QlpYMk9GSkw5KzJHUWxrS1JLdWdLd0tBQT09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.7.4/Path.of.Purpose_0.7.4_x64-setup.nsis.zip"
     }
   }
 }
