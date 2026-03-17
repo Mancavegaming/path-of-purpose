@@ -2170,6 +2170,9 @@ async fn fetch_leagues() -> Result<serde_json::Value, String> {
 // ---------------------------------------------------------------------------
 
 /// Simulate Ctrl+C keystroke to copy item text from PoE.
+///
+/// First releases any held modifier keys (the user is holding Ctrl from Ctrl+D),
+/// waits briefly, then sends a clean Ctrl+C sequence.
 #[cfg(windows)]
 fn simulate_ctrl_c() -> Result<(), String> {
     use windows::Win32::UI::Input::KeyboardAndMouse::{
@@ -2179,9 +2182,42 @@ fn simulate_ctrl_c() -> Result<(), String> {
 
     const VK_CONTROL: VIRTUAL_KEY = VIRTUAL_KEY(0x11);
     const VK_C: VIRTUAL_KEY = VIRTUAL_KEY(0x43);
+    const VK_D: VIRTUAL_KEY = VIRTUAL_KEY(0x44);
 
+    // Step 1: Release keys the user is still holding from Ctrl+D
+    let release_inputs = [
+        INPUT {
+            r#type: INPUT_KEYBOARD,
+            Anonymous: INPUT_0 {
+                ki: KEYBDINPUT {
+                    wVk: VK_D,
+                    wScan: 0,
+                    dwFlags: KEYEVENTF_KEYUP,
+                    time: 0,
+                    dwExtraInfo: 0,
+                },
+            },
+        },
+        INPUT {
+            r#type: INPUT_KEYBOARD,
+            Anonymous: INPUT_0 {
+                ki: KEYBDINPUT {
+                    wVk: VK_CONTROL,
+                    wScan: 0,
+                    dwFlags: KEYEVENTF_KEYUP,
+                    time: 0,
+                    dwExtraInfo: 0,
+                },
+            },
+        },
+    ];
+    unsafe { SendInput(&release_inputs, std::mem::size_of::<INPUT>() as i32) };
+
+    // Small pause to let the OS process the key releases
+    std::thread::sleep(std::time::Duration::from_millis(50));
+
+    // Step 2: Send clean Ctrl+C
     let inputs = [
-        // Ctrl down
         INPUT {
             r#type: INPUT_KEYBOARD,
             Anonymous: INPUT_0 {
@@ -2194,7 +2230,6 @@ fn simulate_ctrl_c() -> Result<(), String> {
                 },
             },
         },
-        // C down
         INPUT {
             r#type: INPUT_KEYBOARD,
             Anonymous: INPUT_0 {
@@ -2207,7 +2242,6 @@ fn simulate_ctrl_c() -> Result<(), String> {
                 },
             },
         },
-        // C up
         INPUT {
             r#type: INPUT_KEYBOARD,
             Anonymous: INPUT_0 {
@@ -2220,7 +2254,6 @@ fn simulate_ctrl_c() -> Result<(), String> {
                 },
             },
         },
-        // Ctrl up
         INPUT {
             r#type: INPUT_KEYBOARD,
             Anonymous: INPUT_0 {
@@ -2276,8 +2309,8 @@ async fn price_check_trigger(
     // Simulate Ctrl+C to copy item info
     simulate_ctrl_c()?;
 
-    // Wait for clipboard to populate
-    tokio::time::sleep(std::time::Duration::from_millis(150)).await;
+    // Wait for clipboard to populate (needs time after key release + PoE processing)
+    tokio::time::sleep(std::time::Duration::from_millis(250)).await;
 
     // Read clipboard via plugin
     use tauri_plugin_clipboard_manager::ClipboardExt;

@@ -1,6 +1,6 @@
-import { createSignal, onMount } from "solid-js";
+import { createSignal, onMount, Show } from "solid-js";
 import { listen } from "@tauri-apps/api/event";
-import { emit } from "@tauri-apps/api/event";
+import { emitTo } from "@tauri-apps/api/event";
 import Sidebar, { type Page } from "./components/Sidebar";
 import DecodePage from "./pages/DecodePage";
 import DeltaPage from "./pages/DeltaPage";
@@ -29,6 +29,7 @@ function App() {
   const [loadedBuild, setLoadedBuild] = createSignal<Build | null>(null);
   const [characterBuild, setCharacterBuild] = createSignal<Build | null>(null);
   const [savedBuilds, setSavedBuilds] = createSignal<SavedBuildEntry[]>([]);
+  const [priceCheckStatus, setPriceCheckStatus] = createSignal("");
 
   async function refreshSavedBuilds() {
     try {
@@ -46,20 +47,26 @@ function App() {
     // Pre-create overlay window (hidden)
     try {
       await createOverlayWindow();
-    } catch {
-      // Overlay creation may fail in dev mode — non-critical
+    } catch (e) {
+      console.warn("Overlay window creation failed:", e);
     }
 
     // Listen for price check hotkey trigger from Rust global shortcut
     await listen("price-check-triggered", async () => {
+      setPriceCheckStatus("Checking price...");
       try {
         const [x, y] = await getCursorPosition();
         const result = await priceCheckTrigger("Standard");
-        // Emit to overlay window
-        await emit("price-check-result", result);
+        // Emit to overlay window specifically
+        await emitTo("price-overlay", "price-check-result", result);
         await showOverlayAt(x + 20, y + 20);
+        setPriceCheckStatus("");
       } catch (e) {
+        const msg = String(e);
+        setPriceCheckStatus(msg);
         console.error("Price check failed:", e);
+        // Clear error after 4 seconds
+        setTimeout(() => setPriceCheckStatus(""), 4000);
       }
     });
   });
@@ -140,6 +147,23 @@ function App() {
           <StreamingPage />
         </div>
       </main>
+      <Show when={priceCheckStatus()}>
+        <div style={{
+          position: "fixed",
+          bottom: "12px",
+          right: "12px",
+          padding: "8px 14px",
+          background: "rgba(30, 30, 50, 0.95)",
+          border: "1px solid rgba(100, 100, 140, 0.4)",
+          "border-radius": "6px",
+          color: priceCheckStatus().startsWith("Checking") ? "#aaa" : "#f88",
+          "font-size": "13px",
+          "z-index": "9999",
+          "pointer-events": "none",
+        }}>
+          {priceCheckStatus()}
+        </div>
+      </Show>
     </div>
   );
 }

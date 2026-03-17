@@ -4,7 +4,7 @@ import { open } from "@tauri-apps/plugin-shell";
 
 const TWITCH_CLIENT_ID = "nxcpw276lnupq2pty6tuj9hwtthhxl";
 const TWITCH_REDIRECT_URI = "http://localhost:8460/callback";
-import { emit } from "@tauri-apps/api/event";
+import { emitTo } from "@tauri-apps/api/event";
 import {
   loadTwitchToken,
   storeTwitchToken,
@@ -160,7 +160,7 @@ export default function StreamingPage() {
                 snap.stats.last_death as unknown as Record<string, unknown>,
                 defence as unknown as Record<string, unknown>,
               );
-              await emit("death-recap", analysis);
+              await emitTo("price-overlay", "death-recap", analysis);
               await showOverlayAt(100, 100);
             } catch {
               // Death analysis is non-critical
