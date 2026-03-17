@@ -2072,6 +2072,58 @@ async fn log_snapshot(
     Ok(result)
 }
 
+/// Upload a loot filter to the player's PoE account
+#[tauri::command]
+async fn upload_filter_to_account(
+    filter_name: String,
+    filter_text: String,
+    description: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let input = serde_json::json!({
+        "filter_name": filter_name,
+        "filter_text": filter_text,
+        "description": description.unwrap_or_default(),
+    });
+    let stdin_data = serde_json::to_string(&input)
+        .map_err(|e| format!("Failed to serialize input: {}", e))?;
+
+    let stdout = run_python_command(
+        &["-m", "pop.main", "upload_filter", "--stdin"],
+        Some(&stdin_data),
+    )?;
+
+    serde_json::from_str::<serde_json::Value>(&stdout)
+        .map_err(|e| format!("Failed to parse upload_filter output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))
+}
+
+/// List all item filters on the player's PoE account
+#[tauri::command]
+async fn list_account_filters() -> Result<serde_json::Value, String> {
+    let stdout = run_python_command(
+        &["-m", "pop.main", "list_account_filters"],
+        None,
+    )?;
+
+    serde_json::from_str::<serde_json::Value>(&stdout)
+        .map_err(|e| format!("Failed to parse list_account_filters output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))
+}
+
+/// Delete an item filter from the player's PoE account
+#[tauri::command]
+async fn delete_account_filter(filter_id: String) -> Result<serde_json::Value, String> {
+    let input = serde_json::json!({ "filter_id": filter_id });
+    let stdin_data = serde_json::to_string(&input)
+        .map_err(|e| format!("Failed to serialize input: {}", e))?;
+
+    let stdout = run_python_command(
+        &["-m", "pop.main", "delete_account_filter", "--stdin"],
+        Some(&stdin_data),
+    )?;
+
+    serde_json::from_str::<serde_json::Value>(&stdout)
+        .map_err(|e| format!("Failed to parse delete_account_filter output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))
+}
+
 /// Fetch available trade leagues from the PoE trade API
 #[tauri::command]
 async fn fetch_leagues() -> Result<serde_json::Value, String> {
@@ -2152,6 +2204,10 @@ pub fn run() {
             stop_overlay_server,
             // Log watcher
             log_snapshot,
+            // Account filter management
+            upload_filter_to_account,
+            list_account_filters,
+            delete_account_filter,
             // Trade utilities
             fetch_leagues,
         ])

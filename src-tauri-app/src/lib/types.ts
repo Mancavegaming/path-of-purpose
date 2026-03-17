@@ -498,3 +498,13 @@ export interface FilterResult {
   filter_text: string;
   filter_name: string;
 }
+
+// --- Account Filter models ---
+
+export interface AccountFilter {
+  id: string;
+  filter_name: string;
+  description: string;
+  realm: string;
+  public: boolean;
+}

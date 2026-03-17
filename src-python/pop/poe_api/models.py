@@ -227,3 +227,18 @@ class League(BaseModel):
     end_at: str | None = Field(default=None, alias="endAt")
 
     model_config = {"populate_by_name": True}
+
+
+# ---------------------------------------------------------------------------
+# Account item filters
+# ---------------------------------------------------------------------------
+
+
+class AccountFilter(BaseModel):
+    """An item filter stored on the player's PoE account."""
+
+    id: str = ""
+    filter_name: str = ""
+    description: str = ""
+    realm: str = "pc"
+    public: bool = False

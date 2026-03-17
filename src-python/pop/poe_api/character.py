@@ -12,6 +12,7 @@ import httpx
 from pop.oauth.token_store import StoredTokens, load_tokens, save_tokens
 from pop.oauth.client import refresh_access_token
 from pop.poe_api.models import (
+    AccountFilter,
     CharacterDetail,
     CharacterEntry,
     EquippedItem,
@@ -190,3 +191,43 @@ class PoeClient:
         data = resp.json()
         leagues = data.get("leagues", data) if isinstance(data, dict) else data
         return [League.model_validate(lg) for lg in leagues]
+
+    # ------------------------------------------------------------------
+    # Item filter methods
+    # ------------------------------------------------------------------
+
+    async def list_filters(self) -> list[AccountFilter]:
+        """List all item filters on the account."""
+        resp = await self._request("GET", "/item-filter")
+        data = resp.json()
+        filters = data.get("filters", data) if isinstance(data, dict) else data
+        return [AccountFilter.model_validate(f) for f in filters]
+
+    async def get_filter(self, filter_id: str) -> dict:
+        """Get a specific filter by ID."""
+        resp = await self._request("GET", f"/item-filter/{filter_id}")
+        return resp.json()
+
+    async def upload_filter(
+        self,
+        filter_name: str,
+        filter_text: str,
+        description: str = "",
+        realm: str = "pc",
+    ) -> dict:
+        """Upload or update an item filter on the account.
+
+        If a filter with the same name exists, it will be overwritten.
+        """
+        payload = {
+            "filter_name": filter_name,
+            "filter": filter_text,
+            "description": description,
+            "realm": realm,
+        }
+        resp = await self._request("POST", "/item-filter", json=payload)
+        return resp.json()
+
+    async def delete_filter(self, filter_id: str) -> None:
+        """Delete a filter from the account."""
+        await self._request("DELETE", f"/item-filter/{filter_id}")

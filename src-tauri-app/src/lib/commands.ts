@@ -3,6 +3,7 @@
  */
 import { invoke } from "@tauri-apps/api/core";
 import type {
+  AccountFilter,
   Build,
   BuildGuide,
   BuildPreferences,
@@ -642,4 +643,26 @@ export async function refineBuildRemote(
     history,
     message,
   });
+}
+
+// --- Account Filter Management ---
+
+export async function uploadFilterToAccount(
+  filterName: string,
+  filterText: string,
+  description?: string,
+): Promise<{ success: boolean }> {
+  return await invoke<{ success: boolean }>("upload_filter_to_account", {
+    filterName,
+    filterText,
+    description: description ?? "",
+  });
+}
+
+export async function listAccountFilters(): Promise<{ filters: AccountFilter[] }> {
+  return await invoke<{ filters: AccountFilter[] }>("list_account_filters");
+}
+
+export async function deleteAccountFilter(filterId: string): Promise<{ success: boolean }> {
+  return await invoke<{ success: boolean }>("delete_account_filter", { filterId });
 }

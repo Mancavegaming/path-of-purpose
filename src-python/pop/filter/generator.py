@@ -24,11 +24,11 @@ from pop.filter.models import (
 
 _CURRENCY_T1 = (
     '"Mirror of Kalandra" "Divine Orb" "Exalted Orb" '
-    '"Awakener\'s Orb" "Maven\'s Orb" "Fracturing Orb"'
+    '"Awakener\'s Orb" "Orb of Annulment"'
 )
 _CURRENCY_T2 = (
     '"Chaos Orb" "Vaal Orb" "Orb of Regret" "Regal Orb" '
-    '"Gemcutter\'s Prism" "Orb of Annulment" "Blessed Orb" '
+    '"Gemcutter\'s Prism" "Blessed Orb" '
     '"Orb of Scouring" "Orb of Fusing" "Orb of Unmaking" '
     '"Veiled Chaos Orb" "Stacked Deck"'
 )

@@ -1680,6 +1680,81 @@ def cmd_fetch_leagues(args: argparse.Namespace) -> None:
         print(json.dumps({"leagues": ["Standard", "Hardcore"]}))
 
 
+def cmd_upload_filter(args: argparse.Namespace) -> None:
+    """Upload a loot filter to the player's PoE account."""
+    import sys
+    from pop.poe_api import PoeClient
+
+    raw = _safe_stdin_read()
+    if not raw:
+        print("No input. Send JSON with 'filter_name' and 'filter_text'.", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        print(f"Invalid JSON: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    filter_name = data.get("filter_name", "PathOfPurpose")
+    filter_text = data.get("filter_text", "")
+    description = data.get("description", "")
+
+    if not filter_text:
+        print("Missing 'filter_text' in input.", file=sys.stderr)
+        sys.exit(1)
+
+    async def _run() -> None:
+        async with PoeClient(client_id=args.client_id) as poe:
+            result = await poe.upload_filter(filter_name, filter_text, description)
+            print(json.dumps({"success": True, **result}))
+
+    asyncio.run(_run())
+
+
+def cmd_list_account_filters(args: argparse.Namespace) -> None:
+    """List all item filters on the player's PoE account."""
+    from pop.poe_api import PoeClient
+
+    async def _run() -> None:
+        async with PoeClient(client_id=args.client_id) as poe:
+            filters = await poe.list_filters()
+            print(json.dumps({
+                "filters": [f.model_dump(mode="json") for f in filters],
+            }))
+
+    asyncio.run(_run())
+
+
+def cmd_delete_account_filter(args: argparse.Namespace) -> None:
+    """Delete an item filter from the player's PoE account."""
+    import sys
+    from pop.poe_api import PoeClient
+
+    raw = _safe_stdin_read()
+    if not raw:
+        print("No input. Send JSON with 'filter_id'.", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        print(f"Invalid JSON: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    filter_id = data.get("filter_id", "")
+    if not filter_id:
+        print("Missing 'filter_id' in input.", file=sys.stderr)
+        sys.exit(1)
+
+    async def _run() -> None:
+        async with PoeClient(client_id=args.client_id) as poe:
+            await poe.delete_filter(filter_id)
+            print(json.dumps({"success": True}))
+
+    asyncio.run(_run())
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog="pop",
@@ -1854,6 +1929,20 @@ def main() -> None:
 
     p_leagues = subparsers.add_parser("fetch_leagues", help="Fetch current trade leagues from PoE API")
     p_leagues.set_defaults(func=cmd_fetch_leagues)
+
+    # --- upload_filter ---
+    p_upload_f = subparsers.add_parser("upload_filter", help="Upload a loot filter to PoE account")
+    p_upload_f.add_argument("--stdin", action="store_true", default=True)
+    p_upload_f.set_defaults(func=cmd_upload_filter)
+
+    # --- list_account_filters ---
+    p_list_f = subparsers.add_parser("list_account_filters", help="List item filters on PoE account")
+    p_list_f.set_defaults(func=cmd_list_account_filters)
+
+    # --- delete_account_filter ---
+    p_del_f = subparsers.add_parser("delete_account_filter", help="Delete an item filter from PoE account")
+    p_del_f.add_argument("--stdin", action="store_true", default=True)
+    p_del_f.set_defaults(func=cmd_delete_account_filter)
 
     args = parser.parse_args()
     args.func(args)

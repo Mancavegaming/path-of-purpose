@@ -34,7 +34,7 @@ from pop.oauth.token_store import StoredTokens, save_tokens
 
 POE_AUTH_URL = "https://www.pathofexile.com/oauth/authorize"
 POE_TOKEN_URL = "https://www.pathofexile.com/oauth/token"
-DEFAULT_SCOPES = "account:profile account:characters account:stashes account:league_accounts"
+DEFAULT_SCOPES = "account:profile account:characters account:stashes account:league_accounts account:item_filter"
 CALLBACK_PORT = 8457
 REDIRECT_URI = f"http://localhost:{CALLBACK_PORT}/callback"
 

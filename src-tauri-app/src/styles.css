@@ -3136,6 +3136,41 @@ button:disabled {
 .filter-build-section h3 label { cursor: pointer; display: flex; align-items: center; gap: 6px; }
 .filter-build-section h3 input { accent-color: var(--accent); }
 
+/* Sound preview button */
+.filter-sound-select-wrap { display: inline-flex; align-items: center; gap: 4px; }
+.filter-sound-preview-btn { background: none; border: 1px solid var(--border); border-radius: 4px; color: var(--text-secondary); cursor: pointer; font-size: 0.7rem; padding: 2px 6px; line-height: 1; transition: color 0.15s, border-color 0.15s; }
+.filter-sound-preview-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+/* Upload to account button */
+.filter-upload-btn { padding: 10px 20px; background: #6a3aaa; color: #fff; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; }
+.filter-upload-btn:hover { background: #7b4abf; }
+
+/* Upload modal */
+.filter-upload-modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-top: 12px; }
+.filter-upload-modal h3 { margin: 0 0 8px; font-size: 1rem; }
+.filter-upload-hint { font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 14px; }
+.filter-upload-field { margin-bottom: 10px; }
+.filter-upload-field label { display: block; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 4px; }
+.filter-upload-field input { width: 100%; max-width: 360px; padding: 6px 10px; background: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; }
+.filter-upload-actions { display: flex; gap: 8px; margin-top: 14px; }
+.filter-upload-confirm-btn { padding: 8px 20px; background: #6a3aaa; color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+.filter-upload-confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.filter-upload-cancel-btn { padding: 8px 16px; background: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
+
+/* Manage account filters */
+.filter-manage-toggle { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--text-secondary); padding: 6px 14px; font-size: 0.85rem; cursor: pointer; transition: color 0.15s, border-color 0.15s; }
+.filter-manage-toggle:hover { color: var(--accent); border-color: var(--accent); }
+.filter-manage-panel { margin-top: 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.filter-manage-loading, .filter-manage-empty { font-size: 0.85rem; color: var(--text-secondary); padding: 10px 0; }
+.filter-manage-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.filter-manage-table th { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); color: var(--text-secondary); font-weight: 500; }
+.filter-manage-table td { padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.filter-manage-delete-btn { background: #a33; color: #fff; border: none; border-radius: 4px; padding: 3px 10px; font-size: 0.8rem; cursor: pointer; }
+.filter-manage-delete-btn:hover { background: #c44; }
+.filter-manage-delete-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.filter-manage-refresh-btn { margin-top: 10px; background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--text-secondary); padding: 4px 12px; font-size: 0.82rem; cursor: pointer; }
+.filter-manage-refresh-btn:hover { color: var(--accent); border-color: var(--accent); }
+
 .sidebar-version {
   padding: 4px 12px 8px;
   text-align: right;

@@ -1,6 +1,12 @@
-import { createSignal, Show, type Accessor } from "solid-js";
-import type { Build, FilterStrictness } from "../lib/types";
-import { generateFilter, saveFilterFile } from "../lib/commands";
+import { createSignal, For, Show, type Accessor } from "solid-js";
+import type { AccountFilter, Build, FilterStrictness } from "../lib/types";
+import {
+  generateFilter,
+  saveFilterFile,
+  uploadFilterToAccount,
+  listAccountFilters,
+  deleteAccountFilter,
+} from "../lib/commands";
 
 interface FilterPageProps {
   loadedBuild?: Accessor<Build | null>;
@@ -8,6 +14,30 @@ interface FilterPageProps {
 
 const BEAMS = ["", "Red", "Green", "Blue", "Yellow", "White", "Orange", "Cyan", "Purple", "Pink", "Brown", "Grey"];
 const SOUNDS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+
+/** Play a PoE alert sound preview. Sounds are short sine-wave tones at different pitches. */
+function playAlertSound(soundId: number) {
+  if (soundId === 0) return;
+  try {
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    // Each sound ID gets a distinct frequency
+    const baseFreq = 220;
+    const freq = baseFreq + (soundId - 1) * 80;
+    osc.type = soundId <= 8 ? "sine" : "square";
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.4);
+    osc.onended = () => ctx.close();
+  } catch {
+    // AudioContext not available
+  }
+}
 
 export default function FilterPage(props: FilterPageProps) {
   // Strictness
@@ -65,6 +95,20 @@ export default function FilterPage(props: FilterPageProps) {
   const [filterText, setFilterText] = createSignal("");
   const [error, setError] = createSignal("");
   const [savedPath, setSavedPath] = createSignal("");
+
+  // Upload to account
+  const [showUploadModal, setShowUploadModal] = createSignal(false);
+  const [uploadName, setUploadName] = createSignal("PathOfPurpose");
+  const [uploadDesc, setUploadDesc] = createSignal("");
+  const [uploading, setUploading] = createSignal(false);
+  const [uploadMsg, setUploadMsg] = createSignal("");
+
+  // Manage account filters
+  const [showManage, setShowManage] = createSignal(false);
+  const [accountFilters, setAccountFilters] = createSignal<AccountFilter[]>([]);
+  const [loadingFilters, setLoadingFilters] = createSignal(false);
+  const [manageError, setManageError] = createSignal("");
+  const [deletingId, setDeletingId] = createSignal("");
 
   const build = () => props.loadedBuild?.() ?? null;
 
@@ -147,10 +191,65 @@ export default function FilterPage(props: FilterPageProps) {
     await navigator.clipboard.writeText(filterText()).catch(() => {});
   }
 
+  async function handleUpload() {
+    if (!filterText() || !uploadName().trim()) return;
+    setUploading(true);
+    setUploadMsg("");
+    try {
+      await uploadFilterToAccount(uploadName().trim(), filterText(), uploadDesc());
+      setUploadMsg(`Filter "${uploadName()}" uploaded to your PoE account.`);
+      setShowUploadModal(false);
+    } catch (e) {
+      setUploadMsg(`Upload failed: ${String(e)}`);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function loadAccountFilters() {
+    setLoadingFilters(true);
+    setManageError("");
+    try {
+      const res = await listAccountFilters();
+      setAccountFilters(res.filters || []);
+    } catch (e) {
+      setManageError(String(e));
+    } finally {
+      setLoadingFilters(false);
+    }
+  }
+
+  async function handleDeleteFilter(id: string) {
+    setDeletingId(id);
+    try {
+      await deleteAccountFilter(id);
+      setAccountFilters((prev) => prev.filter((f) => f.id !== id));
+    } catch (e) {
+      setManageError(`Delete failed: ${String(e)}`);
+    } finally {
+      setDeletingId("");
+    }
+  }
+
+  function toggleManage() {
+    const next = !showManage();
+    setShowManage(next);
+    if (next) loadAccountFilters();
+  }
+
   const SoundSelect = (p: { value: number; onChange: (v: number) => void }) => (
-    <select class="filter-select" value={p.value} onChange={(e) => p.onChange(Number(e.currentTarget.value))}>
-      {SOUNDS.map((s) => <option value={s}>{s === 0 ? "Off" : `Sound ${s}`}</option>)}
-    </select>
+    <span class="filter-sound-select-wrap">
+      <select class="filter-select" value={p.value} onChange={(e) => p.onChange(Number(e.currentTarget.value))}>
+        {SOUNDS.map((s) => <option value={s}>{s === 0 ? "Off" : `Sound ${s}`}</option>)}
+      </select>
+      <Show when={p.value > 0}>
+        <button
+          class="filter-sound-preview-btn"
+          title={`Preview Sound ${p.value}`}
+          onClick={() => playAlertSound(p.value)}
+        >&#9654;</button>
+      </Show>
+    </span>
   );
 
   const BeamSelect = (p: { value: string; onChange: (v: string) => void }) => (
@@ -329,6 +428,7 @@ export default function FilterPage(props: FilterPageProps) {
           </button>
           <Show when={filterText()}>
             <button class="filter-install-main-btn" onClick={handleInstall}>Install to PoE</button>
+            <button class="filter-upload-btn" onClick={() => { setShowUploadModal(true); setUploadMsg(""); }}>Upload to Account</button>
             <button class="filter-download-btn" onClick={handleDownload}>Download .filter</button>
             <button class="filter-copy-main-btn" onClick={handleCopy}>Copy</button>
           </Show>
@@ -336,6 +436,90 @@ export default function FilterPage(props: FilterPageProps) {
         <Show when={error()}><div class="filter-error">{error()}</div></Show>
         <Show when={savedPath()}>
           <div class="filter-success">Installed to: {savedPath()}<br />In-game: Options &gt; UI &gt; Item Filter &gt; select "PathOfPurpose"</div>
+        </Show>
+        <Show when={uploadMsg()}>
+          <div class={uploadMsg().startsWith("Upload failed") ? "filter-error" : "filter-success"}>{uploadMsg()}</div>
+        </Show>
+      </div>
+
+      {/* Upload Modal */}
+      <Show when={showUploadModal()}>
+        <div class="filter-upload-modal">
+          <h3>Upload Filter to PoE Account</h3>
+          <p class="filter-upload-hint">This uploads the filter directly to your PoE account via the API. Available in-game on any machine (including GeForce Now). If a filter with the same name exists, it will be overwritten.</p>
+          <div class="filter-upload-field">
+            <label>Filter Name</label>
+            <input type="text" value={uploadName()} onInput={(e) => setUploadName(e.currentTarget.value)} placeholder="PathOfPurpose" />
+          </div>
+          <div class="filter-upload-field">
+            <label>Description (optional)</label>
+            <input type="text" value={uploadDesc()} onInput={(e) => setUploadDesc(e.currentTarget.value)} placeholder="Generated by Path of Purpose" />
+          </div>
+          <div class="filter-upload-actions">
+            <button class="filter-upload-confirm-btn" onClick={handleUpload} disabled={uploading() || !uploadName().trim()}>
+              {uploading() ? "Uploading..." : "Upload"}
+            </button>
+            <button class="filter-upload-cancel-btn" onClick={() => setShowUploadModal(false)}>Cancel</button>
+          </div>
+        </div>
+      </Show>
+
+      {/* Manage Account Filters */}
+      <div class="filter-section">
+        <button class="filter-manage-toggle" onClick={toggleManage}>
+          {showManage() ? "Hide" : "Manage"} Account Filters
+        </button>
+        <Show when={showManage()}>
+          <div class="filter-manage-panel">
+            <Show when={loadingFilters()}>
+              <div class="filter-manage-loading">Loading filters...</div>
+            </Show>
+            <Show when={manageError()}>
+              <div class="filter-error">{manageError()}</div>
+            </Show>
+            <Show when={!loadingFilters() && accountFilters().length === 0 && !manageError()}>
+              <div class="filter-manage-empty">No filters found on your account.</div>
+            </Show>
+            <Show when={accountFilters().length > 0}>
+              <table class="filter-manage-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Realm</th>
+                    <th>Public</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <For each={accountFilters()}>
+                    {(f) => (
+                      <tr>
+                        <td>{f.filter_name}</td>
+                        <td>{f.realm}</td>
+                        <td>{f.public ? "Yes" : "No"}</td>
+                        <td>
+                          <button
+                            class="filter-manage-delete-btn"
+                            disabled={deletingId() === f.id}
+                            onClick={() => {
+                              if (confirm(`Delete filter "${f.filter_name}"?`)) {
+                                handleDeleteFilter(f.id);
+                              }
+                            }}
+                          >
+                            {deletingId() === f.id ? "..." : "Delete"}
+                          </button>
+                        </td>
+                      </tr>
+                    )}
+                  </For>
+                </tbody>
+              </table>
+            </Show>
+            <button class="filter-manage-refresh-btn" onClick={loadAccountFilters} disabled={loadingFilters()}>
+              Refresh
+            </button>
+          </div>
         </Show>
       </div>
 
