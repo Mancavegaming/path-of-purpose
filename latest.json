@@ -1,11 +1,11 @@
 {
-  "version": "0.6.0",
-  "notes": "Full loot filter page with standalone + build-tailored modes",
+  "version": "0.6.1",
+  "notes": "Account filter upload/manage + sound preview",
   "pub_date": "2026-03-17T00:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXZQbm80UTJzNjdVbFFsZjFsUmo2RzByV2xocVRGVmZIN2hBRXJJd0FsNXhKL3RXdDFOVkFZWnFkS2RsZEZ0K3QwS0lGbzRuRWhPeHlwL2lubkFDN0FRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczNzU0MDA4CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuNi4wX3g2NC1zZXR1cC5uc2lzLnppcApKcWlBZVU4bHhuR2wyN0NiTzNkOWIya2I1LzhwM0h2RVJ1U3JybEJReVU2TkJ1d08yN09mZjdvM2dXanp4c01wZzNNRERkQUJ0ODhuS2t0VWhWL2lDdz09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.6.0/Path.of.Purpose_0.6.0_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXU3OUpaa2ZmRVp5d0lmcjV1RE94YWtlRWNVdi9sRU1KdFVEQkE0WmplWC8vbXNGZXVvTnpRSVRYRWp1YkdPRk1hOVhIWXVzR0k3bmQ0NXEwTlJ1M3c0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczNzU5MDIxCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuNi4xX3g2NC1zZXR1cC5uc2lzLnppcAo2ZmtsMU1JamFkMlNFZWdYSG1GUC8yQUFlZnlCSjQwU3JTVDNPOWJ6VFkrQnBzajBDTkpPODR0QWk4Y0tmWmdCbXdabWYvcGJoT2Q4VDZvdnp0c3NCdz09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.6.1/Path.of.Purpose_0.6.1_x64-setup.nsis.zip"
     }
   }
 }
