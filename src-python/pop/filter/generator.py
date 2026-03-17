@@ -1,8 +1,8 @@
 """
-PoE loot filter generator — build-aware, customizable.
+PoE loot filter generator — standalone + build-aware.
 
-Generates a complete .filter file from a Build and FilterConfig.
-Sections are ordered by priority (first match wins in PoE filters).
+Generates a complete .filter file with granular control over every category.
+Build-tailored mode adds personalized rules when a Build is provided.
 """
 
 from __future__ import annotations
@@ -11,248 +11,206 @@ import datetime
 
 from pop.build_parser.models import Build
 from pop.filter.build_analysis import BuildFilterData, analyze_build_for_filter
-from pop.filter.models import FilterConfig, FilterTheme, Strictness, SoundConfig
+from pop.filter.models import (
+    CurrencyTierConfig,
+    FilterConfig,
+    Strictness,
+)
 
 
-def generate_filter(build: Build, config: FilterConfig | None = None) -> str:
-    """Generate a complete .filter file string from a Build.
+# ===================================================================
+# Currency base type lists
+# ===================================================================
+
+_CURRENCY_T1 = (
+    '"Mirror of Kalandra" "Divine Orb" "Exalted Orb" '
+    '"Awakener\'s Orb" "Maven\'s Orb" "Fracturing Orb"'
+)
+_CURRENCY_T2 = (
+    '"Chaos Orb" "Vaal Orb" "Orb of Regret" "Regal Orb" '
+    '"Gemcutter\'s Prism" "Orb of Annulment" "Blessed Orb" '
+    '"Orb of Scouring" "Orb of Fusing" "Orb of Unmaking" '
+    '"Veiled Chaos Orb" "Stacked Deck"'
+)
+_CURRENCY_T3 = (
+    '"Orb of Alchemy" "Cartographer\'s Chisel" "Jeweller\'s Orb" '
+    '"Orb of Chance" "Chromatic Orb" "Glassblower\'s Bauble" '
+    '"Orb of Binding"'
+)
+_CURRENCY_T4 = (
+    '"Orb of Alteration" "Orb of Augmentation" "Orb of Transmutation"'
+)
+_CURRENCY_T5 = (
+    '"Scroll of Wisdom" "Portal Scroll" '
+    '"Armourer\'s Scrap" "Blacksmith\'s Whetstone"'
+)
+
+
+def generate_filter(
+    build: Build | None = None,
+    config: FilterConfig | None = None,
+) -> str:
+    """Generate a complete .filter file.
 
     Args:
-        build: Parsed PoB Build object.
-        config: Optional filter configuration. Uses defaults if None.
+        build: Optional Build for tailored mode.
+        config: Filter configuration. Uses defaults if None.
 
     Returns:
         Full text content of a PoE .filter file.
     """
     cfg = config or FilterConfig()
-    theme = cfg.theme
-    sounds = cfg.sounds
-    data = analyze_build_for_filter(build)
+    data = None
+    if build and cfg.build_tailored.enabled:
+        data = analyze_build_for_filter(build)
 
     lines: list[str] = []
 
-    # Header
-    _section_header(lines, cfg, data)
-
-    # Priority order (first match wins):
-    _section_currency_high(lines, theme, sounds)
-    _section_currency_mid(lines, theme, sounds, cfg.strictness)
-    _section_currency_low(lines, theme, cfg.strictness)
-    _section_maps(lines, theme, sounds, cfg.strictness)
-    _section_build_gems(lines, theme, sounds, data, cfg)
-    _section_build_weapon_bases(lines, theme, sounds, data, cfg.strictness)
-    _section_build_armour_bases(lines, theme, data, cfg.strictness)
-    if cfg.show_resist_fillers and data.resist_gaps:
-        _section_resist_fillers(lines, theme, data)
-    if cfg.show_cluster_jewels:
-        _section_cluster_jewels(lines, theme, data, cfg.strictness)
-    _section_unique_items(lines, theme, sounds, cfg.strictness)
-    _section_six_links(lines, theme)
-    _section_flasks(lines, theme, cfg.strictness)
-    _section_rares(lines, theme, cfg.strictness)
-    _section_hide(lines, cfg.strictness)
+    _section_header(lines, cfg, data, build)
+    _section_currency(lines, cfg)
+    _section_special_currency(lines, cfg)
+    if data and cfg.build_tailored.highlight_build_gems:
+        _section_build_gems(lines, cfg, data)
+    if data and cfg.build_tailored.highlight_weapon_bases:
+        _section_build_weapons(lines, cfg, data)
+    if data and cfg.build_tailored.highlight_resist_fillers and data.resist_gaps:
+        _section_resist_fillers(lines, data)
+    if data and cfg.build_tailored.highlight_cluster_jewels:
+        _section_cluster_jewels(lines, data)
+    _section_six_links(lines, cfg)
+    _section_maps(lines, cfg)
+    _section_unique_items(lines, cfg)
+    _section_gems(lines, cfg)
+    _section_equipment(lines, cfg)
+    _section_flasks(lines, cfg)
+    _section_hide(lines, cfg)
 
     return "\n".join(lines)
 
 
-# ---------------------------------------------------------------------------
-# Section builders
-# ---------------------------------------------------------------------------
+# ===================================================================
+# Sections
+# ===================================================================
 
 
-def _section_header(lines: list[str], cfg: FilterConfig, data: BuildFilterData) -> None:
+def _section_header(
+    lines: list[str], cfg: FilterConfig,
+    data: BuildFilterData | None, build: Build | None,
+) -> None:
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-    lines.append(f"# =====================================================")
-    lines.append(f"# {cfg.filter_name} — Build-Aware Loot Filter")
+    lines.append("# =====================================================")
+    lines.append(f"# {cfg.filter_name} Loot Filter")
     lines.append(f"# Generated by Path of Purpose on {now}")
     lines.append(f"# Strictness: {cfg.strictness.value}")
-    if data.ascendancy:
-        lines.append(f"# Build: Level {data.level} {data.ascendancy}")
-    if data.active_gem_names:
-        lines.append(f"# Main skills: {', '.join(data.active_gem_names[:5])}")
-    if data.weapon_classes:
-        lines.append(f"# Weapon: {', '.join(data.weapon_classes)}")
-    if data.damage_types:
-        lines.append(f"# Damage: {', '.join(data.damage_types)}")
-    if data.resist_gaps:
-        gaps = [f"{k} {v:+.0f}%" for k, v in data.resist_gaps.items()]
-        lines.append(f"# Resist gaps: {', '.join(gaps)}")
-    lines.append(f"# =====================================================")
+    if data and build:
+        lines.append(f"# Build: Level {build.level} {build.ascendancy_name or build.class_name}")
+        if data.active_gem_names:
+            lines.append(f"# Skills: {', '.join(data.active_gem_names[:5])}")
+        if data.weapon_classes:
+            lines.append(f"# Weapon: {', '.join(data.weapon_classes)}")
+        if data.damage_types:
+            lines.append(f"# Damage: {', '.join(data.damage_types)}")
+        if data.resist_gaps:
+            gaps = [f"{k} {v:+.0f}%" for k, v in data.resist_gaps.items()]
+            lines.append(f"# Resist gaps: {', '.join(gaps)}")
+    lines.append("# =====================================================")
     lines.append("")
 
 
-def _section_currency_high(
-    lines: list[str], theme: FilterTheme, sounds: SoundConfig,
-) -> None:
-    lines.append("# === HIGH-VALUE CURRENCY ===")
-    _block(lines, "Show", [
-        'Class == "Currency"',
-        'BaseType == "Mirror of Kalandra" "Divine Orb" "Exalted Orb" "Awakener\'s Orb" "Maven\'s Orb" "Fracturing Orb" "Annulment Orb"',
-    ], theme.currency_high_text, theme.currency_high_bg, theme.currency_high_border,
-        theme.font_size_high, sounds.currency_high, beam="Red", icon="0 Red Star")
+def _section_currency(lines: list[str], cfg: FilterConfig) -> None:
+    c = cfg.currency
+
+    lines.append("# ========== CURRENCY ==========")
     lines.append("")
 
+    # Tier 1
+    _currency_tier_block(lines, "Tier 1 — Mirror, Divine, Exalt", c.tier1, _CURRENCY_T1,
+                         text="255 0 0", bg="255 255 255 255", border="255 0 0")
+    # Tier 2
+    _currency_tier_block(lines, "Tier 2 — Chaos, Vaal, Regal, GCP", c.tier2, _CURRENCY_T2,
+                         text="255 170 0", bg="0 0 0 220", border="255 170 0")
+    # Tier 3
+    _currency_tier_block(lines, "Tier 3 — Alchemy, Chisel, Jeweller", c.tier3, _CURRENCY_T3,
+                         text="200 200 100", bg="0 0 0 200", border="200 200 100")
+    # Tier 4
+    _currency_tier_block(lines, "Tier 4 — Alteration, Augmentation", c.tier4, _CURRENCY_T4,
+                         text="170 158 130")
+    # Tier 5
+    _currency_tier_block(lines, "Tier 5 — Scrolls, Scraps", c.tier5, _CURRENCY_T5,
+                         text="120 120 120")
 
-def _section_currency_mid(
-    lines: list[str], theme: FilterTheme, sounds: SoundConfig,
-    strictness: Strictness,
-) -> None:
-    lines.append("# === MID-VALUE CURRENCY ===")
-    _block(lines, "Show", [
-        'Class == "Currency"',
-        'BaseType == "Chaos Orb" "Vaal Orb" "Orb of Regret" "Regal Orb" "Gemcutter\'s Prism" '
-        '"Blessed Orb" "Orb of Scouring" "Orb of Fusing" "Cartographer\'s Chisel" '
-        '"Orb of Alchemy" "Orb of Unmaking" "Veiled Chaos Orb"',
-    ], theme.currency_mid_text, theme.currency_mid_bg, theme.currency_mid_border,
-        theme.font_size_medium, sounds.currency_mid, beam="Yellow", icon="1 Yellow Circle")
+
+def _section_special_currency(lines: list[str], cfg: FilterConfig) -> None:
+    c = cfg.currency
+    lines.append("# ========== SPECIAL CURRENCY ==========")
     lines.append("")
 
-
-def _section_currency_low(
-    lines: list[str], theme: FilterTheme, strictness: Strictness,
-) -> None:
-    lines.append("# === LOW-VALUE CURRENCY ===")
-    if strictness in (Strictness.ENDGAME, Strictness.ULTRA_STRICT):
-        # Hide scrolls and low orbs at endgame
-        _block(lines, "Hide", [
-            'Class == "Currency"',
-            'BaseType == "Scroll of Wisdom" "Portal Scroll" "Orb of Transmutation" '
-            '"Orb of Augmentation" "Armourer\'s Scrap" "Blacksmith\'s Whetstone"',
-        ], theme.currency_low_text, font_size=theme.font_size_tiny)
-    else:
+    if c.show_essences:
+        _block(lines, "Show", ['Class == "Currency"', 'BaseType "Essence"'],
+               text="200 100 255", font_size=34)
+    if c.show_fossils:
+        _block(lines, "Show", ['Class == "Currency"', 'BaseType "Fossil"'],
+               text="200 200 100", font_size=34)
+    if c.show_catalysts:
+        _block(lines, "Show", ['Class == "Currency"', 'BaseType "Catalyst"'],
+               text="150 200 150", font_size=32)
+    if c.show_oils:
+        _block(lines, "Show", ['Class == "Currency"', 'BaseType "Oil"'],
+               text="100 200 100", font_size=32)
+    if c.show_delirium_orbs:
+        _block(lines, "Show", ['Class == "Currency"', 'BaseType "Delirium Orb"'],
+               text="180 180 220", font_size=34)
+    if c.show_fragments:
         _block(lines, "Show", [
-            'Class == "Currency"',
-        ], theme.currency_low_text, font_size=theme.font_size_low)
-    lines.append("")
-
-
-def _section_maps(
-    lines: list[str], theme: FilterTheme, sounds: SoundConfig,
-    strictness: Strictness,
-) -> None:
-    lines.append("# === MAPS ===")
-    # High tier maps
-    _block(lines, "Show", [
-        'Class == "Maps"',
-        'MapTier >= 14',
-    ], theme.map_text, border=theme.map_border,
-        font_size=theme.font_size_high, sound=sounds.map_drop,
-        beam="White", icon="0 White Square")
-
-    # Mid tier
-    _block(lines, "Show", [
-        'Class == "Maps"',
-        'MapTier >= 11',
-    ], theme.map_text, border=theme.map_border, font_size=theme.font_size_medium)
-
-    if strictness == Strictness.ULTRA_STRICT:
-        _block(lines, "Hide", [
-            'Class == "Maps"',
-            'MapTier < 11',
-        ], theme.map_text, font_size=theme.font_size_tiny)
-    else:
-        _block(lines, "Show", [
-            'Class == "Maps"',
-        ], theme.map_text, font_size=theme.font_size_low)
+            'Class == "Map Fragments" "Misc Map Items" "Labyrinth Items"',
+        ], text="200 200 200", font_size=32)
     lines.append("")
 
 
 def _section_build_gems(
-    lines: list[str], theme: FilterTheme, sounds: SoundConfig,
-    data: BuildFilterData, cfg: FilterConfig,
+    lines: list[str], cfg: FilterConfig, data: BuildFilterData,
 ) -> None:
     all_gems = list(set(data.active_gem_names + data.support_gem_names))
     if not all_gems:
         return
-
-    lines.append("# === BUILD GEMS ===")
+    lines.append("# ========== BUILD GEMS ==========")
+    lines.append("")
     gem_list = " ".join(f'"{g}"' for g in all_gems)
     _block(lines, "Show", [
         'Class == "Gems"',
         f'BaseType == {gem_list}',
-    ], theme.gem_text, border=theme.gem_border,
-        font_size=theme.font_size_medium,
-        sound=sounds.gem_drop if sounds.gem_drop else 0,
+    ], text="27 162 155", border="27 162 155", font_size=38,
+        sound=cfg.sounds.build_gear, volume=cfg.sounds.build_gear_volume,
         beam="Cyan Temp")
-
-    # Other gems
-    if cfg.strictness in (Strictness.ENDGAME, Strictness.ULTRA_STRICT):
-        _block(lines, "Show", [
-            'Class == "Gems"',
-            'GemLevel >= 19',
-        ], theme.gem_text, font_size=theme.font_size_low)
-        if not cfg.show_leveling_gems:
-            _block(lines, "Hide", ['Class == "Gems"'])
-    else:
-        _block(lines, "Show", ['Class == "Gems"'], theme.gem_text,
-               font_size=theme.font_size_low)
     lines.append("")
 
 
-def _section_build_weapon_bases(
-    lines: list[str], theme: FilterTheme, sounds: SoundConfig,
-    data: BuildFilterData, strictness: Strictness,
+def _section_build_weapons(
+    lines: list[str], cfg: FilterConfig, data: BuildFilterData,
 ) -> None:
     if not data.weapon_classes:
         return
-
-    lines.append("# === BUILD WEAPON BASES ===")
+    lines.append("# ========== BUILD WEAPON BASES ==========")
+    lines.append("")
     class_list = " ".join(f'"{c}"' for c in data.weapon_classes)
-
-    # High ilvl weapon bases
     _block(lines, "Show", [
         f'Class == {class_list}',
         'Rarity <= Rare',
         'ItemLevel >= 82',
-    ], theme.build_gear_text, theme.build_gear_bg, theme.build_gear_border,
-        theme.font_size_medium, sounds.build_gear, beam="Green Temp")
-
-    if strictness != Strictness.ULTRA_STRICT:
-        _block(lines, "Show", [
-            f'Class == {class_list}',
-            'Rarity <= Rare',
-            'ItemLevel >= 60',
-        ], theme.build_gear_text, border=theme.build_gear_border,
-            font_size=theme.font_size_low)
-    lines.append("")
-
-
-def _section_build_armour_bases(
-    lines: list[str], theme: FilterTheme, data: BuildFilterData,
-    strictness: Strictness,
-) -> None:
-    if not data.armour_type or strictness == Strictness.LEVELING:
-        return
-
-    lines.append("# === BUILD ARMOUR BASES ===")
-    # Map armour type to PoE filter classes
-    armour_classes = {
-        "es": ["Body Armours", "Helmets", "Boots", "Gloves", "Shields"],
-        "evasion": ["Body Armours", "Helmets", "Boots", "Gloves", "Shields"],
-        "armour": ["Body Armours", "Helmets", "Boots", "Gloves", "Shields"],
-        "hybrid": ["Body Armours", "Helmets", "Boots", "Gloves", "Shields"],
-    }
-    classes = armour_classes.get(data.armour_type, [])
-    if not classes:
-        return
-
-    class_list = " ".join(f'"{c}"' for c in classes)
+    ], text="0 255 0", bg="0 0 0 220", border="0 255 0", font_size=38,
+        sound=cfg.sounds.build_gear, volume=cfg.sounds.build_gear_volume,
+        beam="Green Temp")
     _block(lines, "Show", [
         f'Class == {class_list}',
         'Rarity <= Rare',
-        'ItemLevel >= 84',
-        'LinkedSockets >= 5',
-    ], theme.build_gear_text, border=theme.build_gear_border,
-        font_size=theme.font_size_medium, beam="Green Temp")
+        'ItemLevel >= 60',
+    ], text="0 200 0", border="0 200 0", font_size=32)
     lines.append("")
 
 
 def _section_resist_fillers(
-    lines: list[str], theme: FilterTheme, data: BuildFilterData,
+    lines: list[str], data: BuildFilterData,
 ) -> None:
-    lines.append("# === RESIST FILLER GEAR ===")
-    lines.append("# Your build needs these resists:")
-
     resist_mods = []
     if "fire" in data.resist_gaps:
         resist_mods.append('"to Fire Resistance"')
@@ -262,28 +220,26 @@ def _section_resist_fillers(
         resist_mods.append('"to Lightning Resistance"')
     if "chaos" in data.resist_gaps:
         resist_mods.append('"to Chaos Resistance"')
-
     if not resist_mods:
         return
 
+    lines.append("# ========== RESIST FILLERS ==========")
+    gaps = [f"{k} {v:+.0f}%" for k, v in data.resist_gaps.items()]
+    lines.append(f"# Your build needs: {', '.join(gaps)}")
+    lines.append("")
     mod_list = " ".join(resist_mods)
     _block(lines, "Show", [
         'Class == "Rings" "Amulets" "Belts"',
         'Rarity == Rare',
         'Identified True',
         f'HasExplicitMod {mod_list}',
-    ], theme.resist_filler_text, border=theme.resist_filler_border,
-        font_size=theme.font_size_medium)
+    ], text="100 200 255", border="100 200 255", font_size=36)
     lines.append("")
 
 
 def _section_cluster_jewels(
-    lines: list[str], theme: FilterTheme, data: BuildFilterData,
-    strictness: Strictness,
+    lines: list[str], data: BuildFilterData,
 ) -> None:
-    lines.append("# === CLUSTER JEWELS ===")
-
-    # Map damage types to cluster jewel enchant keywords
     cluster_keywords = {
         "fire": ["Fire Damage", "Burning Damage"],
         "cold": ["Cold Damage", "Freeze"],
@@ -291,146 +247,204 @@ def _section_cluster_jewels(
         "chaos": ["Chaos Damage", "Poison"],
         "physical": ["Physical Damage", "Attack Damage"],
     }
-
-    enchant_terms = []
+    terms = []
     for dtype in data.damage_types:
         for kw in cluster_keywords.get(dtype, []):
-            enchant_terms.append(f'"{kw}"')
+            terms.append(f'"{kw}"')
+    if not terms:
+        return
 
-    if enchant_terms:
-        terms = " ".join(enchant_terms)
-        _block(lines, "Show", [
-            'BaseType == "Large Cluster Jewel" "Medium Cluster Jewel" "Small Cluster Jewel"',
-            f'EnchantmentPassiveNode {terms}',
-        ], theme.build_gear_text, border=theme.build_gear_border,
-            font_size=theme.font_size_medium)
-    else:
-        # Show all cluster jewels if no specific type detected
-        _block(lines, "Show", [
-            'BaseType == "Large Cluster Jewel" "Medium Cluster Jewel" "Small Cluster Jewel"',
-        ], theme.build_gear_text, font_size=theme.font_size_low)
+    lines.append("# ========== CLUSTER JEWELS ==========")
     lines.append("")
-
-
-def _section_unique_items(
-    lines: list[str], theme: FilterTheme, sounds: SoundConfig,
-    strictness: Strictness,
-) -> None:
-    lines.append("# === UNIQUE ITEMS ===")
     _block(lines, "Show", [
-        'Rarity == Unique',
-    ], theme.unique_text, border=theme.unique_border,
-        font_size=theme.font_size_medium, sound=sounds.unique_drop,
-        beam="Orange Temp", icon="1 Orange Diamond")
+        'BaseType == "Large Cluster Jewel" "Medium Cluster Jewel" "Small Cluster Jewel"',
+        f'EnchantmentPassiveNode {" ".join(terms)}',
+    ], text="0 200 0", border="0 200 0", font_size=36)
     lines.append("")
 
 
-def _section_six_links(lines: list[str], theme: FilterTheme) -> None:
-    lines.append("# === 6-LINKS ===")
-    _block(lines, "Show", [
-        'LinkedSockets >= 6',
-    ], "255 0 0", "255 255 255 255", "255 0 0",
-        theme.font_size_high, sound=1, beam="Red", icon="0 Red Star")
+def _section_six_links(lines: list[str], cfg: FilterConfig) -> None:
+    eq = cfg.equipment
+    lines.append("# ========== LINKED ITEMS ==========")
+    lines.append("")
+    if eq.show_six_links:
+        _block(lines, "Show", ['LinkedSockets >= 6'],
+               text="255 0 0", bg="255 255 255 255", border="255 0 0",
+               font_size=45, sound=eq.six_link_sound, volume=300,
+               beam=eq.six_link_beam, icon="0 Red Star")
+    if eq.show_five_links:
+        _block(lines, "Show", ['LinkedSockets >= 5'],
+               text="200 200 200", border="200 200 200", font_size=36)
     lines.append("")
 
 
-def _section_flasks(
-    lines: list[str], theme: FilterTheme, strictness: Strictness,
-) -> None:
-    lines.append("# === FLASKS ===")
-    if strictness == Strictness.ULTRA_STRICT:
-        _block(lines, "Show", [
-            'Class == "Utility Flasks"',
-            'Quality >= 15',
-        ], font_size=theme.font_size_low)
-        _block(lines, "Hide", ['Class == "Flasks"'])
-    elif strictness == Strictness.ENDGAME:
-        _block(lines, "Show", [
-            'Class == "Utility Flasks"',
-        ], font_size=theme.font_size_low)
-        _block(lines, "Hide", [
-            'Class == "Life Flasks" "Mana Flasks"',
-            'ItemLevel >= 70',
-        ])
+def _section_maps(lines: list[str], cfg: FilterConfig) -> None:
+    m = cfg.maps
+    lines.append("# ========== MAPS ==========")
+    lines.append("")
+
+    if m.show_unique_maps:
+        _block(lines, "Show", ['Class == "Maps"', 'Rarity == Unique'],
+               text="175 96 37", border="175 96 37", font_size=42,
+               sound=m.sound, volume=200, beam="Orange Temp")
+
+    # High tier
+    _block(lines, "Show", ['Class == "Maps"', 'MapTier >= 14'],
+           text="240 240 240", border="240 240 240", font_size=45,
+           sound=m.sound, volume=200, beam=m.beam, icon="0 White Square")
+    # Mid tier
+    if m.min_tier <= 11:
+        _block(lines, "Show", ['Class == "Maps"', 'MapTier >= 11'],
+               text="240 240 240", border="200 200 200", font_size=38)
+    # Low tier
+    if m.min_tier <= 6:
+        _block(lines, "Show", ['Class == "Maps"', 'MapTier >= 6'],
+               text="200 200 200", font_size=32)
+    if m.min_tier <= 1:
+        _block(lines, "Show", ['Class == "Maps"'],
+               text="180 180 180", font_size=28)
     else:
-        _block(lines, "Show", ['Class == "Flasks"'],
-               font_size=theme.font_size_low)
+        _block(lines, "Hide", ['Class == "Maps"', f'MapTier < {m.min_tier}'])
     lines.append("")
 
 
-def _section_rares(
-    lines: list[str], theme: FilterTheme, strictness: Strictness,
-) -> None:
-    lines.append("# === RARE ITEMS ===")
-    if strictness == Strictness.ULTRA_STRICT:
-        # Only show jewellery rares
-        _block(lines, "Show", [
-            'Class == "Rings" "Amulets" "Belts"',
-            'Rarity == Rare',
-            'ItemLevel >= 75',
-        ], font_size=theme.font_size_low)
-        _block(lines, "Show", [
-            'Rarity == Rare',
-            'ItemLevel >= 75',
-            'LinkedSockets >= 5',
-        ], font_size=theme.font_size_low)
-    elif strictness == Strictness.ENDGAME:
-        _block(lines, "Show", [
-            'Rarity == Rare',
-            'ItemLevel >= 75',
-        ], font_size=theme.font_size_low)
+def _section_unique_items(lines: list[str], cfg: FilterConfig) -> None:
+    lines.append("# ========== UNIQUES ==========")
+    lines.append("")
+    _block(lines, "Show", ['Rarity == Unique'],
+           text="175 96 37", border="175 96 37", font_size=38,
+           sound=cfg.sounds.unique_drop, volume=cfg.sounds.unique_volume,
+           beam="Orange Temp", icon="1 Orange Diamond")
+    lines.append("")
+
+
+def _section_gems(lines: list[str], cfg: FilterConfig) -> None:
+    g = cfg.gems
+    lines.append("# ========== GEMS ==========")
+    lines.append("")
+
+    # High quality / level gems always shown
+    if g.min_level >= 19 or g.min_quality >= 15:
+        _block(lines, "Show", ['Class == "Gems"', f'GemLevel >= {max(g.min_level, 19)}'],
+               text="27 162 155", font_size=36)
+    if g.min_quality > 0:
+        _block(lines, "Show", ['Class == "Gems"', f'Quality >= {g.min_quality}'],
+               text="27 162 155", font_size=34)
+
+    if g.min_quality == 0 and g.min_level <= 1:
+        _block(lines, "Show", ['Class == "Gems"'],
+               text="27 162 155", font_size=30)
     else:
-        _block(lines, "Show", ['Rarity == Rare'],
-               font_size=theme.font_size_low)
+        _block(lines, "Hide", ['Class == "Gems"'])
     lines.append("")
 
 
-def _section_hide(lines: list[str], strictness: Strictness) -> None:
-    lines.append("# === HIDE EVERYTHING ELSE ===")
-    if strictness == Strictness.LEVELING:
-        # Show normals/magics during leveling (smaller text)
+def _section_equipment(lines: list[str], cfg: FilterConfig) -> None:
+    eq = cfg.equipment
+    lines.append("# ========== RARE EQUIPMENT ==========")
+    lines.append("")
+
+    if eq.show_rare_jewellery:
+        _block(lines, "Show", [
+            'Class == "Rings" "Amulets" "Belts" "Jewels"',
+            'Rarity == Rare',
+            f'ItemLevel >= {eq.rare_jewellery_ilvl}',
+        ], font_size=32)
+
+    if eq.show_rare_weapons:
+        _block(lines, "Show", [
+            'Class == "Wands" "Daggers" "Rune Daggers" "Sceptres" "Bows" '
+            '"One Hand Swords" "Two Hand Swords" "One Hand Axes" "Two Hand Axes" '
+            '"One Hand Maces" "Two Hand Maces" "Staves" "Warstaves" "Claws"',
+            'Rarity == Rare',
+            f'ItemLevel >= {eq.rare_weapon_ilvl}',
+        ], font_size=30)
+
+    if eq.show_rgb_items:
+        _block(lines, "Show", ['SocketGroup "RGB"'],
+               text="130 130 130", font_size=26)
+    lines.append("")
+
+
+def _section_flasks(lines: list[str], cfg: FilterConfig) -> None:
+    f = cfg.flasks
+    lines.append("# ========== FLASKS ==========")
+    lines.append("")
+    if f.show_utility:
+        _block(lines, "Show", ['Class == "Utility Flasks"'], font_size=30)
+    if f.show_life_mana:
+        _block(lines, "Show", ['Class == "Life Flasks" "Mana Flasks"'], font_size=26)
+    else:
+        _block(lines, "Hide", ['Class == "Life Flasks" "Mana Flasks"'])
+    lines.append("")
+
+
+def _section_hide(lines: list[str], cfg: FilterConfig) -> None:
+    lines.append("# ========== HIDE ==========")
+    lines.append("")
+    if cfg.strictness == Strictness.LEVELING:
         _block(lines, "Show", ['Rarity <= Magic'], font_size=20)
-    elif strictness == Strictness.MAPPING:
-        _block(lines, "Hide", [
-            'Rarity == Normal',
-            'ItemLevel >= 65',
-        ])
+    elif cfg.strictness == Strictness.MAPPING:
+        _block(lines, "Hide", ['Rarity == Normal', 'ItemLevel >= 65'])
         _block(lines, "Show", [], font_size=20)
     else:
         _block(lines, "Hide", ['Rarity <= Magic'])
 
 
-# ---------------------------------------------------------------------------
-# Block builder
-# ---------------------------------------------------------------------------
+# ===================================================================
+# Helpers
+# ===================================================================
+
+
+def _currency_tier_block(
+    lines: list[str],
+    label: str,
+    tier: CurrencyTierConfig,
+    base_types: str,
+    text: str = "",
+    bg: str = "",
+    border: str = "",
+) -> None:
+    lines.append(f"# {label}")
+    block_type = "Show" if tier.show else "Hide"
+    _block(lines, block_type, [
+        'Class == "Currency"',
+        f'BaseType == {base_types}',
+    ], text=text, bg=bg, border=border, font_size=tier.font_size,
+        sound=tier.sound if tier.show else 0,
+        volume=tier.volume,
+        beam=tier.beam if tier.show else "",
+        icon=tier.icon if tier.show else "")
+    lines.append("")
 
 
 def _block(
     lines: list[str],
-    block_type: str,  # "Show" or "Hide"
+    block_type: str,
     conditions: list[str],
-    text_color: str | None = None,
-    bg_color: str | None = None,
-    border: str | None = None,
-    font_size: int | None = None,
+    text: str = "",
+    bg: str = "",
+    border: str = "",
+    font_size: int = 0,
     sound: int = 0,
-    beam: str | None = None,
-    icon: str | None = None,
+    volume: int = 300,
+    beam: str = "",
+    icon: str = "",
 ) -> None:
     """Append a filter block to lines."""
     lines.append(block_type)
     for cond in conditions:
         lines.append(f"    {cond}")
-    if text_color:
-        lines.append(f"    SetTextColor {text_color}")
-    if bg_color:
-        lines.append(f"    SetBackgroundColor {bg_color}")
+    if text:
+        lines.append(f"    SetTextColor {text}")
+    if bg:
+        lines.append(f"    SetBackgroundColor {bg}")
     if border:
         lines.append(f"    SetBorderColor {border}")
     if font_size:
         lines.append(f"    SetFontSize {font_size}")
     if sound > 0:
-        lines.append(f"    PlayAlertSound {sound} 300")
+        lines.append(f"    PlayAlertSound {sound} {volume}")
     if beam:
         lines.append(f"    PlayEffect {beam}")
     if icon:

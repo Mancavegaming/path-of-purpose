@@ -413,11 +413,84 @@ export interface ChatResponse {
 
 export type FilterStrictness = "leveling" | "mapping" | "endgame" | "ultra_strict";
 
+export interface CurrencyTierConfig {
+  show: boolean;
+  sound: number;
+  volume: number;
+  beam: string;
+  icon: string;
+  font_size: number;
+}
+
+export interface CurrencyConfig {
+  tier1: CurrencyTierConfig;
+  tier2: CurrencyTierConfig;
+  tier3: CurrencyTierConfig;
+  tier4: CurrencyTierConfig;
+  tier5: CurrencyTierConfig;
+  show_essences: boolean;
+  show_fossils: boolean;
+  show_catalysts: boolean;
+  show_oils: boolean;
+  show_delirium_orbs: boolean;
+  show_fragments: boolean;
+}
+
+export interface EquipmentConfig {
+  show_rare_jewellery: boolean;
+  rare_jewellery_ilvl: number;
+  show_rare_weapons: boolean;
+  rare_weapon_ilvl: number;
+  show_six_links: boolean;
+  six_link_sound: number;
+  six_link_beam: string;
+  show_five_links: boolean;
+  show_rgb_items: boolean;
+}
+
+export interface MapConfig {
+  min_tier: number;
+  show_unique_maps: boolean;
+  sound: number;
+  beam: string;
+}
+
+export interface GemConfig {
+  min_quality: number;
+  min_level: number;
+}
+
+export interface FlaskConfig {
+  show_utility: boolean;
+  show_life_mana: boolean;
+}
+
+export interface SoundConfig {
+  unique_drop: number;
+  unique_volume: number;
+  map_drop: number;
+  map_volume: number;
+  build_gear: number;
+  build_gear_volume: number;
+}
+
+export interface BuildTailoredConfig {
+  enabled: boolean;
+  highlight_weapon_bases: boolean;
+  highlight_build_gems: boolean;
+  highlight_resist_fillers: boolean;
+  highlight_cluster_jewels: boolean;
+}
+
 export interface FilterConfig {
   strictness: FilterStrictness;
-  show_resist_fillers: boolean;
-  show_cluster_jewels: boolean;
-  show_leveling_gems: boolean;
+  currency: CurrencyConfig;
+  equipment: EquipmentConfig;
+  maps: MapConfig;
+  gems: GemConfig;
+  flasks: FlaskConfig;
+  sounds: SoundConfig;
+  build_tailored: BuildTailoredConfig;
   filter_name: string;
 }
 

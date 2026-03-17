@@ -1488,7 +1488,8 @@ def cmd_generate_filter(args: argparse.Namespace) -> None:
         print(f"Invalid JSON: {exc}", file=sys.stderr)
         sys.exit(1)
 
-    build = Build(**data["build"])
+    build_data = data.get("build")
+    build = Build(**build_data) if build_data else None
     config_data = data.get("config")
     config = FilterConfig(**config_data) if config_data else None
 

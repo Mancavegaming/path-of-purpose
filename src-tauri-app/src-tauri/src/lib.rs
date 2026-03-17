@@ -1050,13 +1050,16 @@ async fn calculate_dps(
         .map_err(|e| format!("Failed to parse calc result: {}", e))
 }
 
-/// Generate a loot filter for a build via the Python engine.
+/// Generate a loot filter, optionally tailored to a build.
 #[tauri::command]
 async fn generate_filter(
-    build: serde_json::Value,
+    build: Option<serde_json::Value>,
     config: Option<serde_json::Value>,
 ) -> Result<serde_json::Value, String> {
-    let mut input = serde_json::json!({ "build": build });
+    let mut input = serde_json::json!({});
+    if let Some(b) = build {
+        input["build"] = b;
+    }
     if let Some(cfg) = config {
         input["config"] = cfg;
     }

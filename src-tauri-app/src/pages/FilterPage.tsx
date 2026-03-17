@@ -6,11 +6,61 @@ interface FilterPageProps {
   loadedBuild?: Accessor<Build | null>;
 }
 
+const BEAMS = ["", "Red", "Green", "Blue", "Yellow", "White", "Orange", "Cyan", "Purple", "Pink", "Brown", "Grey"];
+const SOUNDS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+
 export default function FilterPage(props: FilterPageProps) {
+  // Strictness
   const [strictness, setStrictness] = createSignal<FilterStrictness>("mapping");
-  const [showResists, setShowResists] = createSignal(true);
-  const [showClusters, setShowClusters] = createSignal(true);
-  const [showLevelGems, setShowLevelGems] = createSignal(true);
+
+  // Currency
+  const [t1Sound, setT1Sound] = createSignal(1);
+  const [t1Beam, setT1Beam] = createSignal("Red");
+  const [t2Sound, setT2Sound] = createSignal(2);
+  const [t2Beam, setT2Beam] = createSignal("Yellow");
+  const [t3Sound, setT3Sound] = createSignal(0);
+  const [showT4, setShowT4] = createSignal(true);
+  const [showT5, setShowT5] = createSignal(false);
+  const [showEssences, setShowEssences] = createSignal(true);
+  const [showFossils, setShowFossils] = createSignal(true);
+  const [showCatalysts, setShowCatalysts] = createSignal(true);
+  const [showOils, setShowOils] = createSignal(true);
+  const [showDeliriumOrbs, setShowDeliriumOrbs] = createSignal(true);
+  const [showFragments, setShowFragments] = createSignal(true);
+
+  // Equipment
+  const [showRareJewellery, setShowRareJewellery] = createSignal(true);
+  const [showRareWeapons, setShowRareWeapons] = createSignal(true);
+  const [showSixLinks, setShowSixLinks] = createSignal(true);
+  const [sixLinkSound, setSixLinkSound] = createSignal(1);
+  const [showFiveLinks, setShowFiveLinks] = createSignal(true);
+  const [showRgb, setShowRgb] = createSignal(false);
+
+  // Maps
+  const [mapMinTier, setMapMinTier] = createSignal(1);
+  const [mapSound, setMapSound] = createSignal(4);
+  const [showUniqueMaps, setShowUniqueMaps] = createSignal(true);
+
+  // Gems
+  const [gemMinQual, setGemMinQual] = createSignal(0);
+  const [gemMinLevel, setGemMinLevel] = createSignal(1);
+
+  // Flasks
+  const [showUtilFlasks, setShowUtilFlasks] = createSignal(true);
+  const [showLifeMana, setShowLifeMana] = createSignal(false);
+
+  // Sounds
+  const [uniqueSound, setUniqueSound] = createSignal(3);
+  const [buildGearSound, setBuildGearSound] = createSignal(6);
+
+  // Build tailored
+  const [buildEnabled, setBuildEnabled] = createSignal(false);
+  const [hlWeapons, setHlWeapons] = createSignal(true);
+  const [hlGems, setHlGems] = createSignal(true);
+  const [hlResists, setHlResists] = createSignal(true);
+  const [hlClusters, setHlClusters] = createSignal(true);
+
+  // Output
   const [loading, setLoading] = createSignal(false);
   const [filterText, setFilterText] = createSignal("");
   const [error, setError] = createSignal("");
@@ -18,20 +68,51 @@ export default function FilterPage(props: FilterPageProps) {
 
   const build = () => props.loadedBuild?.() ?? null;
 
+  function buildConfig() {
+    return {
+      strictness: strictness(),
+      currency: {
+        tier1: { show: true, sound: t1Sound(), volume: 300, beam: t1Beam(), icon: "0 Red Star", font_size: 45 },
+        tier2: { show: true, sound: t2Sound(), volume: 300, beam: t2Beam(), icon: "1 Yellow Circle", font_size: 38 },
+        tier3: { show: true, sound: t3Sound(), volume: 200, beam: "", icon: "", font_size: 32 },
+        tier4: { show: showT4(), sound: 0, volume: 0, beam: "", icon: "", font_size: 26 },
+        tier5: { show: showT5(), sound: 0, volume: 0, beam: "", icon: "", font_size: 20 },
+        show_essences: showEssences(), show_fossils: showFossils(),
+        show_catalysts: showCatalysts(), show_oils: showOils(),
+        show_delirium_orbs: showDeliriumOrbs(), show_fragments: showFragments(),
+      },
+      equipment: {
+        show_rare_jewellery: showRareJewellery(), rare_jewellery_ilvl: 75,
+        show_rare_weapons: showRareWeapons(), rare_weapon_ilvl: 82,
+        show_six_links: showSixLinks(), six_link_sound: sixLinkSound(), six_link_beam: "Red",
+        show_five_links: showFiveLinks(), show_rgb_items: showRgb(),
+      },
+      maps: { min_tier: mapMinTier(), show_unique_maps: showUniqueMaps(), sound: mapSound(), beam: "White" },
+      gems: { min_quality: gemMinQual(), min_level: gemMinLevel() },
+      flasks: { show_utility: showUtilFlasks(), show_life_mana: showLifeMana() },
+      sounds: {
+        unique_drop: uniqueSound(), unique_volume: 200,
+        map_drop: mapSound(), map_volume: 200,
+        build_gear: buildGearSound(), build_gear_volume: 200,
+      },
+      build_tailored: {
+        enabled: buildEnabled(),
+        highlight_weapon_bases: hlWeapons(),
+        highlight_build_gems: hlGems(),
+        highlight_resist_fillers: hlResists(),
+        highlight_cluster_jewels: hlClusters(),
+      },
+      filter_name: "PathOfPurpose",
+    };
+  }
+
   async function handleGenerate() {
-    const b = build();
-    if (!b) return;
     setLoading(true);
     setError("");
     setSavedPath("");
     try {
-      const result = await generateFilter(b, {
-        strictness: strictness(),
-        show_resist_fillers: showResists(),
-        show_cluster_jewels: showClusters(),
-        show_leveling_gems: showLevelGems(),
-        filter_name: "PathOfPurpose",
-      });
+      const b = buildEnabled() ? build() : null;
+      const result = await generateFilter(b, buildConfig());
       setFilterText(result.filter_text);
     } catch (e) {
       setError(String(e));
@@ -42,21 +123,11 @@ export default function FilterPage(props: FilterPageProps) {
 
   async function handleInstall() {
     if (!filterText()) return;
-    setError("");
     try {
       const path = await saveFilterFile(filterText(), "PathOfPurpose");
       setSavedPath(path);
     } catch (e) {
       setError(String(e));
-    }
-  }
-
-  async function handleCopy() {
-    if (!filterText()) return;
-    try {
-      await navigator.clipboard.writeText(filterText());
-    } catch {
-      // fallback
     }
   }
 
@@ -71,117 +142,209 @@ export default function FilterPage(props: FilterPageProps) {
     URL.revokeObjectURL(url);
   }
 
+  async function handleCopy() {
+    if (!filterText()) return;
+    await navigator.clipboard.writeText(filterText()).catch(() => {});
+  }
+
+  const SoundSelect = (p: { value: number; onChange: (v: number) => void }) => (
+    <select class="filter-select" value={p.value} onChange={(e) => p.onChange(Number(e.currentTarget.value))}>
+      {SOUNDS.map((s) => <option value={s}>{s === 0 ? "Off" : `Sound ${s}`}</option>)}
+    </select>
+  );
+
+  const BeamSelect = (p: { value: string; onChange: (v: string) => void }) => (
+    <select class="filter-select" value={p.value} onChange={(e) => p.onChange(e.currentTarget.value)}>
+      {BEAMS.map((b) => <option value={b}>{b || "None"}</option>)}
+    </select>
+  );
+
   return (
     <div class="filter-page">
       <h2>Loot Filter Generator</h2>
-      <p class="filter-page-desc">
-        Generate a personalized loot filter based on your build. Load a build from the Build Viewer first, then customize and generate.
-      </p>
+      <p class="filter-page-desc">Create a customized PoE loot filter. Optionally tailor it to your loaded build.</p>
 
-      <Show
-        when={build()}
-        fallback={
-          <div class="filter-no-build">
-            No build loaded. Go to <strong>Build Viewer</strong> and paste a PoB code first, then come back here.
-          </div>
-        }
-      >
-        <div class="filter-build-info">
-          Build: <strong>{build()!.ascendancy_name || build()!.class_name}</strong> — Level {build()!.level}
-        </div>
-
-        {/* Strictness */}
-        <div class="filter-section">
-          <h3>Strictness</h3>
-          <div class="filter-strictness-grid">
-            {(["leveling", "mapping", "endgame", "ultra_strict"] as FilterStrictness[]).map((s) => (
-              <button
-                class={`filter-strictness-btn ${strictness() === s ? "active" : ""}`}
-                onClick={() => setStrictness(s)}
-              >
-                <div class="filter-strictness-label">{s.replace("_", " ")}</div>
-                <div class="filter-strictness-desc">
-                  {s === "leveling" && "Show almost everything"}
-                  {s === "mapping" && "Hide low currency & normals"}
-                  {s === "endgame" && "Only build-relevant drops"}
-                  {s === "ultra_strict" && "Absolute minimum"}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Options */}
-        <div class="filter-section">
-          <h3>Options</h3>
-          <div class="filter-options-grid">
-            <label class="filter-option">
-              <input type="checkbox" checked={showResists()} onChange={(e) => setShowResists(e.currentTarget.checked)} />
-              <div>
-                <div class="filter-option-title">Resist Gap Fillers</div>
-                <div class="filter-option-desc">Highlight rares with resists your build needs</div>
+      {/* Strictness */}
+      <div class="filter-section">
+        <h3>Strictness</h3>
+        <div class="filter-strictness-grid">
+          {(["leveling", "mapping", "endgame", "ultra_strict"] as FilterStrictness[]).map((s) => (
+            <button class={`filter-strictness-btn ${strictness() === s ? "active" : ""}`} onClick={() => setStrictness(s)}>
+              <div class="filter-strictness-label">{s.replace("_", " ")}</div>
+              <div class="filter-strictness-desc">
+                {s === "leveling" && "Show almost everything"}
+                {s === "mapping" && "Hide low currency & normals"}
+                {s === "endgame" && "Only relevant drops"}
+                {s === "ultra_strict" && "Absolute minimum"}
               </div>
-            </label>
-            <label class="filter-option">
-              <input type="checkbox" checked={showClusters()} onChange={(e) => setShowClusters(e.currentTarget.checked)} />
-              <div>
-                <div class="filter-option-title">Cluster Jewels</div>
-                <div class="filter-option-desc">Show cluster jewels matching your damage type</div>
-              </div>
-            </label>
-            <label class="filter-option">
-              <input type="checkbox" checked={showLevelGems()} onChange={(e) => setShowLevelGems(e.currentTarget.checked)} />
-              <div>
-                <div class="filter-option-title">Leveling Gems</div>
-                <div class="filter-option-desc">Show all gem drops (not just build gems)</div>
-              </div>
-            </label>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div class="filter-section">
-          <div class="filter-main-actions">
-            <button
-              class="filter-generate-main-btn"
-              onClick={handleGenerate}
-              disabled={loading()}
-            >
-              {loading() ? "Generating..." : "Generate Filter"}
             </button>
+          ))}
+        </div>
+      </div>
 
-            <Show when={filterText()}>
-              <button class="filter-install-main-btn" onClick={handleInstall}>
-                Install to PoE Folder
-              </button>
-              <button class="filter-download-btn" onClick={handleDownload}>
-                Download .filter
-              </button>
-              <button class="filter-copy-main-btn" onClick={handleCopy}>
-                Copy to Clipboard
-              </button>
-            </Show>
+      {/* Currency */}
+      <div class="filter-section">
+        <h3>Currency</h3>
+        <div class="filter-grid-rows">
+          <div class="filter-row-item">
+            <span class="filter-row-label">T1 — Mirror, Divine, Exalt</span>
+            <span class="filter-row-controls">Sound: <SoundSelect value={t1Sound()} onChange={setT1Sound} /> Beam: <BeamSelect value={t1Beam()} onChange={setT1Beam} /></span>
           </div>
+          <div class="filter-row-item">
+            <span class="filter-row-label">T2 — Chaos, Vaal, Regal, GCP</span>
+            <span class="filter-row-controls">Sound: <SoundSelect value={t2Sound()} onChange={setT2Sound} /> Beam: <BeamSelect value={t2Beam()} onChange={setT2Beam} /></span>
+          </div>
+          <div class="filter-row-item">
+            <span class="filter-row-label">T3 — Alchemy, Chisel, Jeweller</span>
+            <span class="filter-row-controls">Sound: <SoundSelect value={t3Sound()} onChange={setT3Sound} /></span>
+          </div>
+          <div class="filter-row-item">
+            <span class="filter-row-label">T4 — Alteration, Augmentation</span>
+            <label class="filter-toggle-label"><input type="checkbox" checked={showT4()} onChange={(e) => setShowT4(e.currentTarget.checked)} /> Show</label>
+          </div>
+          <div class="filter-row-item">
+            <span class="filter-row-label">T5 — Scrolls, Scraps</span>
+            <label class="filter-toggle-label"><input type="checkbox" checked={showT5()} onChange={(e) => setShowT5(e.currentTarget.checked)} /> Show</label>
+          </div>
+        </div>
+        <div class="filter-checkbox-row">
+          <label><input type="checkbox" checked={showEssences()} onChange={(e) => setShowEssences(e.currentTarget.checked)} /> Essences</label>
+          <label><input type="checkbox" checked={showFossils()} onChange={(e) => setShowFossils(e.currentTarget.checked)} /> Fossils</label>
+          <label><input type="checkbox" checked={showCatalysts()} onChange={(e) => setShowCatalysts(e.currentTarget.checked)} /> Catalysts</label>
+          <label><input type="checkbox" checked={showOils()} onChange={(e) => setShowOils(e.currentTarget.checked)} /> Oils</label>
+          <label><input type="checkbox" checked={showDeliriumOrbs()} onChange={(e) => setShowDeliriumOrbs(e.currentTarget.checked)} /> Delirium Orbs</label>
+          <label><input type="checkbox" checked={showFragments()} onChange={(e) => setShowFragments(e.currentTarget.checked)} /> Fragments</label>
+        </div>
+      </div>
 
-          <Show when={error()}>
-            <div class="filter-error">{error()}</div>
-          </Show>
-          <Show when={savedPath()}>
-            <div class="filter-success">
-              Installed to: {savedPath()}
-              <br />
-              In-game: Options &gt; UI &gt; Item Filter &gt; select "PathOfPurpose"
+      {/* Equipment */}
+      <div class="filter-section">
+        <h3>Equipment</h3>
+        <div class="filter-checkbox-row">
+          <label><input type="checkbox" checked={showRareJewellery()} onChange={(e) => setShowRareJewellery(e.currentTarget.checked)} /> Rare Jewellery (75+)</label>
+          <label><input type="checkbox" checked={showRareWeapons()} onChange={(e) => setShowRareWeapons(e.currentTarget.checked)} /> Rare Weapons (82+)</label>
+          <label><input type="checkbox" checked={showFiveLinks()} onChange={(e) => setShowFiveLinks(e.currentTarget.checked)} /> 5-Links</label>
+          <label><input type="checkbox" checked={showRgb()} onChange={(e) => setShowRgb(e.currentTarget.checked)} /> RGB Items</label>
+        </div>
+        <div class="filter-row-item">
+          <span class="filter-row-label">6-Link Sound</span>
+          <span class="filter-row-controls"><SoundSelect value={sixLinkSound()} onChange={setSixLinkSound} /></span>
+        </div>
+      </div>
+
+      {/* Maps */}
+      <div class="filter-section">
+        <h3>Maps</h3>
+        <div class="filter-row-item">
+          <span class="filter-row-label">Show tiers</span>
+          <select class="filter-select" value={mapMinTier()} onChange={(e) => setMapMinTier(Number(e.currentTarget.value))}>
+            <option value={1}>All</option>
+            <option value={6}>T6+</option>
+            <option value={11}>T11+</option>
+            <option value={14}>T14+</option>
+            <option value={16}>T16 only</option>
+          </select>
+          <span class="filter-row-label" style="margin-left: 12px">Drop sound</span>
+          <SoundSelect value={mapSound()} onChange={setMapSound} />
+        </div>
+        <label class="filter-checkbox-inline"><input type="checkbox" checked={showUniqueMaps()} onChange={(e) => setShowUniqueMaps(e.currentTarget.checked)} /> Show Unique Maps</label>
+      </div>
+
+      {/* Gems */}
+      <div class="filter-section">
+        <h3>Gems</h3>
+        <div class="filter-row-item">
+          <span class="filter-row-label">Min quality</span>
+          <select class="filter-select" value={gemMinQual()} onChange={(e) => setGemMinQual(Number(e.currentTarget.value))}>
+            <option value={0}>All</option>
+            <option value={10}>10%+</option>
+            <option value={15}>15%+</option>
+            <option value={20}>20% only</option>
+          </select>
+          <span class="filter-row-label" style="margin-left: 12px">Min level</span>
+          <select class="filter-select" value={gemMinLevel()} onChange={(e) => setGemMinLevel(Number(e.currentTarget.value))}>
+            <option value={1}>All</option>
+            <option value={19}>19+</option>
+            <option value={20}>20+</option>
+            <option value={21}>21 only</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Flasks */}
+      <div class="filter-section">
+        <h3>Flasks</h3>
+        <div class="filter-checkbox-row">
+          <label><input type="checkbox" checked={showUtilFlasks()} onChange={(e) => setShowUtilFlasks(e.currentTarget.checked)} /> Utility Flasks</label>
+          <label><input type="checkbox" checked={showLifeMana()} onChange={(e) => setShowLifeMana(e.currentTarget.checked)} /> Life/Mana Flasks</label>
+        </div>
+      </div>
+
+      {/* Sounds */}
+      <div class="filter-section">
+        <h3>Sounds</h3>
+        <div class="filter-grid-rows">
+          <div class="filter-row-item">
+            <span class="filter-row-label">Unique drops</span>
+            <SoundSelect value={uniqueSound()} onChange={setUniqueSound} />
+          </div>
+        </div>
+      </div>
+
+      {/* Build Tailored */}
+      <div class="filter-section filter-build-section">
+        <h3>
+          <label>
+            <input type="checkbox" checked={buildEnabled()} onChange={(e) => setBuildEnabled(e.currentTarget.checked)} />
+            {" "}Build-Tailored Mode
+          </label>
+        </h3>
+        <Show when={buildEnabled()}>
+          <Show
+            when={build()}
+            fallback={<div class="filter-no-build">No build loaded. Go to Build Viewer and load a PoB code first.</div>}
+          >
+            <div class="filter-build-info">
+              Build: <strong>{build()!.ascendancy_name || build()!.class_name}</strong> — Level {build()!.level}
+            </div>
+            <div class="filter-checkbox-row">
+              <label><input type="checkbox" checked={hlWeapons()} onChange={(e) => setHlWeapons(e.currentTarget.checked)} /> Highlight weapon bases</label>
+              <label><input type="checkbox" checked={hlGems()} onChange={(e) => setHlGems(e.currentTarget.checked)} /> Highlight build gems</label>
+              <label><input type="checkbox" checked={hlResists()} onChange={(e) => setHlResists(e.currentTarget.checked)} /> Highlight resist fillers</label>
+              <label><input type="checkbox" checked={hlClusters()} onChange={(e) => setHlClusters(e.currentTarget.checked)} /> Highlight cluster jewels</label>
+            </div>
+            <div class="filter-row-item">
+              <span class="filter-row-label">Build gear sound</span>
+              <SoundSelect value={buildGearSound()} onChange={setBuildGearSound} />
             </div>
           </Show>
-        </div>
-
-        {/* Preview */}
-        <Show when={filterText()}>
-          <div class="filter-section">
-            <h3>Filter Preview ({filterText().split("\n").length} lines)</h3>
-            <pre class="filter-preview-full">{filterText()}</pre>
-          </div>
         </Show>
+      </div>
+
+      {/* Actions */}
+      <div class="filter-section">
+        <div class="filter-main-actions">
+          <button class="filter-generate-main-btn" onClick={handleGenerate} disabled={loading()}>
+            {loading() ? "Generating..." : "Generate Filter"}
+          </button>
+          <Show when={filterText()}>
+            <button class="filter-install-main-btn" onClick={handleInstall}>Install to PoE</button>
+            <button class="filter-download-btn" onClick={handleDownload}>Download .filter</button>
+            <button class="filter-copy-main-btn" onClick={handleCopy}>Copy</button>
+          </Show>
+        </div>
+        <Show when={error()}><div class="filter-error">{error()}</div></Show>
+        <Show when={savedPath()}>
+          <div class="filter-success">Installed to: {savedPath()}<br />In-game: Options &gt; UI &gt; Item Filter &gt; select "PathOfPurpose"</div>
+        </Show>
+      </div>
+
+      {/* Preview */}
+      <Show when={filterText()}>
+        <div class="filter-section">
+          <h3>Filter Preview ({filterText().split("\n").length} lines)</h3>
+          <pre class="filter-preview-full">{filterText()}</pre>
+        </div>
       </Show>
     </div>
   );

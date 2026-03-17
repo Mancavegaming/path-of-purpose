@@ -44,11 +44,11 @@ export async function calculateAllDps(
 }
 
 export async function generateFilter(
-  build: Build,
+  build?: Build | null,
   config?: Partial<FilterConfig>,
 ): Promise<FilterResult> {
   return await invoke<FilterResult>("generate_filter", {
-    build,
+    build: build ?? null,
     config: config ?? null,
   });
 }
