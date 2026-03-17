@@ -2446,6 +2446,9 @@ async fn show_overlay_at(app: tauri::AppHandle, x: i32, y: i32) -> Result<(), St
     use tauri::Manager;
 
     if let Some(window) = app.get_webview_window("price-overlay") {
+        // Make window interactive (stop ignoring cursor)
+        window.set_ignore_cursor_events(false)
+            .map_err(|e| format!("Failed to set cursor events: {}", e))?;
         window.set_position(tauri::Position::Physical(tauri::PhysicalPosition { x, y }))
             .map_err(|e| format!("Failed to position overlay: {}", e))?;
         window.show().map_err(|e| format!("Failed to show overlay: {}", e))?;
@@ -2455,12 +2458,14 @@ async fn show_overlay_at(app: tauri::AppHandle, x: i32, y: i32) -> Result<(), St
     }
 }
 
-/// Hide the overlay window.
+/// Hide the overlay window — fully hides and makes click-through.
 #[tauri::command]
 async fn hide_overlay(app: tauri::AppHandle) -> Result<(), String> {
     use tauri::Manager;
 
     if let Some(window) = app.get_webview_window("price-overlay") {
+        // Make window click-through before hiding (belt-and-suspenders)
+        let _ = window.set_ignore_cursor_events(true);
         window.hide().map_err(|e| format!("Failed to hide overlay: {}", e))?;
     }
     Ok(())
