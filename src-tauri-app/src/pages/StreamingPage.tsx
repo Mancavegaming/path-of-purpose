@@ -4,6 +4,7 @@ import { open } from "@tauri-apps/plugin-shell";
 
 const TWITCH_CLIENT_ID = "nxcpw276lnupq2pty6tuj9hwtthhxl";
 const TWITCH_REDIRECT_URI = "http://localhost:8460/callback";
+import { emit } from "@tauri-apps/api/event";
 import {
   loadTwitchToken,
   storeTwitchToken,
@@ -11,7 +12,10 @@ import {
   startOverlayServer,
   updateOverlayState,
   logSnapshot,
+  analyzeDeath,
+  showOverlayAt,
 } from "../lib/commands";
+import { streamDpsResult } from "../lib/streamStore";
 
 import {
   chatLog,
@@ -142,6 +146,28 @@ export default function StreamingPage() {
         setLogError(snap.error);
       } else {
         setLogError("");
+
+        // Detect new deaths and emit death recap to overlay
+        const prevStats = logWatcherStats();
+        const prevDeaths = prevStats?.total_deaths ?? 0;
+        const newDeaths = snap.stats?.total_deaths ?? 0;
+        if (newDeaths > prevDeaths && snap.stats?.last_death) {
+          const dps = streamDpsResult();
+          const defence = dps?.defence;
+          if (defence) {
+            try {
+              const analysis = await analyzeDeath(
+                snap.stats.last_death as unknown as Record<string, unknown>,
+                defence as unknown as Record<string, unknown>,
+              );
+              await emit("death-recap", analysis);
+              await showOverlayAt(100, 100);
+            } catch {
+              // Death analysis is non-critical
+            }
+          }
+        }
+
         updateLogWatcherStats(snap);
       }
     } catch (e) {

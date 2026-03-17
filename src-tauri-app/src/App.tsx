@@ -1,4 +1,6 @@
 import { createSignal, onMount } from "solid-js";
+import { listen } from "@tauri-apps/api/event";
+import { emit } from "@tauri-apps/api/event";
 import Sidebar, { type Page } from "./components/Sidebar";
 import DecodePage from "./pages/DecodePage";
 import DeltaPage from "./pages/DeltaPage";
@@ -9,6 +11,10 @@ import StreamingPage from "./pages/StreamingPage";
 import FilterPage from "./pages/FilterPage";
 import type { Build, BuildGuide } from "./lib/types";
 import {
+  createOverlayWindow,
+  getCursorPosition,
+  priceCheckTrigger,
+  showOverlayAt,
   listSavedBuilds,
   loadSavedBuild,
   deleteSavedBuild,
@@ -33,9 +39,29 @@ function App() {
     }
   }
 
-  onMount(() => {
+  onMount(async () => {
     initAuth();
     refreshSavedBuilds();
+
+    // Pre-create overlay window (hidden)
+    try {
+      await createOverlayWindow();
+    } catch {
+      // Overlay creation may fail in dev mode — non-critical
+    }
+
+    // Listen for price check hotkey trigger from Rust global shortcut
+    await listen("price-check-triggered", async () => {
+      try {
+        const [x, y] = await getCursorPosition();
+        const result = await priceCheckTrigger("Standard");
+        // Emit to overlay window
+        await emit("price-check-result", result);
+        await showOverlayAt(x + 20, y + 20);
+      } catch (e) {
+        console.error("Price check failed:", e);
+      }
+    });
   });
 
   function handleGeneratorComplete(build: Build) {

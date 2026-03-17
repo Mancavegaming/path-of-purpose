@@ -1807,6 +1807,61 @@ def cmd_delete_account_filter(args: argparse.Namespace) -> None:
         print(json.dumps({"error": str(exc)}))
 
 
+def cmd_price_check(args: argparse.Namespace) -> None:
+    """Price check an item from clipboard text via the trade API."""
+    from pop.price_check.price_checker import price_check
+
+    raw = _safe_stdin_read()
+    if not raw:
+        print(json.dumps({"error": "No input provided. Send JSON with 'clipboard_text' key."}))
+        return
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        print(json.dumps({"error": f"Invalid JSON: {exc}"}))
+        return
+
+    clipboard_text = data.get("clipboard_text", "")
+    league = data.get("league", "Standard")
+    enabled_mod_indices = data.get("enabled_mod_indices")
+
+    async def _run() -> None:
+        result = await price_check(clipboard_text, league, enabled_mod_indices)
+        print(json.dumps(result))
+
+    try:
+        asyncio.run(_run())
+    except Exception as exc:
+        print(json.dumps({"error": str(exc)}))
+
+
+def cmd_death_analyze(args: argparse.Namespace) -> None:
+    """Analyze a death event against player defences."""
+    from pop.price_check.death_analyzer import analyze_death
+
+    raw = _safe_stdin_read()
+    if not raw:
+        print(json.dumps({"error": "No input provided. Send JSON with 'death_event' and 'defence' keys."}))
+        return
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        print(json.dumps({"error": f"Invalid JSON: {exc}"}))
+        return
+
+    death_event = data.get("death_event", {})
+    defence = data.get("defence", {})
+    zone_name = data.get("zone_name", "")
+
+    try:
+        result = analyze_death(death_event, defence, zone_name)
+        print(json.dumps(result))
+    except Exception as exc:
+        print(json.dumps({"error": str(exc)}))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog="pop",
@@ -2004,6 +2059,16 @@ def main() -> None:
     p_del_f = subparsers.add_parser("delete_account_filter", help="Delete an item filter from PoE account")
     p_del_f.add_argument("--stdin", action="store_true", default=True)
     p_del_f.set_defaults(func=cmd_delete_account_filter)
+
+    # --- price_check ---
+    p_price = subparsers.add_parser("price_check", help="Price check an item from clipboard text")
+    p_price.add_argument("--stdin", action="store_true", default=True)
+    p_price.set_defaults(func=cmd_price_check)
+
+    # --- death_analyze ---
+    p_death = subparsers.add_parser("death_analyze", help="Analyze a death event against player defences")
+    p_death.add_argument("--stdin", action="store_true", default=True)
+    p_death.set_defaults(func=cmd_death_analyze)
 
     args = parser.parse_args()
     args.func(args)

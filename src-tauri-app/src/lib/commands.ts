@@ -10,9 +10,11 @@ import type {
   CalcResult,
   ChatMessage,
   ChatResponse,
+  DeathAnalysis,
   DeltaReport,
   Item,
   ItemComparison,
+  PriceCheckResult,
   TradeSearchResult,
   FilterConfig,
   FilterResult,
@@ -683,4 +685,50 @@ export async function listAccountFilters(): Promise<{ filters: AccountFilter[] }
 
 export async function deleteAccountFilter(filterId: string): Promise<{ success: boolean }> {
   return await invoke<{ success: boolean }>("delete_account_filter", { filterId });
+}
+
+// --- Price Check + Death Analyzer ---
+
+export async function priceCheckTrigger(league: string): Promise<PriceCheckResult> {
+  return await invoke<PriceCheckResult>("price_check_trigger", { league });
+}
+
+export async function priceCheckRefine(
+  clipboardText: string,
+  league: string,
+  enabledModIndices: number[],
+): Promise<PriceCheckResult> {
+  return await invoke<PriceCheckResult>("price_check_refine", {
+    clipboardText,
+    league,
+    enabledModIndices,
+  });
+}
+
+export async function analyzeDeath(
+  deathEvent: Record<string, unknown>,
+  defence: Record<string, unknown>,
+  zoneName?: string,
+): Promise<DeathAnalysis> {
+  return await invoke<DeathAnalysis>("analyze_death", {
+    deathEvent,
+    defence,
+    zoneName: zoneName ?? null,
+  });
+}
+
+export async function getCursorPosition(): Promise<[number, number]> {
+  return await invoke<[number, number]>("get_cursor_position");
+}
+
+export async function createOverlayWindow(): Promise<void> {
+  await invoke("create_overlay_window");
+}
+
+export async function showOverlayAt(x: number, y: number): Promise<void> {
+  await invoke("show_overlay_at", { x, y });
+}
+
+export async function hideOverlay(): Promise<void> {
+  await invoke("hide_overlay");
 }

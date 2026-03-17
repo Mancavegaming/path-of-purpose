@@ -499,6 +499,61 @@ export interface FilterResult {
   filter_name: string;
 }
 
+// --- Price Check + Death Analyzer models ---
+
+export interface ClipboardItem {
+  item_class: string;
+  rarity: string;
+  name: string;
+  base_type: string;
+  quality: number;
+  ilvl: number;
+  sockets: string;
+  implicits: string[];
+  explicits: string[];
+  crafted_mods: string[];
+  corrupted: boolean;
+  influences: string[];
+  unidentified: boolean;
+  note: string;
+  is_gem: boolean;
+  is_currency: boolean;
+  is_map: boolean;
+}
+
+export interface PriceSummary {
+  min: number;
+  max: number;
+  median: number;
+  currency: string;
+  count: number;
+}
+
+export interface PriceCheckResult {
+  item: ClipboardItem;
+  results: TradeSearchResult | null;
+  price_summary: PriceSummary | null;
+  clipboard_text: string;
+  trade_url?: string;
+  error: string | null;
+}
+
+export interface DeathWeakness {
+  stat: string;
+  current: number;
+  target: number;
+  severity: "critical" | "warning";
+}
+
+export interface DeathAnalysis {
+  killer: string;
+  zone: string;
+  weaknesses: DeathWeakness[];
+  suggestions: string[];
+  grace_verse: string;
+  grace_ref: string;
+}
+
 // --- Account Filter models ---
 
 export interface AccountFilter {

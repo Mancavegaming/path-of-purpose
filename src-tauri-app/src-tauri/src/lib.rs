@@ -2165,6 +2165,242 @@ async fn fetch_leagues() -> Result<serde_json::Value, String> {
     Ok(result)
 }
 
+// ---------------------------------------------------------------------------
+// Price Check + Death Analyzer commands
+// ---------------------------------------------------------------------------
+
+/// Simulate Ctrl+C keystroke to copy item text from PoE.
+#[cfg(windows)]
+fn simulate_ctrl_c() -> Result<(), String> {
+    use windows::Win32::UI::Input::KeyboardAndMouse::{
+        SendInput, INPUT, INPUT_0, INPUT_KEYBOARD, KEYBDINPUT,
+        KEYEVENTF_KEYUP, VIRTUAL_KEY,
+    };
+
+    const VK_CONTROL: VIRTUAL_KEY = VIRTUAL_KEY(0x11);
+    const VK_C: VIRTUAL_KEY = VIRTUAL_KEY(0x43);
+
+    let inputs = [
+        // Ctrl down
+        INPUT {
+            r#type: INPUT_KEYBOARD,
+            Anonymous: INPUT_0 {
+                ki: KEYBDINPUT {
+                    wVk: VK_CONTROL,
+                    wScan: 0,
+                    dwFlags: Default::default(),
+                    time: 0,
+                    dwExtraInfo: 0,
+                },
+            },
+        },
+        // C down
+        INPUT {
+            r#type: INPUT_KEYBOARD,
+            Anonymous: INPUT_0 {
+                ki: KEYBDINPUT {
+                    wVk: VK_C,
+                    wScan: 0,
+                    dwFlags: Default::default(),
+                    time: 0,
+                    dwExtraInfo: 0,
+                },
+            },
+        },
+        // C up
+        INPUT {
+            r#type: INPUT_KEYBOARD,
+            Anonymous: INPUT_0 {
+                ki: KEYBDINPUT {
+                    wVk: VK_C,
+                    wScan: 0,
+                    dwFlags: KEYEVENTF_KEYUP,
+                    time: 0,
+                    dwExtraInfo: 0,
+                },
+            },
+        },
+        // Ctrl up
+        INPUT {
+            r#type: INPUT_KEYBOARD,
+            Anonymous: INPUT_0 {
+                ki: KEYBDINPUT {
+                    wVk: VK_CONTROL,
+                    wScan: 0,
+                    dwFlags: KEYEVENTF_KEYUP,
+                    time: 0,
+                    dwExtraInfo: 0,
+                },
+            },
+        },
+    ];
+
+    let sent = unsafe { SendInput(&inputs, std::mem::size_of::<INPUT>() as i32) };
+    if sent != 4 {
+        return Err("Failed to simulate Ctrl+C keystrokes".to_string());
+    }
+    Ok(())
+}
+
+#[cfg(not(windows))]
+fn simulate_ctrl_c() -> Result<(), String> {
+    Err("Ctrl+C simulation is only supported on Windows".to_string())
+}
+
+/// Get current cursor position.
+#[tauri::command]
+async fn get_cursor_position() -> Result<(i32, i32), String> {
+    #[cfg(windows)]
+    {
+        use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
+        use windows::Win32::Foundation::POINT;
+        let mut point = POINT { x: 0, y: 0 };
+        unsafe {
+            GetCursorPos(&mut point)
+                .map_err(|e| format!("Failed to get cursor position: {}", e))?;
+        }
+        Ok((point.x, point.y))
+    }
+    #[cfg(not(windows))]
+    {
+        Ok((0, 0))
+    }
+}
+
+/// Trigger a price check: simulate Ctrl+C, read clipboard, send to Python.
+#[tauri::command]
+async fn price_check_trigger(
+    app: tauri::AppHandle,
+    league: String,
+) -> Result<serde_json::Value, String> {
+    // Simulate Ctrl+C to copy item info
+    simulate_ctrl_c()?;
+
+    // Wait for clipboard to populate
+    tokio::time::sleep(std::time::Duration::from_millis(150)).await;
+
+    // Read clipboard via plugin
+    use tauri_plugin_clipboard_manager::ClipboardExt;
+    let clipboard_text = app.clipboard().read_text()
+        .map_err(|e| format!("Failed to read clipboard: {}", e))?;
+
+    if clipboard_text.is_empty() || !clipboard_text.contains("Rarity:") {
+        return Err("No PoE item data found in clipboard. Hover over an item first.".to_string());
+    }
+
+    // Send to Python price_check command
+    let input = serde_json::json!({
+        "clipboard_text": clipboard_text,
+        "league": league,
+    });
+
+    let stdout = run_python_command(
+        &["-m", "pop.main", "price_check", "--stdin"],
+        Some(&input.to_string()),
+    )?;
+
+    serde_json::from_str::<serde_json::Value>(&stdout)
+        .map_err(|e| format!("Failed to parse price_check output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))
+}
+
+/// Re-run price check with toggled mod filters.
+#[tauri::command]
+async fn price_check_refine(
+    clipboard_text: String,
+    league: String,
+    enabled_mod_indices: Vec<usize>,
+) -> Result<serde_json::Value, String> {
+    let input = serde_json::json!({
+        "clipboard_text": clipboard_text,
+        "league": league,
+        "enabled_mod_indices": enabled_mod_indices,
+    });
+
+    let stdout = run_python_command(
+        &["-m", "pop.main", "price_check", "--stdin"],
+        Some(&input.to_string()),
+    )?;
+
+    serde_json::from_str::<serde_json::Value>(&stdout)
+        .map_err(|e| format!("Failed to parse price_check_refine output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))
+}
+
+/// Analyze a death event against player defences.
+#[tauri::command]
+async fn analyze_death(
+    death_event: serde_json::Value,
+    defence: serde_json::Value,
+    zone_name: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let input = serde_json::json!({
+        "death_event": death_event,
+        "defence": defence,
+        "zone_name": zone_name.unwrap_or_default(),
+    });
+
+    let stdout = run_python_command(
+        &["-m", "pop.main", "death_analyze", "--stdin"],
+        Some(&input.to_string()),
+    )?;
+
+    serde_json::from_str::<serde_json::Value>(&stdout)
+        .map_err(|e| format!("Failed to parse death_analyze output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))
+}
+
+/// Create the overlay window (hidden, transparent, always-on-top).
+#[tauri::command]
+async fn create_overlay_window(app: tauri::AppHandle) -> Result<(), String> {
+    use tauri::WebviewWindowBuilder;
+
+    // Don't create if already exists
+    if app.get_webview_window("price-overlay").is_some() {
+        return Ok(());
+    }
+
+    WebviewWindowBuilder::new(
+        &app,
+        "price-overlay",
+        tauri::WebviewUrl::App("overlay.html".into()),
+    )
+        .title("Price Check Overlay")
+        .inner_size(420.0, 500.0)
+        .transparent(true)
+        .decorations(false)
+        .always_on_top(true)
+        .visible(false)
+        .skip_taskbar(true)
+        .build()
+        .map_err(|e| format!("Failed to create overlay window: {}", e))?;
+
+    Ok(())
+}
+
+/// Show overlay window near the given screen coordinates.
+#[tauri::command]
+async fn show_overlay_at(app: tauri::AppHandle, x: i32, y: i32) -> Result<(), String> {
+    use tauri::Manager;
+
+    if let Some(window) = app.get_webview_window("price-overlay") {
+        window.set_position(tauri::Position::Physical(tauri::PhysicalPosition { x, y }))
+            .map_err(|e| format!("Failed to position overlay: {}", e))?;
+        window.show().map_err(|e| format!("Failed to show overlay: {}", e))?;
+        Ok(())
+    } else {
+        Err("Overlay window not created yet".to_string())
+    }
+}
+
+/// Hide the overlay window.
+#[tauri::command]
+async fn hide_overlay(app: tauri::AppHandle) -> Result<(), String> {
+    use tauri::Manager;
+
+    if let Some(window) = app.get_webview_window("price-overlay") {
+        window.hide().map_err(|e| format!("Failed to hide overlay: {}", e))?;
+    }
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -2173,8 +2409,21 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .manage(OverlayState(Arc::new(RwLock::new(serde_json::json!({})))))
         .manage(OverlayServerRunning(Arc::new(RwLock::new(false))))
+        .setup(|app| {
+            // Register Ctrl+D global hotkey for price check
+            use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
+            use tauri::Emitter;
+            app.global_shortcut().on_shortcut("CmdOrCtrl+D", move |app_handle: &tauri::AppHandle, _shortcut, event| {
+                if event.state == ShortcutState::Pressed {
+                    let _ = app_handle.emit("price-check-triggered", ());
+                }
+            }).ok(); // Non-fatal if registration fails (e.g. hotkey already taken)
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             decode_build,
             analyze_delta,
@@ -2241,6 +2490,14 @@ pub fn run() {
             delete_account_filter,
             // Trade utilities
             fetch_leagues,
+            // Price check + death analyzer
+            price_check_trigger,
+            price_check_refine,
+            analyze_death,
+            create_overlay_window,
+            show_overlay_at,
+            hide_overlay,
+            get_cursor_position,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
