@@ -1,11 +1,11 @@
 {
-  "version": "0.7.1",
-  "notes": "v0.7.1: Fix price check overlay hotkey and event routing",
-  "pub_date": "2026-03-17T18:32:29Z",
+  "version": "0.7.2",
+  "notes": "v0.7.2: Price Check settings page + overlay fixes",
+  "pub_date": "2026-03-17T18:56:25Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWttZzJBYjZYQU51UERJelA4MHZYWDRlZUdidC9CTkUwZGlUa3kxaWRxVzE4RUgyVlhwL0NHK0tpNVpiTStjc240b3pRVWxpY2dFTW9CbGVkbkRFZmdNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczNzcxMDM0CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuNy4xX3g2NC1zZXR1cC5uc2lzLnppcApYOVBNVmNoWHFSeHAySWNCUklXb0hlK1VoQ2RNRTdlQUdzYnhZb2hubVBCMEpCOGw1YVV0LzJQZ05OaDI5M3dFOHZIOWtLTFhuRTJpUVE0bTNCZEtCdz09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.7.1/Path.of.Purpose_0.7.1_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWt3Tlo1Ylo3SEJwOFUxMGc5SDJBUktINjhPUHVQdnp1Ni9GSUJPUlk4Mm5tbytFNHZ3THorUGtHQkhZMEdYUEU3ZlJHVmhVSWZoUFYxWmVJK3RXTFFrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczNzczMzg0CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuNy4yX3g2NC1zZXR1cC5uc2lzLnppcApNYyttWUlHYzQ0U1NKYTM3eE5mTUk5djI4M2VCU3BvZ2U2SjNWMVZIemdhREd5dGoxOEJJNSs5L1FLY1F5UjYrcUtUMWdzd1RmbWhVc2dFSm5GUHVDUT09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.7.2/Path.of.Purpose_0.7.2_x64-setup.nsis.zip"
     }
   }
 }
