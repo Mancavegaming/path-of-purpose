@@ -9,6 +9,7 @@ import EditorPage from "./pages/EditorPage";
 import CharacterPage from "./pages/CharacterPage";
 import StreamingPage from "./pages/StreamingPage";
 import FilterPage from "./pages/FilterPage";
+import PriceCheckPage from "./pages/PriceCheckPage";
 import type { Build, BuildGuide } from "./lib/types";
 import {
   createOverlayWindow,
@@ -22,6 +23,7 @@ import {
 } from "./lib/commands";
 import { guideToBuild } from "./lib/buildUtils";
 import { initAuth } from "./lib/auth";
+import { loadPriceCheckSettings, settings } from "./lib/priceCheckStore";
 import "./styles.css";
 
 function App() {
@@ -43,6 +45,7 @@ function App() {
   onMount(async () => {
     initAuth();
     refreshSavedBuilds();
+    await loadPriceCheckSettings();
 
     // Pre-create overlay window (hidden)
     try {
@@ -56,10 +59,20 @@ function App() {
       setPriceCheckStatus("Checking price...");
       try {
         const [x, y] = await getCursorPosition();
-        const result = await priceCheckTrigger("Standard");
+        const league = settings().league || "Standard";
+        const result = await priceCheckTrigger(league);
         // Emit to overlay window specifically
         await emitTo("price-overlay", "price-check-result", result);
-        await showOverlayAt(x + 20, y + 20);
+
+        // Position based on settings
+        const pos = settings().overlayPosition;
+        if (pos === "top-left") {
+          await showOverlayAt(20, 20);
+        } else if (pos === "top-right") {
+          await showOverlayAt(1400, 20);
+        } else {
+          await showOverlayAt(x + 20, y + 20);
+        }
         setPriceCheckStatus("");
       } catch (e) {
         const msg = String(e);
@@ -142,6 +155,9 @@ function App() {
         </div>
         <div style={{ display: page() === "filter" ? "block" : "none" }}>
           <FilterPage loadedBuild={loadedBuild} />
+        </div>
+        <div style={{ display: page() === "pricecheck" ? "block" : "none" }}>
+          <PriceCheckPage />
         </div>
         <div style={{ display: page() === "streaming" ? "block" : "none" }}>
           <StreamingPage />

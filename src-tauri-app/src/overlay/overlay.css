@@ -19,7 +19,7 @@
   top: 8px;
   left: 8px;
   width: 400px;
-  max-height: 480px;
+  max-height: calc(100vh - 16px);
   overflow-y: auto;
   background: rgba(20, 20, 30, 0.94);
   border: 1px solid rgba(100, 100, 140, 0.4);

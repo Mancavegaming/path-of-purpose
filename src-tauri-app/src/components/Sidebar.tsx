@@ -16,7 +16,7 @@ import { getVersion } from "@tauri-apps/api/app";
 
 const DISCORD_CLIENT_ID = "1479135178650554510";
 
-export type Page = "build" | "delta" | "generator" | "editor" | "character" | "streaming" | "filter";
+export type Page = "build" | "delta" | "generator" | "editor" | "character" | "streaming" | "filter" | "pricecheck";
 
 interface SidebarProps {
   page: Accessor<Page>;
@@ -163,6 +163,13 @@ export default function Sidebar(props: SidebarProps) {
         >
           <span class="nav-icon">{"\u{1F3AF}"}</span>
           Loot Filter
+        </button>
+        <button
+          class={`nav-item ${props.page() === "pricecheck" ? "active" : ""}`}
+          onClick={() => props.setPage("pricecheck")}
+        >
+          <span class="nav-icon">{"\u{1F4B0}"}</span>
+          Price Check
         </button>
         <button
           class={`nav-item ${props.page() === "streaming" ? "active" : ""}`}

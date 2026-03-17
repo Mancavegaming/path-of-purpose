@@ -2380,6 +2380,36 @@ async fn analyze_death(
         .map_err(|e| format!("Failed to parse death_analyze output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))
 }
 
+/// Save price check settings to app data directory.
+#[tauri::command]
+async fn save_price_check_settings(app: tauri::AppHandle, settings: serde_json::Value) -> Result<(), String> {
+    let data_dir = app.path().app_data_dir()
+        .map_err(|e| format!("Failed to get app data dir: {}", e))?;
+    fs::create_dir_all(&data_dir)
+        .map_err(|e| format!("Failed to create app data dir: {}", e))?;
+    let path = data_dir.join("price_check_settings.json");
+    let json = serde_json::to_string_pretty(&settings)
+        .map_err(|e| format!("Failed to serialize settings: {}", e))?;
+    fs::write(&path, json)
+        .map_err(|e| format!("Failed to write settings: {}", e))?;
+    Ok(())
+}
+
+/// Load price check settings from app data directory.
+#[tauri::command]
+async fn load_price_check_settings(app: tauri::AppHandle) -> Result<serde_json::Value, String> {
+    let data_dir = app.path().app_data_dir()
+        .map_err(|e| format!("Failed to get app data dir: {}", e))?;
+    let path = data_dir.join("price_check_settings.json");
+    if !path.exists() {
+        return Ok(serde_json::json!(null));
+    }
+    let json = fs::read_to_string(&path)
+        .map_err(|e| format!("Failed to read settings: {}", e))?;
+    serde_json::from_str(&json)
+        .map_err(|e| format!("Failed to parse settings: {}", e))
+}
+
 /// Create the overlay window (hidden, transparent, always-on-top).
 #[tauri::command]
 async fn create_overlay_window(app: tauri::AppHandle) -> Result<(), String> {
@@ -2396,12 +2426,14 @@ async fn create_overlay_window(app: tauri::AppHandle) -> Result<(), String> {
         tauri::WebviewUrl::App("overlay.html".into()),
     )
         .title("Price Check Overlay")
-        .inner_size(420.0, 500.0)
+        .inner_size(420.0, 700.0)
         .transparent(true)
         .decorations(false)
         .always_on_top(true)
         .visible(false)
         .skip_taskbar(true)
+        .focusable(false)
+        .shadow(false)
         .build()
         .map_err(|e| format!("Failed to create overlay window: {}", e))?;
 
@@ -2524,6 +2556,8 @@ pub fn run() {
             // Trade utilities
             fetch_leagues,
             // Price check + death analyzer
+            save_price_check_settings,
+            load_price_check_settings,
             price_check_trigger,
             price_check_refine,
             analyze_death,
