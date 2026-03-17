@@ -177,7 +177,7 @@ def _section_build_gems(
     lines.append("")
     gem_list = " ".join(f'"{g}"' for g in all_gems)
     _block(lines, "Show", [
-        'Class == "Gems"',
+        'Class == "Skill Gems"',
         f'BaseType == {gem_list}',
     ], text="27 162 155", border="27 162 155", font_size=38,
         sound=cfg.sounds.build_gear, volume=cfg.sounds.build_gear_volume,
@@ -325,17 +325,17 @@ def _section_gems(lines: list[str], cfg: FilterConfig) -> None:
 
     # High quality / level gems always shown
     if g.min_level >= 19 or g.min_quality >= 15:
-        _block(lines, "Show", ['Class == "Gems"', f'GemLevel >= {max(g.min_level, 19)}'],
+        _block(lines, "Show", ['Class == "Skill Gems"', f'GemLevel >= {max(g.min_level, 19)}'],
                text="27 162 155", font_size=36)
     if g.min_quality > 0:
-        _block(lines, "Show", ['Class == "Gems"', f'Quality >= {g.min_quality}'],
+        _block(lines, "Show", ['Class == "Skill Gems"', f'Quality >= {g.min_quality}'],
                text="27 162 155", font_size=34)
 
     if g.min_quality == 0 and g.min_level <= 1:
-        _block(lines, "Show", ['Class == "Gems"'],
+        _block(lines, "Show", ['Class == "Skill Gems"'],
                text="27 162 155", font_size=30)
     else:
-        _block(lines, "Hide", ['Class == "Gems"'])
+        _block(lines, "Hide", ['Class == "Skill Gems"'])
     lines.append("")
 
 
