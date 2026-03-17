@@ -645,6 +645,24 @@ export async function refineBuildRemote(
   });
 }
 
+// --- PoE OAuth Login ---
+
+export interface PoeLoginStatus {
+  logged_in: boolean;
+  expired?: boolean;
+  expires_in?: number;
+  scope?: string;
+  has_filter_scope?: boolean;
+}
+
+export async function poeCheckLogin(): Promise<PoeLoginStatus> {
+  return await invoke<PoeLoginStatus>("poe_check_login");
+}
+
+export async function poeLogin(clientId: string): Promise<{ success?: boolean; error?: string }> {
+  return await invoke<{ success?: boolean; error?: string }>("poe_login", { clientId });
+}
+
 // --- Account Filter Management ---
 
 export async function uploadFilterToAccount(

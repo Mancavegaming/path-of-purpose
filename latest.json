@@ -1,11 +1,11 @@
 {
-  "version": "0.6.1",
-  "notes": "Account filter upload/manage + sound preview",
+  "version": "0.6.2",
+  "notes": "Fix filter commands error handling + add PoE OAuth login flow",
   "pub_date": "2026-03-17T00:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXU3OUpaa2ZmRVp5d0lmcjV1RE94YWtlRWNVdi9sRU1KdFVEQkE0WmplWC8vbXNGZXVvTnpRSVRYRWp1YkdPRk1hOVhIWXVzR0k3bmQ0NXEwTlJ1M3c0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczNzU5MDIxCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuNi4xX3g2NC1zZXR1cC5uc2lzLnppcAo2ZmtsMU1JamFkMlNFZWdYSG1GUC8yQUFlZnlCSjQwU3JTVDNPOWJ6VFkrQnBzajBDTkpPODR0QWk4Y0tmWmdCbXdabWYvcGJoT2Q4VDZvdnp0c3NCdz09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.6.1/Path.of.Purpose_0.6.1_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXM3MHBVSlJQaWcwN3hwWUhOT2tJck5UTEJkcWVLZkhSTm5mWGJMUURtb0EyOGlMMFpTRlkySXREY09pSDh0ckVNbkxzZ1k5WmRoT1M2dlUzQnpxUHdzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczNzYxMDM3CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuNi4yX3g2NC1zZXR1cC5uc2lzLnppcApjTXE5SVRTRUhQUzlzUW5ZVGk2VXdmOWFTa3pZWlpKYzBMenZnMGNoWEp3bC9MbVBLbEt5cTdhcnJzeG9SeEZSMllxbkYvOTh1bFN1K09oRDhPRkNEdz09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.6.2/Path.of.Purpose_0.6.2_x64-setup.nsis.zip"
     }
   }
 }

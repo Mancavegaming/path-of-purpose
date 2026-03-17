@@ -1680,36 +1680,83 @@ def cmd_fetch_leagues(args: argparse.Namespace) -> None:
         print(json.dumps({"leagues": ["Standard", "Hardcore"]}))
 
 
+def cmd_poe_login(args: argparse.Namespace) -> None:
+    """Run PoE OAuth PKCE login flow and return result as JSON."""
+    from pop.oauth.client import login_sync
+
+    raw = _safe_stdin_read() if args.stdin else ""
+    client_id = ""
+    if raw:
+        try:
+            data = json.loads(raw)
+            client_id = data.get("client_id", "")
+        except json.JSONDecodeError:
+            pass
+    client_id = client_id or args.client_id
+    if not client_id:
+        print(json.dumps({"error": "No client_id provided. Register at pathofexile.com/developer/apps"}))
+        return
+
+    try:
+        tokens = login_sync(client_id=client_id)
+        print(json.dumps({
+            "success": True,
+            "expires_in": tokens.expires_in_seconds,
+            "scope": tokens.scope,
+        }))
+    except Exception as exc:
+        print(json.dumps({"error": str(exc)}))
+
+
+def cmd_poe_check_login(_args: argparse.Namespace) -> None:
+    """Check if PoE OAuth tokens exist and are valid."""
+    from pop.oauth.token_store import load_tokens
+
+    tokens = load_tokens()
+    if tokens is None:
+        print(json.dumps({"logged_in": False}))
+        return
+    print(json.dumps({
+        "logged_in": True,
+        "expired": tokens.is_expired,
+        "expires_in": tokens.expires_in_seconds,
+        "scope": tokens.scope,
+        "has_filter_scope": "account:item_filter" in tokens.scope,
+    }))
+
+
 def cmd_upload_filter(args: argparse.Namespace) -> None:
     """Upload a loot filter to the player's PoE account."""
-    import sys
     from pop.poe_api import PoeClient
 
     raw = _safe_stdin_read()
     if not raw:
-        print("No input. Send JSON with 'filter_name' and 'filter_text'.", file=sys.stderr)
-        sys.exit(1)
+        print(json.dumps({"error": "No input. Send JSON with 'filter_name' and 'filter_text'."}))
+        return
 
     try:
         data = json.loads(raw)
     except json.JSONDecodeError as exc:
-        print(f"Invalid JSON: {exc}", file=sys.stderr)
-        sys.exit(1)
+        print(json.dumps({"error": f"Invalid JSON: {exc}"}))
+        return
 
     filter_name = data.get("filter_name", "PathOfPurpose")
     filter_text = data.get("filter_text", "")
     description = data.get("description", "")
 
     if not filter_text:
-        print("Missing 'filter_text' in input.", file=sys.stderr)
-        sys.exit(1)
+        print(json.dumps({"error": "Missing 'filter_text' in input."}))
+        return
 
     async def _run() -> None:
         async with PoeClient(client_id=args.client_id) as poe:
             result = await poe.upload_filter(filter_name, filter_text, description)
             print(json.dumps({"success": True, **result}))
 
-    asyncio.run(_run())
+    try:
+        asyncio.run(_run())
+    except Exception as exc:
+        print(json.dumps({"error": str(exc)}))
 
 
 def cmd_list_account_filters(args: argparse.Namespace) -> None:
@@ -1723,36 +1770,41 @@ def cmd_list_account_filters(args: argparse.Namespace) -> None:
                 "filters": [f.model_dump(mode="json") for f in filters],
             }))
 
-    asyncio.run(_run())
+    try:
+        asyncio.run(_run())
+    except Exception as exc:
+        print(json.dumps({"error": str(exc)}))
 
 
 def cmd_delete_account_filter(args: argparse.Namespace) -> None:
     """Delete an item filter from the player's PoE account."""
-    import sys
     from pop.poe_api import PoeClient
 
     raw = _safe_stdin_read()
     if not raw:
-        print("No input. Send JSON with 'filter_id'.", file=sys.stderr)
-        sys.exit(1)
+        print(json.dumps({"error": "No input. Send JSON with 'filter_id'."}))
+        return
 
     try:
         data = json.loads(raw)
     except json.JSONDecodeError as exc:
-        print(f"Invalid JSON: {exc}", file=sys.stderr)
-        sys.exit(1)
+        print(json.dumps({"error": f"Invalid JSON: {exc}"}))
+        return
 
     filter_id = data.get("filter_id", "")
     if not filter_id:
-        print("Missing 'filter_id' in input.", file=sys.stderr)
-        sys.exit(1)
+        print(json.dumps({"error": "Missing 'filter_id' in input."}))
+        return
 
     async def _run() -> None:
         async with PoeClient(client_id=args.client_id) as poe:
             await poe.delete_filter(filter_id)
             print(json.dumps({"success": True}))
 
-    asyncio.run(_run())
+    try:
+        asyncio.run(_run())
+    except Exception as exc:
+        print(json.dumps({"error": str(exc)}))
 
 
 def main() -> None:
@@ -1929,6 +1981,15 @@ def main() -> None:
 
     p_leagues = subparsers.add_parser("fetch_leagues", help="Fetch current trade leagues from PoE API")
     p_leagues.set_defaults(func=cmd_fetch_leagues)
+
+    # --- poe_login ---
+    p_poe_login = subparsers.add_parser("poe_login", help="Login to PoE via OAuth PKCE")
+    p_poe_login.add_argument("--stdin", action="store_true", default=True)
+    p_poe_login.set_defaults(func=cmd_poe_login)
+
+    # --- poe_check_login ---
+    p_poe_check = subparsers.add_parser("poe_check_login", help="Check if PoE OAuth tokens exist")
+    p_poe_check.set_defaults(func=cmd_poe_check_login)
 
     # --- upload_filter ---
     p_upload_f = subparsers.add_parser("upload_filter", help="Upload a loot filter to PoE account")

@@ -3170,6 +3170,8 @@ button:disabled {
 .filter-manage-delete-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .filter-manage-refresh-btn { margin-top: 10px; background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--text-secondary); padding: 4px 12px; font-size: 0.82rem; cursor: pointer; }
 .filter-manage-refresh-btn:hover { color: var(--accent); border-color: var(--accent); }
+.filter-poe-login-section { padding: 4px 0 10px; }
+.filter-poe-login-section code { background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 3px; font-size: 0.82rem; }
 
 .sidebar-version {
   padding: 4px 12px 8px;

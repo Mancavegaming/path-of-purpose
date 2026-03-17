@@ -2072,6 +2072,34 @@ async fn log_snapshot(
     Ok(result)
 }
 
+/// Run the PoE OAuth PKCE login flow (opens browser, waits for callback)
+#[tauri::command]
+async fn poe_login(client_id: String) -> Result<serde_json::Value, String> {
+    let input = serde_json::json!({ "client_id": client_id });
+    let stdin_data = serde_json::to_string(&input)
+        .map_err(|e| format!("Failed to serialize input: {}", e))?;
+
+    let stdout = run_python_command(
+        &["-m", "pop.main", "poe_login", "--stdin"],
+        Some(&stdin_data),
+    )?;
+
+    serde_json::from_str::<serde_json::Value>(&stdout)
+        .map_err(|e| format!("Failed to parse poe_login output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))
+}
+
+/// Check if PoE OAuth tokens exist
+#[tauri::command]
+async fn poe_check_login() -> Result<serde_json::Value, String> {
+    let stdout = run_python_command(
+        &["-m", "pop.main", "poe_check_login"],
+        None,
+    )?;
+
+    serde_json::from_str::<serde_json::Value>(&stdout)
+        .map_err(|e| format!("Failed to parse poe_check_login output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))
+}
+
 /// Upload a loot filter to the player's PoE account
 #[tauri::command]
 async fn upload_filter_to_account(
@@ -2204,6 +2232,9 @@ pub fn run() {
             stop_overlay_server,
             // Log watcher
             log_snapshot,
+            // PoE OAuth login
+            poe_login,
+            poe_check_login,
             // Account filter management
             upload_filter_to_account,
             list_account_filters,
