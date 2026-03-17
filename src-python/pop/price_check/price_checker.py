@@ -63,7 +63,7 @@ async def price_check(
     try:
         async with TradeClient(league=league) as client:
             result = await client.search(request)
-            result.trade_url = trade_url
+            # trade_url is already set by TradeClient with the query ID — don't overwrite
     except Exception as exc:
         return {
             "item": item_dict,
