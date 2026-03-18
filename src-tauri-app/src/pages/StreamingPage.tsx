@@ -1,4 +1,4 @@
-import { createSignal, createEffect, onCleanup, For, Show } from "solid-js";
+import { createSignal, createEffect, onMount, onCleanup, For, Show } from "solid-js";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-shell";
 
@@ -16,6 +16,7 @@ import {
   showOverlayAt,
 } from "../lib/commands";
 import { streamDpsResult } from "../lib/streamStore";
+import { settings as priceCheckSettings, loadPriceCheckSettings } from "../lib/priceCheckStore";
 
 import {
   chatLog,
@@ -68,9 +69,17 @@ export default function StreamingPage() {
   const [overlayUrl, setOverlayUrl] = createSignal("");
   const [overlayRunning, setOverlayRunning] = createSignal(false);
 
-  // Death recap polling
+  // Death recap polling — also controlled by Price Check settings page
   const [deathRecapEnabled, setDeathRecapEnabled] = createSignal(false);
   const [logError, setLogError] = createSignal("");
+
+  // Sync death recap toggle from price check settings
+  onMount(async () => {
+    await loadPriceCheckSettings();
+    if (priceCheckSettings().deathRecapEnabled) {
+      setDeathRecapEnabled(true);
+    }
+  });
 
   // Command toggles (track in a signal for reactivity)
   const initStates = (): Record<string, boolean> => {

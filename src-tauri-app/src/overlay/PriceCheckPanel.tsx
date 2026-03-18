@@ -5,6 +5,8 @@ import type { PriceCheckResult } from "../lib/types";
 interface Props {
   result: PriceCheckResult;
   onClose: () => void;
+  maxListings: number;
+  opacity: number;
 }
 
 const RARITY_COLORS: Record<string, string> = {
@@ -21,11 +23,9 @@ export default function PriceCheckPanel(props: Props) {
   const [loading, setLoading] = createSignal(false);
   const [result, setResult] = createSignal(props.result);
 
-  // Initialize mod toggles (all enabled)
   const item = () => result().item;
   const allMods = () => [...(item()?.explicits || []), ...(item()?.crafted_mods || [])];
 
-  // Initialize toggles on first render
   if (modToggles().length === 0 && allMods().length > 0) {
     setModToggles(allMods().map(() => true));
   }
@@ -35,7 +35,6 @@ export default function PriceCheckPanel(props: Props) {
     current[index] = !current[index];
     setModToggles(current);
 
-    // Get enabled indices
     const enabledIndices = current
       .map((enabled, i) => (enabled ? i : -1))
       .filter((i) => i >= 0);
@@ -60,8 +59,11 @@ export default function PriceCheckPanel(props: Props) {
   const rarityColor = () => RARITY_COLORS[item()?.rarity || "Normal"] || "#c8c8c8";
 
   return (
-    <div class="price-panel" onClick={(e) => e.stopPropagation()}>
-      {/* Header */}
+    <div
+      class="price-panel"
+      style={{ opacity: props.opacity }}
+      onClick={(e) => e.stopPropagation()}
+    >
       <div class="price-header">
         <div class="price-item-name" style={{ color: rarityColor() }}>
           {item()?.name || item()?.base_type || "Unknown Item"}
@@ -75,7 +77,6 @@ export default function PriceCheckPanel(props: Props) {
         <button class="price-close" onClick={props.onClose}>x</button>
       </div>
 
-      {/* Price Summary */}
       <Show when={summary()}>
         <div class="price-bar">
           <span class="price-min">{summary()!.min}</span>
@@ -86,12 +87,10 @@ export default function PriceCheckPanel(props: Props) {
         </div>
       </Show>
 
-      {/* Error */}
       <Show when={result().error}>
         <div class="price-error">{result().error}</div>
       </Show>
 
-      {/* Mod toggles */}
       <Show when={allMods().length > 0 && item()?.rarity !== "Unique"}>
         <div class="price-mods">
           <div class="price-mods-header">Search Filters {loading() && "(searching...)"}</div>
@@ -112,10 +111,9 @@ export default function PriceCheckPanel(props: Props) {
         </div>
       </Show>
 
-      {/* Listings */}
       <Show when={listings().length > 0}>
         <div class="price-listings">
-          <For each={listings().slice(0, 8)}>
+          <For each={listings().slice(0, props.maxListings)}>
             {(listing) => (
               <div class="price-listing">
                 <span class="listing-price">
@@ -128,7 +126,6 @@ export default function PriceCheckPanel(props: Props) {
         </div>
       </Show>
 
-      {/* Trade URL */}
       <Show when={result().results?.trade_url}>
         <a
           class="price-trade-link"

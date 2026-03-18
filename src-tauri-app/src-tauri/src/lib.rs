@@ -2484,14 +2484,30 @@ pub fn run() {
         .manage(OverlayState(Arc::new(RwLock::new(serde_json::json!({})))))
         .manage(OverlayServerRunning(Arc::new(RwLock::new(false))))
         .setup(|app| {
-            // Register Ctrl+D global hotkey for price check
+            // Read hotkey from saved settings, default to CmdOrCtrl+D
+            let hotkey = {
+                let data_dir = app.path().app_data_dir().ok();
+                let mut key = "CmdOrCtrl+D".to_string();
+                if let Some(dir) = data_dir {
+                    let path = dir.join("price_check_settings.json");
+                    if let Ok(json) = fs::read_to_string(&path) {
+                        if let Ok(val) = serde_json::from_str::<serde_json::Value>(&json) {
+                            if let Some(k) = val.get("hotkey").and_then(|v| v.as_str()) {
+                                key = k.to_string();
+                            }
+                        }
+                    }
+                }
+                key
+            };
+
             use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
             use tauri::Emitter;
-            app.global_shortcut().on_shortcut("CmdOrCtrl+D", move |app_handle: &tauri::AppHandle, _shortcut, event| {
+            app.global_shortcut().on_shortcut(hotkey.as_str(), move |app_handle: &tauri::AppHandle, _shortcut, event| {
                 if event.state == ShortcutState::Pressed {
                     let _ = app_handle.emit("price-check-triggered", ());
                 }
-            }).ok(); // Non-fatal if registration fails (e.g. hotkey already taken)
+            }).ok(); // Non-fatal if registration fails
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
