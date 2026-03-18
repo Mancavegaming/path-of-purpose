@@ -295,11 +295,15 @@ export default function CharacterPage(props: CharacterPageProps) {
                 class="btn-secondary"
                 onClick={() => {
                   setBuild(null);
+                  props.setLoadedBuild?.(null);
                   setDpsResult(null);
                   setSelectedItem(null);
+                  setDpsError("");
+                  setImportedCharName("");
+                  setStreamBuild(null, null);
                 }}
               >
-                Back to Characters
+                Unload Character
               </button>
             </div>
           </div>
