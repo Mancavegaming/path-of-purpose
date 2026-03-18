@@ -25,7 +25,7 @@ const DEFAULT_SETTINGS: PriceCheckSettings = {
   overlayOpacity: 94,
   overlayAutoDismiss: 0,
   overlayPosition: "cursor",
-  deathRecapEnabled: true,
+  deathRecapEnabled: false,
   deathRecapDismiss: 10,
   showGraceVerses: true,
 };

@@ -120,7 +120,7 @@ export default function OverlayApp() {
     for (const unlisten of unlisteners) unlisten();
   });
 
-  const opacity = () => settings().overlayOpacity / 100;
+  const opacity = () => Math.max(0.2, settings().overlayOpacity / 100);
 
   return (
     <div class="overlay-root">
