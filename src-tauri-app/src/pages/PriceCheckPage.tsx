@@ -1,4 +1,4 @@
-import { createSignal, onMount, For } from "solid-js";
+import { createSignal, onMount, For, Show } from "solid-js";
 import {
   settings,
   updateSetting,
@@ -6,10 +6,12 @@ import {
   settingsLoaded,
 } from "../lib/priceCheckStore";
 import { fetchLeagues } from "../lib/commands";
+import { emit } from "@tauri-apps/api/event";
 
 export default function PriceCheckPage() {
   const [leagues, setLeagues] = createSignal<string[]>(["Standard"]);
   const [leagueLoading, setLeagueLoading] = createSignal(false);
+  const [testStatus, setTestStatus] = createSignal("");
 
   onMount(async () => {
     if (!settingsLoaded()) {
@@ -64,6 +66,21 @@ export default function PriceCheckPage() {
         <div class="settings-hint">
           Press this key while hovering an item in PoE (borderless windowed mode).
           Restart the app after changing the hotkey.
+        </div>
+        <div class="settings-row" style={{ "margin-top": "8px" }}>
+          <button
+            class="btn-primary"
+            onClick={async () => {
+              setTestStatus("Triggered! Hover an item in PoE first.");
+              await emit("price-check-triggered");
+              setTimeout(() => setTestStatus(""), 4000);
+            }}
+          >
+            Manual Price Check
+          </button>
+          <Show when={testStatus()}>
+            <span style={{ "margin-left": "8px", color: "#999", "font-size": "0.85rem" }}>{testStatus()}</span>
+          </Show>
         </div>
       </section>
 

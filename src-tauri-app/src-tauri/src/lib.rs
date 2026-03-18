@@ -2604,11 +2604,31 @@ pub fn run() {
             // Register Ctrl+D global hotkey for price check
             use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
             use tauri::Emitter;
-            app.global_shortcut().on_shortcut("CmdOrCtrl+D", move |app_handle: &tauri::AppHandle, _shortcut, event| {
+
+            let hotkey_result = app.global_shortcut().on_shortcut("CmdOrCtrl+D", move |app_handle: &tauri::AppHandle, _shortcut, event| {
                 if event.state == ShortcutState::Pressed {
                     let _ = app_handle.emit("price-check-triggered", ());
                 }
-            }).ok(); // Non-fatal if registration fails (e.g. hotkey already taken)
+            });
+
+            match &hotkey_result {
+                Ok(_) => eprintln!("[PoP] Global hotkey Ctrl+D registered successfully"),
+                Err(e) => eprintln!("[PoP] WARNING: Failed to register Ctrl+D hotkey: {}", e),
+            }
+
+            // If Ctrl+D failed (another app grabbed it), try Ctrl+Shift+D as fallback
+            if hotkey_result.is_err() {
+                let fallback = app.global_shortcut().on_shortcut("CmdOrCtrl+Shift+D", move |app_handle: &tauri::AppHandle, _shortcut, event| {
+                    if event.state == ShortcutState::Pressed {
+                        let _ = app_handle.emit("price-check-triggered", ());
+                    }
+                });
+                match &fallback {
+                    Ok(_) => eprintln!("[PoP] Fallback hotkey Ctrl+Shift+D registered successfully"),
+                    Err(e) => eprintln!("[PoP] WARNING: Fallback hotkey also failed: {}", e),
+                }
+            }
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
