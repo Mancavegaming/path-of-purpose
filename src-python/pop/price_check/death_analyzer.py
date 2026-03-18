@@ -40,7 +40,11 @@ def analyze_death(
         Dict with killer, zone, weaknesses, suggestions, grace_verse, grace_ref.
     """
     killer = death_event.get("killer", "Unknown")
+    killer_raw = death_event.get("killer_raw", "")
     zone = zone_name or death_event.get("zone", "Unknown")
+
+    # Infer damage element from killer metadata path and resolved name
+    damage_element = _infer_element(killer_raw, killer)
 
     weaknesses: list[dict] = []
     suggestions: list[str] = []
@@ -130,14 +134,52 @@ def analyze_death(
     # Select a grace verse
     verse, ref = random.choice(_GRACE_VERSES)
 
+    # If we know the element, prioritize the matching resistance weakness
+    if damage_element and damage_element != "Physical":
+        ele_key = damage_element.lower()
+        if ele_key == "chaos":
+            if chaos_res < 20:
+                if not any("chaos" in s.lower() for s in suggestions):
+                    suggestions.insert(0, f"You died to {damage_element} damage — prioritize chaos resistance")
+        elif ele_key in ("fire", "cold", "lightning"):
+            res_val = ele_res.get(ele_key, 0)
+            if res_val < 75:
+                suggestions.insert(0, f"You died to {damage_element} damage — cap your {ele_key} resistance")
+
     return {
         "killer": killer,
         "zone": zone,
+        "damage_element": damage_element,
         "weaknesses": weaknesses,
         "suggestions": suggestions[:3],  # max 3 actionable suggestions
         "grace_verse": verse,
         "grace_ref": ref,
     }
+
+
+def _infer_element(killer_raw: str, killer_name: str) -> str:
+    """Infer the likely damage element from killer metadata path and name."""
+    combined = (killer_raw + " " + killer_name).lower()
+
+    # Check for specific element keywords in order of specificity
+    fire_keywords = ["fire", "flame", "burn", "ignit", "magma", "lava", "searing", "infernal", "scorch"]
+    cold_keywords = ["cold", "frost", "ice", "chill", "freez", "blizzard", "avalanche", "glacial"]
+    lightning_keywords = ["lightning", "storm", "shock", "thunder", "spark", "electr"]
+    chaos_keywords = ["chaos", "caustic", "poison", "venom", "blight", "wither", "profane", "desecrat"]
+    physical_keywords = ["physical", "bleed", "impale", "bone", "crush", "slam"]
+
+    if any(kw in combined for kw in fire_keywords):
+        return "Fire"
+    if any(kw in combined for kw in cold_keywords):
+        return "Cold"
+    if any(kw in combined for kw in lightning_keywords):
+        return "Lightning"
+    if any(kw in combined for kw in chaos_keywords):
+        return "Chaos"
+    if any(kw in combined for kw in physical_keywords):
+        return "Physical"
+
+    return ""
 
 
 def _is_boss_zone(zone_name: str) -> bool:

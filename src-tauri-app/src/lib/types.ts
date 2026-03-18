@@ -548,6 +548,7 @@ export interface DeathWeakness {
 export interface DeathAnalysis {
   killer: string;
   zone: string;
+  damage_element: string;
   weaknesses: DeathWeakness[];
   suggestions: string[];
   grace_verse: string;

@@ -206,6 +206,11 @@
   color: #ff6666;
 }
 
+.death-element {
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .death-zone {
   color: #999;
   font-size: 12px;

@@ -146,6 +146,8 @@ export default function StreamingPage() {
     }
   });
 
+  let isFirstPoll = true;
+
   async function pollLogSnapshot() {
     try {
       const offset = logWatcherOffset();
@@ -156,11 +158,11 @@ export default function StreamingPage() {
       } else {
         setLogError("");
 
-        // Detect new deaths and emit death recap to overlay
-        const prevStats = logWatcherStats();
-        const prevDeaths = prevStats?.total_deaths ?? 0;
+        // Detect new deaths — each snapshot creates a fresh watcher so
+        // total_deaths is only for the lines in this chunk, not cumulative.
+        // Skip the first poll (reads old log history, would false-trigger).
         const newDeaths = snap.stats?.total_deaths ?? 0;
-        if (newDeaths > prevDeaths && snap.stats?.last_death) {
+        if (!isFirstPoll && newDeaths > 0 && snap.stats?.last_death) {
           const dps = streamDpsResult();
           const defence = dps?.defence;
           if (defence) {
@@ -176,6 +178,7 @@ export default function StreamingPage() {
             }
           }
         }
+        isFirstPoll = false;
 
         updateLogWatcherStats(snap);
       }

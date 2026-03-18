@@ -8,7 +8,18 @@ interface Props {
   opacity: number;
 }
 
+const ELEMENT_COLORS: Record<string, string> = {
+  Fire: "#f97316",
+  Cold: "#38bdf8",
+  Lightning: "#facc15",
+  Chaos: "#c084fc",
+  Physical: "#a1a1aa",
+};
+
 export default function DeathRecapToast(props: Props) {
+  const element = () => props.analysis.damage_element || "";
+  const elementColor = () => ELEMENT_COLORS[element()] || "";
+
   return (
     <div
       class="death-toast"
@@ -17,6 +28,11 @@ export default function DeathRecapToast(props: Props) {
     >
       <div class="death-header">
         <span class="death-skull">Slain by {props.analysis.killer}</span>
+        <Show when={element()}>
+          <span class="death-element" style={{ color: elementColor() }}>
+            ({element()})
+          </span>
+        </Show>
         <Show when={props.analysis.zone}>
           <span class="death-zone">in {props.analysis.zone}</span>
         </Show>

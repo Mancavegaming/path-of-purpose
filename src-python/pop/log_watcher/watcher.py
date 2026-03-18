@@ -168,6 +168,7 @@ class SessionStats:
             last_death = {
                 "character": self.last_death.character_name,
                 "killer": self.last_death.killer_name or self.last_death.killer_raw or "Unknown",
+                "killer_raw": self.last_death.killer_raw,
                 "zone": self.last_death.zone_name,
                 "timestamp": self.last_death.timestamp,
                 "grace_verse": self.last_death.grace_verse,
