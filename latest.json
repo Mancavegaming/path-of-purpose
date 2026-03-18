@@ -1,11 +1,11 @@
 {
-  "version": "0.7.6",
-  "notes": "v0.7.6: Vibrant loot filter sounds + Defender exclusions on install",
-  "pub_date": "2026-03-18T14:57:28Z",
+  "version": "0.7.7",
+  "notes": "v0.7.7: Fix Defender exclusions",
+  "pub_date": "2026-03-18T15:43:33Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXVuRllrRnlhRTU2ZysxRnBSa3RRQ0t3clM5S0wvckR5OEc5S09BclptYXNvSDYxYzRnRENlOEkzREc0UVZpcWgwV2x3M0doVTFkUkJvVnRoaldjYkFrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczODQ1NDE3CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuNy42X3g2NC1zZXR1cC5uc2lzLnppcAo4Snp3SjREWmdsZGRWSjBJdXRvaHNsY08yVFZRUW1MMjdIcHJhZGdpWmhvVm50ek9BWnFNSTh0czVVTEo3dDU2bGJwM1JyYXoyMEZxcnp4RlVVY0ZDZz09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.7.6/Path.of.Purpose_0.7.6_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWxnRFlIbndBdEVnOVQzMWhpbys2UFVnWDJ1bzJRQzZaQlIwY0hjdHVBbjhvVXNEU1dZWXI3NzNZQ3dxb1IrOEgxUjBLRlN5Wnc2N3Iwam5Ba2grNFFZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczODQ4NDAyCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuNy43X3g2NC1zZXR1cC5uc2lzLnppcAozTFRCZVJZaFhUVzBtOWdDZUY3cjg1a3FxQmxpUUlxVFpXVUhlcUxIWDMyWklUVnRhUkwwQVlmTWZPVTVFWUMyTnF2dE91THNLL045Z0RERzRBMFlEQT09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.7.7/Path.of.Purpose_0.7.7_x64-setup.nsis.zip"
     }
   }
 }
