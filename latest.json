@@ -1,11 +1,11 @@
 {
-  "version": "0.7.4",
-  "notes": "v0.7.4: Fix trade URL + overlay fixes",
-  "pub_date": "2026-03-17T21:30:06Z",
+  "version": "0.7.5",
+  "notes": "v0.7.5: Wire overlay settings — hotkey, opacity, auto-dismiss, max listings",
+  "pub_date": "2026-03-18T13:52:15Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWhRSFpNOTlGeVZ1eXQ1U0JoY09WS0NoZUE3NHVZWlhROTIrM2l2RWR2VDJPSnh4blhRUEdINmZqTitTRGh0RmtyK1pWbXljeTNoR3dNY29YSmt0ZndRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczNzgyNTIzCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuNy40X3g2NC1zZXR1cC5uc2lzLnppcApIZ29NTmpQb0hjREJVM0FDMWV3aXZvUm1IL3VvdHMvRXcwdkltM1h6VGUveDBlenBBNnQzNVhnWnJCS1h5QlpYMk9GSkw5KzJHUWxrS1JLdWdLd0tBQT09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.7.4/Path.of.Purpose_0.7.4_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXZNZTJ4djVYbm1EeWhnaUhEcFl5WGJEbDF4QjZ2ekpNclpVOXA1OHhrZS9rdm85STNXbm5Id0U5VzJVQlUwNDFwRVlnZldzc3VVOXM5MDAyR3JXVEFBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczODQxNzk2CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuNy41X3g2NC1zZXR1cC5uc2lzLnppcAo5VEVJQ3poMjZuRVNwSFVaVngrNlM4ZTdkYStCRVBlRkxEM0I2RmRoL2gzeVdHSFRha2FwQmhNdm94QjIyTis1V0t6U2FDeEJld2swbFg5dkMwcmRBUT09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.7.5/Path.of.Purpose_0.7.5_x64-setup.nsis.zip"
     }
   }
 }
