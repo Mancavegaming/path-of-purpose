@@ -151,13 +151,18 @@ fn run_python_command(
         args.to_vec()
     };
 
-    let mut child = StdCommand::new(&python_exe)
-        .args(&effective_args)
+    let mut cmd = StdCommand::new(&python_exe);
+    cmd.args(&effective_args)
         .current_dir(&python_cwd)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
+        .stderr(Stdio::piped());
+
+    // Hide the console window on Windows
+    #[cfg(windows)]
+    cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+
+    let mut child = cmd.spawn()
         .map_err(|e| format!("Failed to run Python engine: {}", e))?;
 
     // Assign to job object so it dies when the app exits
