@@ -1,11 +1,11 @@
 {
-  "version": "0.7.9",
-  "notes": "v0.7.9: Fix death recap detection + show damage element",
-  "pub_date": "2026-03-18T17:14:09Z",
+  "version": "0.8.0",
+  "notes": "v0.8.0: Process timeout + cleanup",
+  "pub_date": "2026-03-18T18:08:05Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYW9NVzVJa0xPQWtXRDNJR3k1RWtHeFNaSkhIb1BJdGpqL0ZWMFFaZ09tN1JUWHpJeGU5Z3E4YjlNVTVjZkkzQmpyYkJqRWo5WHkzeHU5dm5wTkRwQmd3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczODUzNTgzCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuNy45X3g2NC1zZXR1cC5uc2lzLnppcApCbFJQL2NxZ09tL2Jlcnc5L3BoY1pvSXVoMGwxV2pVSVFqa2psZEZESVA1c0s3V1M1a3lRb3dVRHdpanhxQnVGLzBvOW1yeFJ0aURKMjFaWXlER1JBUT09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.7.9/Path.of.Purpose_0.7.9_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXF1eDhNVmt0MkVKdXVLYmJOUVRZNjVtSGExU0RkaXlNaU1UT1pMTUdKTGpwSHhwc2hjOVdnUDlwU1V2Umx3ckQwUUNKRFB6U0NPVFI0Szl0MlhrSHdRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczODU2NDQxCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOC4wX3g2NC1zZXR1cC5uc2lzLnppcApNcWRXMTdzOTdlMHR6bHRVcDhHR0Y3bEdtY21LNzBXVnR1WU8xWDdLTmRnelRZalBzL3ZkbE14YUd4M3lpN2hKWi9QVE8xOG5YYlpaMDZMUXU4dElEQT09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.8.0/Path.of.Purpose_0.8.0_x64-setup.nsis.zip"
     }
   }
 }
