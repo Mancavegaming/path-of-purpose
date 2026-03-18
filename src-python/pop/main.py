@@ -1625,9 +1625,13 @@ def cmd_log_snapshot(args: argparse.Namespace) -> None:
     try:
         with open(log_path, "r", encoding="utf-8", errors="replace") as f:
             file_size = os.path.getsize(log_path)
-            if offset > 0 and offset < file_size:
+            if offset > 0 and offset >= file_size:
+                # Log hasn't grown since last poll — nothing new to read
+                print(json.dumps({"log_path": log_path, "offset": offset, "stats": watcher.stats.to_dict()}))
+                return
+            elif offset > 0:
                 f.seek(offset)
-            elif offset == 0:
+            else:
                 # First call: only read last 50KB to catch recent events
                 start = max(0, file_size - 50 * 1024)
                 f.seek(start)
