@@ -1,11 +1,11 @@
 {
-  "version": "0.8.1",
-  "notes": "v0.8.1: Fix death recap spam",
-  "pub_date": "2026-03-18T19:16:23Z",
+  "version": "0.8.2",
+  "notes": "v0.8.2: Hide pop-engine console window",
+  "pub_date": "2026-03-18T20:13:12Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWlsSW1FN2thd2w1R1dvcUpPOUZhL0pkZkUwRlRMZ2t5dUxEaTRrelpGOVA3bnBRSnBDV3pNWmRVQk55SVlQaEtrVlk1ZS9DSDRJVmdYQThBMDk3RGdrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczODYwMTEwCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOC4xX3g2NC1zZXR1cC5uc2lzLnppcApwTDh0RkE1NVpGb25vUkM4SHRRV1BvOXlYUjFmdDhiSnJZUFcrMDU2aFl2enBjUm9VOURsWGJ1dW5EbnNNUW9kQlZwNnVzUjhaQ2hwOGdDbTdFc0tCUT09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.8.1/Path.of.Purpose_0.8.1_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWdqYVNmc3ZQaWR0RjhHSXdLdWNTU1QzUnJMV2xYeStPeC9EeTdYMmdrbm0rS0xvRlgza2ZsSGdCS3FWQ2x5NDBjdWg1OHNiZ1NvZ2JkU0pyS3gvdFFzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczODY0Nzc4CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOC4yX3g2NC1zZXR1cC5uc2lzLnppcApGOHpCSTFlczR5NEJLSVZpK0NnUjBSdDAxL2duSkZxZnRsd3NGaTNhS2J5Uk1jYU5zQ0piQ0dTK09WZytoSWRmVVF0ay9iQWJzM1VOZVgrdS8rUWxCZz09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.8.2/Path.of.Purpose_0.8.2_x64-setup.nsis.zip"
     }
   }
 }
