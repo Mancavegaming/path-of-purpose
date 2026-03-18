@@ -1,11 +1,11 @@
 {
-  "version": "0.8.2",
-  "notes": "v0.8.2: Hide pop-engine console window",
-  "pub_date": "2026-03-18T20:13:12Z",
+  "version": "0.8.3",
+  "notes": "v0.8.3: Unload Character button",
+  "pub_date": "2026-03-18T20:38:59Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWdqYVNmc3ZQaWR0RjhHSXdLdWNTU1QzUnJMV2xYeStPeC9EeTdYMmdrbm0rS0xvRlgza2ZsSGdCS3FWQ2x5NDBjdWg1OHNiZ1NvZ2JkU0pyS3gvdFFzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczODY0Nzc4CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOC4yX3g2NC1zZXR1cC5uc2lzLnppcApGOHpCSTFlczR5NEJLSVZpK0NnUjBSdDAxL2duSkZxZnRsd3NGaTNhS2J5Uk1jYU5zQ0piQ0dTK09WZytoSWRmVVF0ay9iQWJzM1VOZVgrdS8rUWxCZz09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.8.2/Path.of.Purpose_0.8.2_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWpZcWgxNzRtRU5iaUh0c2RPYStsTVFXazRUREIrTjhCVjJleWlUbmNUNG9QNjdxZkcybGs1Zk1JSjdVcGR4Y1FPbTNpeGVFUjF4N3pwNGY5NFNpL3c4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczODY2MzE3CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOC4zX3g2NC1zZXR1cC5uc2lzLnppcApyeWZIZFhwNTVlRlBOUkpyZ0xVajZHVVowYmo3OEgydHVodGVuZnpqNUJkcG9wS0FiWHlVektWcEloa2RKSzdmL3drRGsycFFlTURXTDNVVkxLWmdBZz09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.8.3/Path.of.Purpose_0.8.3_x64-setup.nsis.zip"
     }
   }
 }
