@@ -17,25 +17,124 @@ interface FilterPageProps {
 const BEAMS = ["", "Red", "Green", "Blue", "Yellow", "White", "Orange", "Cyan", "Purple", "Pink", "Brown", "Grey"];
 const SOUNDS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
 
-/** Play a PoE alert sound preview. Sounds are short sine-wave tones at different pitches. */
+/** Create a convolver node that simulates a reverb tail. */
+function createReverb(ctx: AudioContext, duration: number, decay: number): ConvolverNode {
+  const rate = ctx.sampleRate;
+  const len = rate * duration;
+  const buf = ctx.createBuffer(2, len, rate);
+  for (let ch = 0; ch < 2; ch++) {
+    const data = buf.getChannelData(ch);
+    for (let i = 0; i < len; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
+    }
+  }
+  const conv = ctx.createConvolver();
+  conv.buffer = buf;
+  return conv;
+}
+
+/** Add an oscillator with envelope to the audio graph. */
+function addTone(
+  ctx: AudioContext, dest: AudioNode,
+  type: OscillatorType, freq: number, vol: number,
+  attack: number, sustain: number, release: number, delay: number = 0,
+) {
+  const osc = ctx.createOscillator();
+  const env = ctx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, ctx.currentTime);
+  const t = ctx.currentTime + delay;
+  env.gain.setValueAtTime(0, t);
+  env.gain.linearRampToValueAtTime(vol, t + attack);
+  env.gain.setValueAtTime(vol, t + attack + sustain);
+  env.gain.exponentialRampToValueAtTime(0.001, t + attack + sustain + release);
+  osc.connect(env);
+  env.connect(dest);
+  osc.start(t);
+  osc.stop(t + attack + sustain + release + 0.05);
+  return osc;
+}
+
+/** Play a vibrant loot filter alert sound (3-5s). Each ID has a distinct character. */
 function playAlertSound(soundId: number) {
   if (soundId === 0) return;
   try {
     const ctx = new AudioContext();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    // Each sound ID gets a distinct frequency
-    const baseFreq = 220;
-    const freq = baseFreq + (soundId - 1) * 80;
-    osc.type = soundId <= 8 ? "sine" : "square";
-    osc.frequency.setValueAtTime(freq, ctx.currentTime);
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.4);
-    osc.onended = () => ctx.close();
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.35, ctx.currentTime);
+    const reverb = createReverb(ctx, 3, 2.5);
+    const dry = ctx.createGain();
+    const wet = ctx.createGain();
+    dry.gain.setValueAtTime(0.6, ctx.currentTime);
+    wet.gain.setValueAtTime(0.4, ctx.currentTime);
+    dry.connect(master);
+    reverb.connect(wet);
+    wet.connect(master);
+    master.connect(ctx.destination);
+
+    const allOsc: OscillatorNode[] = [];
+    const track = (o: OscillatorNode) => { allOsc.push(o); return o; };
+
+    if (soundId >= 1 && soundId <= 4) {
+      // Warm chimes — ascending arpeggio with soft sine layers
+      const roots = [262, 294, 330, 392]; // C4, D4, E4, G4
+      const root = roots[soundId - 1];
+      const notes = [root, root * 1.25, root * 1.5, root * 2];
+      notes.forEach((f, i) => {
+        track(addTone(ctx, dry, "sine", f, 0.25, 0.05, 0.6, 1.8, i * 0.35));
+        track(addTone(ctx, reverb, "sine", f * 2, 0.08, 0.03, 0.3, 1.5, i * 0.35 + 0.05));
+      });
+      // Soft pad underneath
+      track(addTone(ctx, reverb, "sine", root / 2, 0.12, 0.3, 1.5, 1.2));
+    } else if (soundId >= 5 && soundId <= 8) {
+      // Bright bells — metallic shimmer with harmonics
+      const roots = [523, 587, 659, 784]; // C5, D5, E5, G5
+      const root = roots[soundId - 5];
+      // Bell fundamental + inharmonic partials
+      track(addTone(ctx, dry, "sine", root, 0.22, 0.01, 0.8, 2.5));
+      track(addTone(ctx, dry, "sine", root * 2.76, 0.1, 0.01, 0.4, 2.0));
+      track(addTone(ctx, reverb, "sine", root * 5.4, 0.05, 0.01, 0.2, 1.5));
+      track(addTone(ctx, dry, "triangle", root * 1.5, 0.08, 0.01, 0.5, 2.2));
+      // Sparkle arpeggios
+      for (let i = 0; i < 3; i++) {
+        track(addTone(ctx, reverb, "sine", root * (1 + i * 0.5), 0.06, 0.02, 0.15, 1.0, 0.8 + i * 0.25));
+      }
+    } else if (soundId >= 9 && soundId <= 12) {
+      // Epic power tones — deep layered fifths with rising swell
+      const roots = [131, 147, 165, 175]; // C3, D3, E3, F3
+      const root = roots[soundId - 9];
+      // Deep foundation
+      track(addTone(ctx, dry, "sawtooth", root, 0.12, 0.4, 1.5, 2.0));
+      track(addTone(ctx, dry, "sawtooth", root * 1.5, 0.1, 0.4, 1.2, 1.8));
+      // Octave layer
+      track(addTone(ctx, dry, "square", root * 2, 0.07, 0.3, 1.0, 1.5));
+      // Bright overtone swell
+      track(addTone(ctx, reverb, "sine", root * 4, 0.08, 0.8, 0.8, 1.5));
+      track(addTone(ctx, reverb, "sine", root * 3, 0.06, 0.6, 1.0, 1.8));
+      // Sub bass hit
+      track(addTone(ctx, dry, "sine", root / 2, 0.15, 0.05, 0.5, 2.5));
+    } else {
+      // Celestial shimmer — ethereal choir-like tones with slow bloom
+      const roots = [392, 440, 494, 523]; // G4, A4, B4, C5
+      const root = roots[soundId - 13];
+      // Slow-blooming pad voices
+      track(addTone(ctx, reverb, "sine", root, 0.18, 1.2, 1.5, 2.0));
+      track(addTone(ctx, reverb, "sine", root * 1.5, 0.12, 1.0, 1.2, 2.0, 0.3));
+      track(addTone(ctx, reverb, "sine", root * 2, 0.08, 0.8, 1.0, 2.0, 0.6));
+      // Detuned shimmer (chorus effect)
+      track(addTone(ctx, reverb, "sine", root * 1.003, 0.1, 1.0, 1.2, 2.2));
+      track(addTone(ctx, reverb, "sine", root * 0.997, 0.1, 1.0, 1.2, 2.2));
+      // Gentle high sparkle
+      for (let i = 0; i < 4; i++) {
+        track(addTone(ctx, reverb, "sine", root * 3 + i * 50, 0.03, 0.05, 0.2, 1.5, 1.0 + i * 0.6));
+      }
+      // Sub warmth
+      track(addTone(ctx, dry, "sine", root / 2, 0.08, 0.8, 2.0, 2.0));
+    }
+
+    // Close context after the longest sound finishes
+    const maxDur = soundId >= 13 ? 5.5 : soundId >= 9 ? 4.5 : soundId >= 5 ? 4.0 : 3.5;
+    setTimeout(() => ctx.close().catch(() => {}), maxDur * 1000);
   } catch {
     // AudioContext not available
   }
