@@ -1,11 +1,11 @@
 {
-  "version": "0.8.3",
-  "notes": "v0.8.3: Unload Character button",
-  "pub_date": "2026-03-18T20:38:59Z",
+  "version": "0.8.4",
+  "notes": "v0.8.4: Hotkey fallback + manual price check",
+  "pub_date": "2026-03-18T20:54:25Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWpZcWgxNzRtRU5iaUh0c2RPYStsTVFXazRUREIrTjhCVjJleWlUbmNUNG9QNjdxZkcybGs1Zk1JSjdVcGR4Y1FPbTNpeGVFUjF4N3pwNGY5NFNpL3c4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczODY2MzE3CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOC4zX3g2NC1zZXR1cC5uc2lzLnppcApyeWZIZFhwNTVlRlBOUkpyZ0xVajZHVVowYmo3OEgydHVodGVuZnpqNUJkcG9wS0FiWHlVektWcEloa2RKSzdmL3drRGsycFFlTURXTDNVVkxLWmdBZz09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.8.3/Path.of.Purpose_0.8.3_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYW1laTR0Qk45ci9NNUpvcjczOXlIZXlycmc2eHpmWTFhZEplQUhwVGVnSCtFOHlTZDFpYUwzbTZqRWdETlZEazlMMERJbTZYRFZCVjFwcVlnUW5zMVFVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczODY3MTQ0CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOC40X3g2NC1zZXR1cC5uc2lzLnppcAowZkhKU2JQd1Uyd0RNWDlMeHR2bWsrR29LQ2sxeklEMG5uT2s2dVFsQlhKYlJXbERpbDJlQnlaaVFsbDlTRVMwTHBQUUFlUENhdnRUOHpUeWlwU1hCZz09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.8.4/Path.of.Purpose_0.8.4_x64-setup.nsis.zip"
     }
   }
 }
