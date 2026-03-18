@@ -7,6 +7,88 @@ use std::sync::Arc;
 use tauri::Manager;
 use tokio::sync::RwLock;
 
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
+
+/// Windows Job Object — ensures all spawned child processes die when the app exits.
+/// Uses raw Win32 FFI since the `windows` crate doesn't expose CreateJobObjectW cleanly.
+#[cfg(windows)]
+mod job_object {
+    use std::sync::OnceLock;
+
+    #[repr(C)]
+    struct JOBOBJECT_BASIC_LIMIT_INFORMATION {
+        per_process_user_time_limit: i64,
+        per_job_user_time_limit: i64,
+        limit_flags: u32,
+        minimum_working_set_size: usize,
+        maximum_working_set_size: usize,
+        active_process_limit: u32,
+        affinity: usize,
+        priority_class: u32,
+        scheduling_class: u32,
+    }
+
+    #[repr(C)]
+    struct IO_COUNTERS {
+        read_operations: u64, read_transfer: u64,
+        write_operations: u64, write_transfer: u64,
+        other_operations: u64, other_transfer: u64,
+    }
+
+    #[repr(C)]
+    struct JOBOBJECT_EXTENDED_LIMIT_INFORMATION {
+        basic: JOBOBJECT_BASIC_LIMIT_INFORMATION,
+        io_info: IO_COUNTERS,
+        process_memory_limit: usize,
+        job_memory_limit: usize,
+        peak_process_memory_used: usize,
+        peak_job_memory_used: usize,
+    }
+
+    type HANDLE = *mut core::ffi::c_void;
+    const JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE: u32 = 0x2000;
+    const JOB_OBJECT_EXTENDED_LIMIT_INFO_CLASS: u32 = 9;
+
+    extern "system" {
+        fn CreateJobObjectW(attrs: *const core::ffi::c_void, name: *const u16) -> HANDLE;
+        fn SetInformationJobObject(job: HANDLE, class: u32, info: *const core::ffi::c_void, len: u32) -> i32;
+        fn AssignProcessToJobObject(job: HANDLE, process: HANDLE) -> i32;
+    }
+
+    struct SafeHandle(HANDLE);
+    unsafe impl Send for SafeHandle {}
+    unsafe impl Sync for SafeHandle {}
+
+    static JOB: OnceLock<SafeHandle> = OnceLock::new();
+
+    pub fn init() {
+        unsafe {
+            let job = CreateJobObjectW(core::ptr::null(), core::ptr::null());
+            if job.is_null() { return; }
+
+            let mut info: JOBOBJECT_EXTENDED_LIMIT_INFORMATION = core::mem::zeroed();
+            info.basic.limit_flags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+            SetInformationJobObject(
+                job,
+                JOB_OBJECT_EXTENDED_LIMIT_INFO_CLASS,
+                &info as *const _ as *const core::ffi::c_void,
+                core::mem::size_of::<JOBOBJECT_EXTENDED_LIMIT_INFORMATION>() as u32,
+            );
+            JOB.set(SafeHandle(job)).ok();
+        }
+    }
+
+    pub fn assign(child: &std::process::Child) {
+        use std::os::windows::io::AsRawHandle;
+        if let Some(job) = JOB.get() {
+            unsafe {
+                AssignProcessToJobObject(job.0, child.as_raw_handle());
+            }
+        }
+    }
+}
+
 // Backend API base URL — configurable for dev vs production
 const API_BASE: &str = "http://45.61.55.200:8080";
 
@@ -50,8 +132,9 @@ fn resolve_python_paths() -> (String, String, bool) {
     (DEV_PYTHON_EXE.to_string(), DEV_PYTHON_CWD.to_string(), false)
 }
 
-/// Run a Python subcommand, optionally piping stdin_data. Returns (stdout, stderr).
+/// Run a Python subcommand, optionally piping stdin_data. Returns stdout.
 /// Args should include `-m pop.main` prefix — it will be stripped automatically for the compiled sidecar.
+/// Enforces a 30-second timeout to prevent hangs.
 fn run_python_command(
     args: &[&str],
     stdin_data: Option<&str>,
@@ -77,6 +160,12 @@ fn run_python_command(
         .spawn()
         .map_err(|e| format!("Failed to run Python engine: {}", e))?;
 
+    // Assign to job object so it dies when the app exits
+    #[cfg(windows)]
+    job_object::assign(&child);
+
+    let child_pid = child.id();
+
     if let Some(data) = stdin_data {
         let mut stdin = child.stdin.take()
             .ok_or("Failed to open stdin pipe")?;
@@ -87,19 +176,38 @@ fn run_python_command(
         // stdin drops here, closing the pipe
     }
 
-    let output = child.wait_with_output()
-        .map_err(|e| format!("Failed to wait for Python engine: {}", e))?;
+    // Wait with a 30-second timeout to prevent hangs
+    let (tx, rx) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        let _ = tx.send(child.wait_with_output());
+    });
 
-    if output.status.success() {
-        Ok(String::from_utf8_lossy(&output.stdout).to_string())
-    } else {
-        let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
-        let msg = if stderr.is_empty() {
-            "Python engine exited with an unknown error.".to_string()
-        } else {
-            stderr
-        };
-        Err(msg)
+    match rx.recv_timeout(std::time::Duration::from_secs(30)) {
+        Ok(result) => {
+            let output = result.map_err(|e| format!("Failed to wait for Python engine: {}", e))?;
+            if output.status.success() {
+                Ok(String::from_utf8_lossy(&output.stdout).to_string())
+            } else {
+                let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+                let msg = if stderr.is_empty() {
+                    "Python engine exited with an unknown error.".to_string()
+                } else {
+                    stderr
+                };
+                Err(msg)
+            }
+        }
+        Err(_) => {
+            // Timeout — kill the hung process
+            #[cfg(windows)]
+            {
+                let _ = StdCommand::new("taskkill")
+                    .args(["/F", "/PID", &child_pid.to_string()])
+                    .creation_flags(0x08000000) // CREATE_NO_WINDOW
+                    .output();
+            }
+            Err(format!("Python engine timed out after 30 seconds (PID {})", child_pid))
+        }
     }
 }
 
@@ -2484,6 +2592,10 @@ pub fn run() {
         .manage(OverlayState(Arc::new(RwLock::new(serde_json::json!({})))))
         .manage(OverlayServerRunning(Arc::new(RwLock::new(false))))
         .setup(|app| {
+            // Create job object so child processes die when the app exits
+            #[cfg(windows)]
+            job_object::init();
+
             // Register Ctrl+D global hotkey for price check
             use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
             use tauri::Emitter;
