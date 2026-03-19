@@ -1,11 +1,11 @@
 {
-  "version": "0.8.6",
-  "notes": "v0.8.6: Fix memory leaks — prevent process pileup, timer cleanup, server shutdown",
-  "pub_date": "2026-03-19T00:30:00Z",
+  "version": "0.8.7",
+  "notes": "v0.8.7: Fix price check — release Alt key (not Ctrl) before simulating Ctrl+C",
+  "pub_date": "2026-03-19T10:30:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWhFTzNWaHV4SGRsRHBndkdCRDVpT3dFWS9zMmN2c1VBY0FiZEVSTTdOMTZORFNqekNFRUFKYU5XbWpPQzNsby8zN0xDaTMrOXhpV0lPWSsrajBIN0FvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczODkyNjM3CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOC42X3g2NC1zZXR1cC5uc2lzLnppcAo1eVhxVnRIOXNmNWhYb2dVdFB1UVNRRWU1V3RFUW5FUWgwNHNHMkYxSi9CME9VZDI2bXg4K1hCVWFVa3ZneXdrcUNiREZ6SjZQVDFvcll0cHJnQjBDdz09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.8.6/Path.of.Purpose_0.8.6_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYW0zZmE3Ri9KLzIwbnBDWk5ZV25SR2p3NDJtU1UyT0tJNldFMWFyN3B4MVFZdlliZkQ1NWpsdVM4WG1CVmJ6L3c0NDNZZllKc3hhNU5WZFhCbzNrZkFvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczOTI4NjM3CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOC43X3g2NC1zZXR1cC5uc2lzLnppcApTcGZvT0F2ZUlwK3RUZkhRNlczVmZoVVFpQzZxMnp5RUJvNnNDd3phUFViU2liajNsdWNDQVdTTHVia0ZjVWk4RzlrNmF0ZG5HNHlTb0t5cU5rc0lEZz09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.8.7/Path.of.Purpose_0.8.7_x64-setup.nsis.zip"
     }
   }
 }

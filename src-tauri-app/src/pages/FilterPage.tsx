@@ -1,13 +1,8 @@
-import { createSignal, For, Show, type Accessor } from "solid-js";
-import type { AccountFilter, Build, FilterStrictness } from "../lib/types";
+import { createSignal, Show, type Accessor } from "solid-js";
+import type { Build, FilterStrictness } from "../lib/types";
 import {
   generateFilter,
   saveFilterFile,
-  uploadFilterToAccount,
-  listAccountFilters,
-  deleteAccountFilter,
-  poeCheckLogin,
-  poeLogin,
 } from "../lib/commands";
 
 interface FilterPageProps {
@@ -197,27 +192,6 @@ export default function FilterPage(props: FilterPageProps) {
   const [error, setError] = createSignal("");
   const [savedPath, setSavedPath] = createSignal("");
 
-  // Upload to account
-  const [showUploadModal, setShowUploadModal] = createSignal(false);
-  const [uploadName, setUploadName] = createSignal("PathOfPurpose");
-  const [uploadDesc, setUploadDesc] = createSignal("");
-  const [uploading, setUploading] = createSignal(false);
-  const [uploadMsg, setUploadMsg] = createSignal("");
-
-  // Manage account filters
-  const [showManage, setShowManage] = createSignal(false);
-  const [accountFilters, setAccountFilters] = createSignal<AccountFilter[]>([]);
-  const [loadingFilters, setLoadingFilters] = createSignal(false);
-  const [manageError, setManageError] = createSignal("");
-  const [deletingId, setDeletingId] = createSignal("");
-
-  // PoE OAuth login state
-  const [poeLoggedIn, setPoeLoggedIn] = createSignal<boolean | null>(null); // null = unknown
-  const [poeHasFilterScope, setPoeHasFilterScope] = createSignal(false);
-  const [poeClientId, setPoeClientId] = createSignal("");
-  const [poeLoggingIn, setPoeLoggingIn] = createSignal(false);
-  const [poeLoginMsg, setPoeLoginMsg] = createSignal("");
-
   const build = () => props.loadedBuild?.() ?? null;
 
   function buildConfig() {
@@ -297,101 +271,6 @@ export default function FilterPage(props: FilterPageProps) {
   async function handleCopy() {
     if (!filterText()) return;
     await navigator.clipboard.writeText(filterText()).catch(() => {});
-  }
-
-  async function checkPoeLogin() {
-    try {
-      const status = await poeCheckLogin();
-      setPoeLoggedIn(status.logged_in && !status.expired);
-      setPoeHasFilterScope(status.has_filter_scope ?? false);
-    } catch {
-      setPoeLoggedIn(false);
-    }
-  }
-
-  async function handlePoeLogin() {
-    const id = poeClientId().trim();
-    if (!id) {
-      setPoeLoginMsg("Enter your PoE API Client ID first.");
-      return;
-    }
-    setPoeLoggingIn(true);
-    setPoeLoginMsg("Opening browser for PoE authorization...");
-    try {
-      const res = await poeLogin(id);
-      if (res.error) {
-        setPoeLoginMsg(`Login failed: ${res.error}`);
-      } else {
-        setPoeLoginMsg("Logged in to PoE successfully!");
-        setPoeLoggedIn(true);
-        setPoeHasFilterScope(true);
-      }
-    } catch (e) {
-      setPoeLoginMsg(`Login failed: ${String(e)}`);
-    } finally {
-      setPoeLoggingIn(false);
-    }
-  }
-
-  async function handleUpload() {
-    if (!filterText() || !uploadName().trim()) return;
-    setUploading(true);
-    setUploadMsg("");
-    try {
-      const res = await uploadFilterToAccount(uploadName().trim(), filterText(), uploadDesc()) as Record<string, unknown>;
-      if (res.error) {
-        setUploadMsg(`Upload failed: ${String(res.error)}`);
-      } else {
-        setUploadMsg(`Filter "${uploadName()}" uploaded to your PoE account.`);
-        setShowUploadModal(false);
-      }
-    } catch (e) {
-      setUploadMsg(`Upload failed: ${String(e)}`);
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  async function loadAccountFilters() {
-    setLoadingFilters(true);
-    setManageError("");
-    try {
-      const res = await listAccountFilters() as Record<string, unknown>;
-      if (res.error) {
-        setManageError(String(res.error));
-      } else {
-        setAccountFilters((res.filters as AccountFilter[]) || []);
-      }
-    } catch (e) {
-      setManageError(String(e));
-    } finally {
-      setLoadingFilters(false);
-    }
-  }
-
-  async function handleDeleteFilter(id: string) {
-    setDeletingId(id);
-    try {
-      const res = await deleteAccountFilter(id) as Record<string, unknown>;
-      if (res.error) {
-        setManageError(`Delete failed: ${String(res.error)}`);
-      } else {
-        setAccountFilters((prev) => prev.filter((f) => f.id !== id));
-      }
-    } catch (e) {
-      setManageError(`Delete failed: ${String(e)}`);
-    } finally {
-      setDeletingId("");
-    }
-  }
-
-  async function toggleManage() {
-    const next = !showManage();
-    setShowManage(next);
-    if (next) {
-      await checkPoeLogin();
-      if (poeLoggedIn()) loadAccountFilters();
-    }
   }
 
   const SoundSelect = (p: { value: number; onChange: (v: number) => void }) => (
@@ -585,7 +464,6 @@ export default function FilterPage(props: FilterPageProps) {
           </button>
           <Show when={filterText()}>
             <button class="filter-install-main-btn" onClick={handleInstall}>Install to PoE</button>
-            <button class="filter-upload-btn" onClick={() => { checkPoeLogin(); setShowUploadModal(true); setUploadMsg(""); }}>Upload to Account</button>
             <button class="filter-download-btn" onClick={handleDownload}>Download .filter</button>
             <button class="filter-copy-main-btn" onClick={handleCopy}>Copy</button>
           </Show>
@@ -593,123 +471,6 @@ export default function FilterPage(props: FilterPageProps) {
         <Show when={error()}><div class="filter-error">{error()}</div></Show>
         <Show when={savedPath()}>
           <div class="filter-success">Installed to: {savedPath()}<br />In-game: Options &gt; UI &gt; Item Filter &gt; select "PathOfPurpose"</div>
-        </Show>
-        <Show when={uploadMsg()}>
-          <div class={uploadMsg().startsWith("Upload failed") ? "filter-error" : "filter-success"}>{uploadMsg()}</div>
-        </Show>
-      </div>
-
-      {/* Upload Modal */}
-      <Show when={showUploadModal()}>
-        <div class="filter-upload-modal">
-          <h3>Upload Filter to PoE Account</h3>
-          <Show when={poeLoggedIn() === false}>
-            <div class="filter-poe-login-section">
-              <p class="filter-upload-hint">You need to log in to your PoE account first. This requires a PoE API Client ID — register one at <strong>pathofexile.com/developer/apps</strong> (select "Confidential" = No, add redirect <code>http://localhost:8457/callback</code>).</p>
-              <div class="filter-upload-field">
-                <label>PoE Client ID</label>
-                <input type="text" value={poeClientId()} onInput={(e) => setPoeClientId(e.currentTarget.value)} placeholder="paste your client ID here" />
-              </div>
-              <div class="filter-upload-actions">
-                <button class="filter-upload-confirm-btn" onClick={handlePoeLogin} disabled={poeLoggingIn() || !poeClientId().trim()}>
-                  {poeLoggingIn() ? "Waiting for browser..." : "Login to PoE"}
-                </button>
-                <button class="filter-upload-cancel-btn" onClick={() => setShowUploadModal(false)}>Cancel</button>
-              </div>
-              <Show when={poeLoginMsg()}><div class={poeLoginMsg().includes("failed") ? "filter-error" : "filter-success"}>{poeLoginMsg()}</div></Show>
-            </div>
-          </Show>
-          <Show when={poeLoggedIn() !== false}>
-            <p class="filter-upload-hint">This uploads the filter directly to your PoE account via the API. Available in-game on any machine (including GeForce Now). If a filter with the same name exists, it will be overwritten.</p>
-            <div class="filter-upload-field">
-              <label>Filter Name</label>
-              <input type="text" value={uploadName()} onInput={(e) => setUploadName(e.currentTarget.value)} placeholder="PathOfPurpose" />
-            </div>
-            <div class="filter-upload-field">
-              <label>Description (optional)</label>
-              <input type="text" value={uploadDesc()} onInput={(e) => setUploadDesc(e.currentTarget.value)} placeholder="Generated by Path of Purpose" />
-            </div>
-            <div class="filter-upload-actions">
-              <button class="filter-upload-confirm-btn" onClick={handleUpload} disabled={uploading() || !uploadName().trim()}>
-                {uploading() ? "Uploading..." : "Upload"}
-              </button>
-              <button class="filter-upload-cancel-btn" onClick={() => setShowUploadModal(false)}>Cancel</button>
-            </div>
-          </Show>
-        </div>
-      </Show>
-
-      {/* Manage Account Filters */}
-      <div class="filter-section">
-        <button class="filter-manage-toggle" onClick={toggleManage}>
-          {showManage() ? "Hide" : "Manage"} Account Filters
-        </button>
-        <Show when={showManage()}>
-          <div class="filter-manage-panel">
-            <Show when={poeLoggedIn() === false}>
-              <div class="filter-poe-login-section">
-                <p class="filter-upload-hint">Log in to your PoE account to manage uploaded filters. Register a Client ID at <strong>pathofexile.com/developer/apps</strong>.</p>
-                <div class="filter-upload-field">
-                  <label>PoE Client ID</label>
-                  <input type="text" value={poeClientId()} onInput={(e) => setPoeClientId(e.currentTarget.value)} placeholder="paste your client ID here" />
-                </div>
-                <div class="filter-upload-actions">
-                  <button class="filter-upload-confirm-btn" onClick={handlePoeLogin} disabled={poeLoggingIn() || !poeClientId().trim()}>
-                    {poeLoggingIn() ? "Waiting for browser..." : "Login to PoE"}
-                  </button>
-                </div>
-                <Show when={poeLoginMsg()}><div class={poeLoginMsg().includes("failed") ? "filter-error" : "filter-success"}>{poeLoginMsg()}</div></Show>
-              </div>
-            </Show>
-            <Show when={loadingFilters()}>
-              <div class="filter-manage-loading">Loading filters...</div>
-            </Show>
-            <Show when={manageError()}>
-              <div class="filter-error">{manageError()}</div>
-            </Show>
-            <Show when={poeLoggedIn() !== false && !loadingFilters() && accountFilters().length === 0 && !manageError()}>
-              <div class="filter-manage-empty">No filters found on your account.</div>
-            </Show>
-            <Show when={accountFilters().length > 0}>
-              <table class="filter-manage-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Realm</th>
-                    <th>Public</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <For each={accountFilters()}>
-                    {(f) => (
-                      <tr>
-                        <td>{f.filter_name}</td>
-                        <td>{f.realm}</td>
-                        <td>{f.public ? "Yes" : "No"}</td>
-                        <td>
-                          <button
-                            class="filter-manage-delete-btn"
-                            disabled={deletingId() === f.id}
-                            onClick={() => {
-                              if (confirm(`Delete filter "${f.filter_name}"?`)) {
-                                handleDeleteFilter(f.id);
-                              }
-                            }}
-                          >
-                            {deletingId() === f.id ? "..." : "Delete"}
-                          </button>
-                        </td>
-                      </tr>
-                    )}
-                  </For>
-                </tbody>
-              </table>
-            </Show>
-            <button class="filter-manage-refresh-btn" onClick={loadAccountFilters} disabled={loadingFilters()}>
-              Refresh
-            </button>
-          </div>
         </Show>
       </div>
 

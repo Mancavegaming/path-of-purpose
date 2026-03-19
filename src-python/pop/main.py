@@ -1725,7 +1725,7 @@ def cmd_poe_check_login(_args: argparse.Namespace) -> None:
         "expired": tokens.is_expired,
         "expires_in": tokens.expires_in_seconds,
         "scope": tokens.scope,
-        "has_filter_scope": "account:item_filter" in tokens.scope,
+        "has_leagues_scope": "account:leagues" in tokens.scope,
     }))
 
 
@@ -1873,8 +1873,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--client-id",
-        default="",
-        help="PoE API OAuth client ID (register at pathofexile.com/developer/apps)",
+        default="pathofpurpose",
+        help="PoE API OAuth client ID",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 

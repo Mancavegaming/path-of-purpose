@@ -3,7 +3,6 @@
  */
 import { invoke } from "@tauri-apps/api/core";
 import type {
-  AccountFilter,
   Build,
   BuildGuide,
   BuildPreferences,
@@ -654,37 +653,14 @@ export interface PoeLoginStatus {
   expired?: boolean;
   expires_in?: number;
   scope?: string;
-  has_filter_scope?: boolean;
 }
 
 export async function poeCheckLogin(): Promise<PoeLoginStatus> {
   return await invoke<PoeLoginStatus>("poe_check_login");
 }
 
-export async function poeLogin(clientId: string): Promise<{ success?: boolean; error?: string }> {
-  return await invoke<{ success?: boolean; error?: string }>("poe_login", { clientId });
-}
-
-// --- Account Filter Management ---
-
-export async function uploadFilterToAccount(
-  filterName: string,
-  filterText: string,
-  description?: string,
-): Promise<{ success: boolean }> {
-  return await invoke<{ success: boolean }>("upload_filter_to_account", {
-    filterName,
-    filterText,
-    description: description ?? "",
-  });
-}
-
-export async function listAccountFilters(): Promise<{ filters: AccountFilter[] }> {
-  return await invoke<{ filters: AccountFilter[] }>("list_account_filters");
-}
-
-export async function deleteAccountFilter(filterId: string): Promise<{ success: boolean }> {
-  return await invoke<{ success: boolean }>("delete_account_filter", { filterId });
+export async function poeLogin(): Promise<{ success?: boolean; error?: string }> {
+  return await invoke<{ success?: boolean; error?: string }>("poe_login");
 }
 
 // --- Price Check + Death Analyzer ---

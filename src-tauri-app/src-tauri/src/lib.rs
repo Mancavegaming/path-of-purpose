@@ -103,14 +103,17 @@ const DEV_PYTHON_CWD: &str = "C:\\DEV\\Path of Purpose\\path-of-purpose\\src-pyt
 fn resolve_python_paths() -> (String, String, bool) {
     if let Ok(exe_path) = std::env::current_exe() {
         if let Some(exe_dir) = exe_path.parent() {
-            // 1. Tauri externalBin sidecar: <exe_dir>/pop-engine.exe (production install)
-            let sidecar_exe = exe_dir.join("pop-engine.exe");
-            if sidecar_exe.exists() {
-                return (
-                    sidecar_exe.to_string_lossy().to_string(),
-                    exe_dir.to_string_lossy().to_string(),
-                    true,
-                );
+            // 1. Tauri externalBin sidecar (production install)
+            //    Tauri bundles with target triple: pop-engine-x86_64-pc-windows-msvc.exe
+            for name in &["pop-engine-x86_64-pc-windows-msvc.exe", "pop-engine.exe"] {
+                let sidecar_exe = exe_dir.join(name);
+                if sidecar_exe.exists() {
+                    return (
+                        sidecar_exe.to_string_lossy().to_string(),
+                        exe_dir.to_string_lossy().to_string(),
+                        true,
+                    );
+                }
             }
 
             // 2. Dev mode via `cargo tauri dev`: exe is in src-tauri/target/debug/
@@ -2194,8 +2197,8 @@ async fn log_snapshot(
 
 /// Run the PoE OAuth PKCE login flow (opens browser, waits for callback)
 #[tauri::command]
-async fn poe_login(client_id: String) -> Result<serde_json::Value, String> {
-    let input = serde_json::json!({ "client_id": client_id });
+async fn poe_login() -> Result<serde_json::Value, String> {
+    let input = serde_json::json!({ "client_id": "pathofpurpose" });
     let stdin_data = serde_json::to_string(&input)
         .map_err(|e| format!("Failed to serialize input: {}", e))?;
 
@@ -2291,7 +2294,7 @@ async fn fetch_leagues() -> Result<serde_json::Value, String> {
 
 /// Simulate Ctrl+C keystroke to copy item text from PoE.
 ///
-/// First releases any held modifier keys (the user is holding Ctrl from Ctrl+D),
+/// First releases any held modifier keys (the user is holding Alt from Alt+D),
 /// waits briefly, then sends a clean Ctrl+C sequence.
 #[cfg(windows)]
 fn simulate_ctrl_c() -> Result<(), String> {
@@ -2300,11 +2303,12 @@ fn simulate_ctrl_c() -> Result<(), String> {
         KEYEVENTF_KEYUP, VIRTUAL_KEY,
     };
 
+    const VK_MENU: VIRTUAL_KEY = VIRTUAL_KEY(0x12);    // Alt key
     const VK_CONTROL: VIRTUAL_KEY = VIRTUAL_KEY(0x11);
     const VK_C: VIRTUAL_KEY = VIRTUAL_KEY(0x43);
     const VK_D: VIRTUAL_KEY = VIRTUAL_KEY(0x44);
 
-    // Step 1: Release keys the user is still holding from Ctrl+D
+    // Step 1: Release keys the user is still holding from Alt+D
     let release_inputs = [
         INPUT {
             r#type: INPUT_KEYBOARD,
@@ -2322,7 +2326,7 @@ fn simulate_ctrl_c() -> Result<(), String> {
             r#type: INPUT_KEYBOARD,
             Anonymous: INPUT_0 {
                 ki: KEYBDINPUT {
-                    wVk: VK_CONTROL,
+                    wVk: VK_MENU,
                     wScan: 0,
                     dwFlags: KEYEVENTF_KEYUP,
                     time: 0,
