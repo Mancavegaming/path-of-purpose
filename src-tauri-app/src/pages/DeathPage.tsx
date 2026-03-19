@@ -91,7 +91,7 @@ export default function DeathPage() {
   );
 }
 
-function DeathDetail(props: { death: { killer: string; zone: string; element: string; timestamp: number; analysis: DeathAnalysis | null } }) {
+function DeathDetail(props: { death: { killer: string; zone: string; element: string; timestamp: number; graceVerse: string; graceRef: string; analysis: DeathAnalysis | null } }) {
   const elementColor = () => ELEMENT_COLORS[props.death.element] || "";
 
   return (
@@ -110,14 +110,7 @@ function DeathDetail(props: { death: { killer: string; zone: string; element: st
         <span style={{ "margin-left": "16px" }}>Time: {formatTime(props.death.timestamp)}</span>
       </div>
 
-      <Show
-        when={props.death.analysis}
-        fallback={
-          <div class="death-empty" style={{ "margin-top": "16px" }}>
-            Load a build to see survival analysis.
-          </div>
-        }
-      >
+      <Show when={props.death.analysis}>
         {(analysis) => (
           <>
             {/* Weaknesses */}
@@ -146,16 +139,22 @@ function DeathDetail(props: { death: { killer: string; zone: string; element: st
                 </For>
               </div>
             </Show>
-
-            {/* Grace verse */}
-            <Show when={showGraceVerses() && analysis().grace_verse}>
-              <div class="death-grace-card">
-                <em>"{analysis().grace_verse}"</em>
-                <span class="death-grace-ref"> — {analysis().grace_ref}</span>
-              </div>
-            </Show>
           </>
         )}
+      </Show>
+
+      <Show when={!props.death.analysis}>
+        <div class="death-empty" style={{ "margin-top": "16px" }}>
+          Load a build to see survival analysis.
+        </div>
+      </Show>
+
+      {/* Grace verse — show from entry data even without analysis */}
+      <Show when={showGraceVerses() && (props.death.analysis?.grace_verse || props.death.graceVerse)}>
+        <div class="death-grace-card">
+          <em>"{props.death.analysis?.grace_verse || props.death.graceVerse}"</em>
+          <span class="death-grace-ref"> — {props.death.analysis?.grace_ref || props.death.graceRef}</span>
+        </div>
       </Show>
 
       {/* Verse toggle */}

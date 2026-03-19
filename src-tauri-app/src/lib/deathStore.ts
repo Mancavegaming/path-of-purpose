@@ -24,6 +24,8 @@ export interface DeathEntry {
   killer: string;
   zone: string;
   element: string;
+  graceVerse: string;
+  graceRef: string;
   analysis: DeathAnalysis | null;
 }
 
@@ -71,6 +73,8 @@ async function pollLogSnapshot(): Promise<void> {
           killer: (death.killer as string) || "Unknown",
           zone: (death.zone as string) || "Unknown",
           element: (death.damage_element as string) || "",
+          graceVerse: (death.grace_verse as string) || "",
+          graceRef: (death.grace_ref as string) || "",
           analysis: null,
         };
 
@@ -90,7 +94,19 @@ async function pollLogSnapshot(): Promise<void> {
           }
         }
 
-        setDeathHistory((prev) => [entry, ...prev].slice(0, 50));
+        // If the last death was "Unknown" and this one has a real killer,
+        // replace it instead of adding a duplicate (split poll boundary)
+        setDeathHistory((prev) => {
+          if (
+            prev.length > 0 &&
+            prev[0].killer === "Unknown" &&
+            entry.killer !== "Unknown" &&
+            entry.timestamp - prev[0].timestamp < 10000
+          ) {
+            return [entry, ...prev.slice(1)].slice(0, 50);
+          }
+          return [entry, ...prev].slice(0, 50);
+        });
       }
       isFirstPoll = false;
 

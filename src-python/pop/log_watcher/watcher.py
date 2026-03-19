@@ -492,17 +492,23 @@ class LogWatcher:
             self._handle_death(m.group(1), m.group(2))
             return
 
-        # Death detail (killer metadata)
+        # Death detail (killer metadata) — may arrive in same chunk or a later chunk
         m = RE_DEATH_DETAIL.match(line)
-        if m and self.stats.last_death and not self.stats.last_death.killer_raw:
+        if m:
             killer_raw = m.group(1)
-            self.stats.last_death.killer_raw = killer_raw
-            self.stats.last_death.killer_name = self._resolve_killer(killer_raw)
-            # Also update the map's death recap
-            if self.stats.current_map and self.stats.current_map.death_recaps:
-                last = self.stats.current_map.death_recaps[-1]
-                last.killer_raw = killer_raw
-                last.killer_name = self.stats.last_death.killer_name
+            if self.stats.last_death and not self.stats.last_death.killer_raw:
+                # Normal case: fill in killer for the death we just detected
+                self.stats.last_death.killer_raw = killer_raw
+                self.stats.last_death.killer_name = self._resolve_killer(killer_raw)
+                # Also update the map's death recap
+                if self.stats.current_map and self.stats.current_map.death_recaps:
+                    last = self.stats.current_map.death_recaps[-1]
+                    last.killer_raw = killer_raw
+                    last.killer_name = self.stats.last_death.killer_name
+            elif not self.stats.last_death:
+                # "Player died" line arrived in a new poll without preceding "has been slain"
+                # (split across poll boundaries). Create a death event from the killer info.
+                self._handle_death("", "", killer_raw=killer_raw)
             return
 
         # Level up
