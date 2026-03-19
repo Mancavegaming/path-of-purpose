@@ -114,6 +114,11 @@ export default function StreamingPage() {
   let overlayTimer: ReturnType<typeof setInterval> | null = null;
 
   createEffect(() => {
+    // Always clear old timer first to prevent duplicates
+    if (overlayTimer) {
+      clearInterval(overlayTimer);
+      overlayTimer = null;
+    }
     if (overlayRunning()) {
       overlayTimer = setInterval(async () => {
         try {
@@ -122,33 +127,32 @@ export default function StreamingPage() {
           // Overlay server may not be ready
         }
       }, 2000);
-    } else {
-      if (overlayTimer) {
-        clearInterval(overlayTimer);
-        overlayTimer = null;
-      }
     }
   });
 
   // Death recap polling — read Client.txt every 5s from last offset
   let logTimer: ReturnType<typeof setInterval> | null = null;
+  let isPolling = false; // Guard against overlapping polls
 
   createEffect(() => {
+    // Always clear old timer first to prevent duplicates
+    if (logTimer) {
+      clearInterval(logTimer);
+      logTimer = null;
+    }
     if (deathRecapEnabled()) {
       // Initial snapshot (full scan)
       pollLogSnapshot();
       logTimer = setInterval(pollLogSnapshot, 5000);
-    } else {
-      if (logTimer) {
-        clearInterval(logTimer);
-        logTimer = null;
-      }
     }
   });
 
   let isFirstPoll = true;
 
   async function pollLogSnapshot() {
+    // Skip if a previous poll is still in flight — prevents process pileup
+    if (isPolling) return;
+    isPolling = true;
     try {
       const offset = logWatcherOffset();
       const path = logWatcherPath() || undefined;
@@ -184,6 +188,8 @@ export default function StreamingPage() {
       }
     } catch (e) {
       setLogError(String(e));
+    } finally {
+      isPolling = false;
     }
   }
 

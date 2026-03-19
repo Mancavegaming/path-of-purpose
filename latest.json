@@ -1,11 +1,11 @@
 {
-  "version": "0.8.5",
-  "notes": "v0.8.5: Price check hotkey changed to Alt+D, removed manual button",
-  "pub_date": "2026-03-18T23:59:00Z",
+  "version": "0.8.6",
+  "notes": "v0.8.6: Fix memory leaks — prevent process pileup, timer cleanup, server shutdown",
+  "pub_date": "2026-03-19T00:30:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWhvU1BrK2FaeGZBRTN0WkxZbFU4NHRxYS81WDk0ZFhwQm1RTStnRENRamViY1pyenhPQ3dpbElKczZUVnh5Ylhmb3Y3ZnVMcnRlMkhlOG9QNzRvT2dRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczODgxMTQxCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOC41X3g2NC1zZXR1cC5uc2lzLnppcAowV2FweTlJOUdBUzRLa3AxVTNhUHY2NTB0WjdjcXVtaGRUbGQwMUFxWHZWTUxlcHlRK0RjdVFPRXFIZEYzVStUNmFEOGFyVXpOZkd4b080VWxrNU1Edz09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.8.5/Path.of.Purpose_0.8.5_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWhFTzNWaHV4SGRsRHBndkdCRDVpT3dFWS9zMmN2c1VBY0FiZEVSTTdOMTZORFNqekNFRUFKYU5XbWpPQzNsby8zN0xDaTMrOXhpV0lPWSsrajBIN0FvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczODkyNjM3CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOC42X3g2NC1zZXR1cC5uc2lzLnppcAo1eVhxVnRIOXNmNWhYb2dVdFB1UVNRRWU1V3RFUW5FUWgwNHNHMkYxSi9CME9VZDI2bXg4K1hCVWFVa3ZneXdrcUNiREZ6SjZQVDFvcll0cHJnQjBDdz09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.8.6/Path.of.Purpose_0.8.6_x64-setup.nsis.zip"
     }
   }
 }

@@ -62,6 +62,7 @@ export function disconnect(): void {
     ws.close();
     ws = null;
   }
+  userCooldowns.clear();
   setConnectionStatus("disconnected");
   setConnectedChannel("");
 }
@@ -159,8 +160,8 @@ function _handleLine(line: string): void {
   userCooldowns.set(userKey, now);
 
   // Clean up old cooldown entries periodically
-  if (userCooldowns.size > 1000) {
-    const cutoff = now - USER_COOLDOWN_MS * 2;
+  if (userCooldowns.size > 200) {
+    const cutoff = now - 60_000; // purge entries older than 1 minute
     for (const [k, v] of userCooldowns) {
       if (v < cutoff) userCooldowns.delete(k);
     }

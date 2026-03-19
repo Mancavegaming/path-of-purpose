@@ -1334,8 +1334,9 @@ async fn get_tree_layout(app: tauri::AppHandle) -> Result<serde_json::Value, Str
 /// Shared overlay state — updated by frontend, read by overlay HTTP server.
 struct OverlayState(Arc<RwLock<serde_json::Value>>);
 
-/// Whether the overlay server is already running.
+/// Whether the overlay server is already running, plus a shutdown signal.
 struct OverlayServerRunning(Arc<RwLock<bool>>);
+struct OverlayShutdown(Arc<tokio::sync::Notify>);
 
 /// Store Twitch token + username in app data.
 #[tauri::command]
@@ -1481,6 +1482,7 @@ async fn update_overlay_state(
 async fn start_overlay_server(
     overlay_state: tauri::State<'_, OverlayState>,
     running: tauri::State<'_, OverlayServerRunning>,
+    shutdown: tauri::State<'_, OverlayShutdown>,
 ) -> Result<String, String> {
     let mut is_running = running.0.write().await;
     if *is_running {
@@ -1488,6 +1490,7 @@ async fn start_overlay_server(
     }
 
     let state_ref = overlay_state.0.clone();
+    let notify = shutdown.0.clone();
 
     tokio::spawn(async move {
         use axum::{Router, routing::get, extract::State, response::Html};
@@ -1505,7 +1508,10 @@ async fn start_overlay_server(
         let listener = tokio::net::TcpListener::bind("127.0.0.1:8459")
             .await
             .expect("Failed to bind overlay server on port 8459");
-        axum::serve(listener, app).await.ok();
+        axum::serve(listener, app)
+            .with_graceful_shutdown(async move { notify.notified().await })
+            .await
+            .ok();
     });
 
     *is_running = true;
@@ -1516,12 +1522,13 @@ async fn start_overlay_server(
 #[tauri::command]
 async fn stop_overlay_server(
     running: tauri::State<'_, OverlayServerRunning>,
+    shutdown: tauri::State<'_, OverlayShutdown>,
 ) -> Result<(), String> {
     let mut is_running = running.0.write().await;
+    if *is_running {
+        shutdown.0.notify_one();
+    }
     *is_running = false;
-    // Note: actual tokio task continues until port is rebound.
-    // For a clean stop we'd need a shutdown signal, but for now
-    // this just marks it as stopped so the UI reflects correctly.
     Ok(())
 }
 
@@ -2596,6 +2603,7 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .manage(OverlayState(Arc::new(RwLock::new(serde_json::json!({})))))
         .manage(OverlayServerRunning(Arc::new(RwLock::new(false))))
+        .manage(OverlayShutdown(Arc::new(tokio::sync::Notify::new())))
         .setup(|app| {
             // Create job object so child processes die when the app exits
             #[cfg(windows)]

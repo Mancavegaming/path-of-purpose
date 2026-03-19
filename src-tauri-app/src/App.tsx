@@ -1,5 +1,5 @@
-import { createSignal, onMount, Show } from "solid-js";
-import { listen } from "@tauri-apps/api/event";
+import { createSignal, onMount, onCleanup, Show } from "solid-js";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { emitTo } from "@tauri-apps/api/event";
 import Sidebar, { type Page } from "./components/Sidebar";
 import DecodePage from "./pages/DecodePage";
@@ -55,7 +55,7 @@ function App() {
     }
 
     // Listen for price check hotkey trigger from Rust global shortcut
-    await listen("price-check-triggered", async () => {
+    const unlisten = await listen("price-check-triggered", async () => {
       setPriceCheckStatus("Checking price...");
       try {
         const [x, y] = await getCursorPosition();
@@ -82,7 +82,11 @@ function App() {
         setTimeout(() => setPriceCheckStatus(""), 4000);
       }
     });
+    unlistenRef = unlisten;
   });
+
+  let unlistenRef: UnlistenFn | null = null;
+  onCleanup(() => { unlistenRef?.(); });
 
   function handleGeneratorComplete(build: Build) {
     setLoadedBuild(build);
