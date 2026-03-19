@@ -1,11 +1,11 @@
 {
-  "version": "0.9.0",
-  "notes": "v0.9.0: Death Log tab replaces death recap popup",
-  "pub_date": "2026-03-19T12:30:00Z",
+  "version": "0.9.1",
+  "notes": "v0.9.1: Death log polls continuously, shows detected log path",
+  "pub_date": "2026-03-19T13:30:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWdiU2RvWjA5R2IrM3UwbUsyajVGZGdKeEZPN0tsV3NsZnFiMTlma0JZVy95dmtKaGRoM3UyL1UzTmI4K053K2NwWHhNVG9DS3Q3THkvVldGQWt5QWdZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczOTM1NzQ1CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOS4wX3g2NC1zZXR1cC5uc2lzLnppcApQUERLN0FTNndLMVRMZWVhdWtYMEtVeHJWTURmTmtMRXIxOTJCcVFjN1VNdXJLZWxzZktJc1hGNUJ3V2QxRmhMeUU4YnBGVUkrY3J3aVdVMXM4K1pEQT09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.9.0/Path.of.Purpose_0.9.0_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXFoTUF0K0xoT3VvUWF4VWRUeGFYcFIwb3dSODhZSU96Ym84eURqVlVVYjNaZVA2NHVtOHBsb3JycE5MWEZraDJwRGtZWW9VL1FzQ2RUYmR6YUpQaXdZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczOTQwNTk4CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOS4xX3g2NC1zZXR1cC5uc2lzLnppcApIYWtPS250ZkZkeGJxS1h3d1AyNkRCNVYrV3pUYWtTSXZtNDkwU01mZUpwQXVoOWlSWXg5eDl3T0NySHVjYTZPL1F1dkZtMktxSXZkNTBMdmJSWWNDUT09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.9.1/Path.of.Purpose_0.9.1_x64-setup.nsis.zip"
     }
   }
 }

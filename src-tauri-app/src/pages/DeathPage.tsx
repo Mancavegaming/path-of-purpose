@@ -1,18 +1,14 @@
-import { createEffect, For, Show, type Accessor } from "solid-js";
+import { For, Show } from "solid-js";
 import type { DeathAnalysis } from "../lib/types";
 import {
   deathHistory,
   selectedDeath,
   setSelectedDeath,
-  setDeathTabActive,
   deathLogError,
+  detectedLogPath,
   showGraceVerses,
   setShowGraceVerses,
 } from "../lib/deathStore";
-
-interface DeathPageProps {
-  active: Accessor<boolean>;
-}
 
 const ELEMENT_COLORS: Record<string, string> = {
   Fire: "#f97316",
@@ -27,11 +23,7 @@ function formatTime(ts: number): string {
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
-export default function DeathPage(props: DeathPageProps) {
-  createEffect(() => {
-    setDeathTabActive(props.active());
-  });
-
+export default function DeathPage() {
   return (
     <div class="page-content">
       <h2 class="page-title">Death Log</h2>
@@ -42,6 +34,11 @@ export default function DeathPage(props: DeathPageProps) {
       <Show when={deathLogError()}>
         <div style={{ color: "#f88", "font-size": "0.85rem", "margin-bottom": "8px" }}>
           {deathLogError()}
+        </div>
+      </Show>
+      <Show when={detectedLogPath()}>
+        <div style={{ color: "#666", "font-size": "0.8rem", "margin-bottom": "8px" }}>
+          Monitoring: {detectedLogPath()}
         </div>
       </Show>
 

@@ -11,6 +11,7 @@ import StreamingPage from "./pages/StreamingPage";
 import FilterPage from "./pages/FilterPage";
 import PriceCheckPage from "./pages/PriceCheckPage";
 import DeathPage from "./pages/DeathPage";
+import "./lib/deathStore"; // Start death log polling on app launch
 import type { Build, BuildGuide } from "./lib/types";
 import {
   createOverlayWindow,
@@ -168,7 +169,7 @@ function App() {
           <StreamingPage />
         </div>
         <div style={{ display: page() === "death" ? "block" : "none" }}>
-          <DeathPage active={() => page() === "death"} />
+          <DeathPage />
         </div>
       </main>
       <Show when={priceCheckStatus()}>

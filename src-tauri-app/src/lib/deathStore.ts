@@ -1,10 +1,11 @@
 /**
  * Death Store — session-only reactive state for the Death tab.
  *
- * Polls Client.txt for death events when the Death tab is active.
+ * Polls Client.txt continuously in the background (with overlap guard).
+ * The Death tab just displays data — polling is not tied to tab visibility.
  * No persistence — history resets each app session.
  */
-import { createSignal, createEffect } from "solid-js";
+import { createSignal } from "solid-js";
 import type { DeathAnalysis } from "./types";
 import {
   logSnapshot,
@@ -29,8 +30,8 @@ export interface DeathEntry {
 // --- Signals ---
 const [deathHistory, setDeathHistory] = createSignal<DeathEntry[]>([]);
 const [selectedDeath, setSelectedDeath] = createSignal<DeathEntry | null>(null);
-const [isActive, setIsActive] = createSignal(false);
 const [deathLogError, setDeathLogError] = createSignal("");
+const [detectedLogPath, setDetectedLogPath] = createSignal("");
 const [showGraceVerses, setShowGraceVerses] = createSignal(true);
 
 export {
@@ -38,16 +39,12 @@ export {
   selectedDeath,
   setSelectedDeath,
   deathLogError,
+  detectedLogPath,
   showGraceVerses,
   setShowGraceVerses,
 };
 
-export function setDeathTabActive(active: boolean): void {
-  setIsActive(active);
-}
-
-// --- Polling ---
-let logTimer: ReturnType<typeof setInterval> | null = null;
+// --- Polling (runs continuously from app start) ---
 let isPolling = false;
 let isFirstPoll = true;
 let nextId = 1;
@@ -63,6 +60,7 @@ async function pollLogSnapshot(): Promise<void> {
       setDeathLogError(snap.error);
     } else {
       setDeathLogError("");
+      if (snap.log_path) setDetectedLogPath(snap.log_path);
 
       const newDeaths = snap.stats?.total_deaths ?? 0;
       if (!isFirstPoll && newDeaths > 0 && snap.stats?.last_death) {
@@ -105,15 +103,7 @@ async function pollLogSnapshot(): Promise<void> {
   }
 }
 
-// Reactive polling — starts/stops based on tab visibility
-createEffect(() => {
-  if (logTimer) {
-    clearInterval(logTimer);
-    logTimer = null;
-  }
-  if (isActive()) {
-    isFirstPoll = true; // Reset so first poll after activation is a baseline
-    pollLogSnapshot();
-    logTimer = setInterval(pollLogSnapshot, 5000);
-  }
-});
+// Start polling immediately on import — runs for the lifetime of the app.
+// The isPolling guard ensures at most one Python process at a time.
+pollLogSnapshot();
+setInterval(pollLogSnapshot, 5000);
