@@ -206,7 +206,6 @@ def cmd_trade_search(args: argparse.Namespace) -> None:
         # Single search — no auto-relaxation (user controls stat filters)
         async with TradeClient(league=league) as client:
             result = await client.search(request)
-            result.trade_url = trade_url
 
         # Compare DPS vs the equipped item (character's current gear, not guide target)
         _add_dps_changes(equipped_item, result)

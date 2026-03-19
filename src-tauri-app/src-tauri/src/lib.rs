@@ -2430,16 +2430,24 @@ async fn price_check_trigger(
     app: tauri::AppHandle,
     league: String,
 ) -> Result<serde_json::Value, String> {
+    // Clear clipboard first so we don't re-read stale item data
+    use tauri_plugin_clipboard_manager::ClipboardExt;
+    let _ = app.clipboard().write_text("");
+
     // Simulate Ctrl+C to copy item info
     simulate_ctrl_c()?;
 
-    // Wait for clipboard to populate (needs time after key release + PoE processing)
-    tokio::time::sleep(std::time::Duration::from_millis(250)).await;
-
-    // Read clipboard via plugin
-    use tauri_plugin_clipboard_manager::ClipboardExt;
-    let clipboard_text = app.clipboard().read_text()
-        .map_err(|e| format!("Failed to read clipboard: {}", e))?;
+    // Wait for clipboard to populate, retry if needed
+    let mut clipboard_text = String::new();
+    for delay_ms in &[200, 200, 300] {
+        tokio::time::sleep(std::time::Duration::from_millis(*delay_ms)).await;
+        if let Ok(text) = app.clipboard().read_text() {
+            if text.contains("Rarity:") {
+                clipboard_text = text;
+                break;
+            }
+        }
+    }
 
     if clipboard_text.is_empty() || !clipboard_text.contains("Rarity:") {
         return Err("No PoE item data found in clipboard. Hover over an item first.".to_string());
