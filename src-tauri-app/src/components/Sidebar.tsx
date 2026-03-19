@@ -16,7 +16,7 @@ import { getVersion } from "@tauri-apps/api/app";
 
 const DISCORD_CLIENT_ID = "1479135178650554510";
 
-export type Page = "build" | "delta" | "generator" | "editor" | "character" | "streaming" | "filter" | "pricecheck";
+export type Page = "build" | "delta" | "generator" | "editor" | "character" | "streaming" | "filter" | "pricecheck" | "death";
 
 interface SidebarProps {
   page: Accessor<Page>;
@@ -177,6 +177,13 @@ export default function Sidebar(props: SidebarProps) {
         >
           <span class="nav-icon">{"\u{1F4F9}"}</span>
           Streaming
+        </button>
+        <button
+          class={`nav-item ${props.page() === "death" ? "active" : ""}`}
+          onClick={() => props.setPage("death")}
+        >
+          <span class="nav-icon">{"\u{1F480}"}</span>
+          Death Log
         </button>
       </nav>
 

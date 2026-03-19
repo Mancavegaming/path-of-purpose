@@ -5349,3 +5349,143 @@ button:disabled {
   transform: translateX(18px);
   background: white;
 }
+
+/* ===== Death Page ===== */
+.death-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 12px;
+}
+.death-log-panel, .death-detail-panel {
+  background: var(--bg-secondary, rgba(30,30,50,0.5));
+  border: 1px solid var(--border, rgba(100,100,140,0.25));
+  border-radius: 8px;
+  padding: 14px;
+  min-height: 300px;
+}
+.death-empty {
+  color: #666;
+  font-size: 0.9rem;
+  font-style: italic;
+  padding: 24px 0;
+  text-align: center;
+}
+.death-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+.death-log-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.15s;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid transparent;
+  color: #ccc;
+  font-size: 0.85rem;
+  text-align: left;
+  width: 100%;
+}
+.death-log-entry:hover { background: rgba(255,255,255,0.05); }
+.death-log-entry.selected {
+  border-color: rgba(248,113,113,0.4);
+  background: rgba(248,113,113,0.08);
+}
+.death-entry-time {
+  color: #888;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  width: 70px;
+}
+.death-entry-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.death-entry-killer {
+  font-weight: 600;
+  color: #e8c56d;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.death-entry-zone {
+  color: #888;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.death-detail-header {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f87171;
+  margin-bottom: 4px;
+}
+.death-detail-skull { color: #f87171; }
+.death-detail-meta {
+  color: #888;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border, rgba(100,100,140,0.25));
+}
+.death-section-title {
+  color: #ccc;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 14px 0 6px;
+}
+.death-weakness-list { display: flex; flex-direction: column; gap: 4px; }
+.death-weakness-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+.death-weakness-row.critical { background: rgba(248,113,113,0.1); color: #f87171; }
+.death-weakness-row.warning { background: rgba(250,204,21,0.08); color: #facc15; }
+.death-w-stat { flex: 1; color: #ccc; }
+.death-w-current { font-weight: 600; }
+.death-w-arrow { color: #666; }
+.death-w-target { font-weight: 600; color: #4ade80; }
+.death-suggestion-list { display: flex; flex-direction: column; gap: 4px; }
+.death-suggestion-item {
+  padding: 6px 10px;
+  background: rgba(56,189,248,0.06);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #93c5fd;
+  line-height: 1.4;
+}
+.death-grace-card {
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: rgba(192,132,252,0.06);
+  border: 1px solid rgba(192,132,252,0.15);
+  border-radius: 6px;
+  color: #d8b4fe;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.death-grace-ref { color: #a78bfa; font-size: 0.8rem; }
+.death-verse-toggle {
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border, rgba(100,100,140,0.25));
+}

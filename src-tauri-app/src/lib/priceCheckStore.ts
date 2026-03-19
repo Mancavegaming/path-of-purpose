@@ -13,9 +13,6 @@ export interface PriceCheckSettings {
   overlayOpacity: number;
   overlayAutoDismiss: number; // seconds, 0 = off
   overlayPosition: "cursor" | "top-left" | "top-right";
-  deathRecapEnabled: boolean;
-  deathRecapDismiss: number; // seconds, 0 = off
-  showGraceVerses: boolean;
 }
 
 const DEFAULT_SETTINGS: PriceCheckSettings = {
@@ -25,9 +22,6 @@ const DEFAULT_SETTINGS: PriceCheckSettings = {
   overlayOpacity: 94,
   overlayAutoDismiss: 0,
   overlayPosition: "cursor",
-  deathRecapEnabled: false,
-  deathRecapDismiss: 10,
-  showGraceVerses: true,
 };
 
 const [settings, setSettingsSignal] = createSignal<PriceCheckSettings>({ ...DEFAULT_SETTINGS });

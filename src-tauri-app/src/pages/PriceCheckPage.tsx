@@ -123,46 +123,6 @@ export default function PriceCheckPage() {
         </div>
       </section>
 
-      {/* Death Recap */}
-      <section class="settings-section">
-        <h3 class="settings-heading">Death Recap</h3>
-        <div class="settings-row">
-          <label class="settings-label">Enable death recap overlay</label>
-          <label class="settings-toggle">
-            <input
-              type="checkbox"
-              checked={settings().deathRecapEnabled}
-              onChange={(e) => updateSetting("deathRecapEnabled", e.currentTarget.checked)}
-            />
-            <span class="toggle-slider" />
-          </label>
-        </div>
-        <div class="settings-row">
-          <label class="settings-label">Auto-dismiss (seconds)</label>
-          <select
-            class="settings-select"
-            value={settings().deathRecapDismiss}
-            onChange={(e) => updateSetting("deathRecapDismiss", parseInt(e.currentTarget.value))}
-            disabled={!settings().deathRecapEnabled}
-          >
-            <option value="0">Off (manual close)</option>
-            <option value="5">5 seconds</option>
-            <option value="10">10 seconds</option>
-            <option value="15">15 seconds</option>
-          </select>
-        </div>
-        <div class="settings-row">
-          <label class="settings-label">Show grace verses on death</label>
-          <label class="settings-toggle">
-            <input
-              type="checkbox"
-              checked={settings().showGraceVerses}
-              onChange={(e) => updateSetting("showGraceVerses", e.currentTarget.checked)}
-            />
-            <span class="toggle-slider" />
-          </label>
-        </div>
-      </section>
     </div>
   );
 }

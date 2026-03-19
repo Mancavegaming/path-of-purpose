@@ -2,23 +2,18 @@ import { createSignal, onMount, onCleanup, Show } from "solid-js";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import PriceCheckPanel from "./PriceCheckPanel";
-import DeathRecapToast from "./DeathRecapToast";
-import type { PriceCheckResult, DeathAnalysis } from "../lib/types";
+import type { PriceCheckResult } from "../lib/types";
 
 interface OverlaySettings {
   maxListings: number;
   overlayOpacity: number;
   overlayAutoDismiss: number;
-  deathRecapDismiss: number;
-  showGraceVerses: boolean;
 }
 
 const DEFAULT_SETTINGS: OverlaySettings = {
   maxListings: 8,
   overlayOpacity: 94,
   overlayAutoDismiss: 0,
-  deathRecapDismiss: 10,
-  showGraceVerses: true,
 };
 
 async function dismissOverlay() {
@@ -31,13 +26,10 @@ async function dismissOverlay() {
 
 export default function OverlayApp() {
   const [priceResult, setPriceResult] = createSignal<PriceCheckResult | null>(null);
-  const [deathRecap, setDeathRecap] = createSignal<DeathAnalysis | null>(null);
   const [showPrice, setShowPrice] = createSignal(false);
-  const [showDeath, setShowDeath] = createSignal(false);
   const [settings, setSettings] = createSignal<OverlaySettings>(DEFAULT_SETTINGS);
 
   let priceTimer: ReturnType<typeof setTimeout> | null = null;
-  let deathTimer: ReturnType<typeof setTimeout> | null = null;
 
   async function loadSettings() {
     try {
@@ -53,20 +45,12 @@ export default function OverlayApp() {
   function closePrice() {
     setShowPrice(false);
     if (priceTimer) { clearTimeout(priceTimer); priceTimer = null; }
-    if (!showDeath()) dismissOverlay();
-  }
-
-  function closeDeath() {
-    setShowDeath(false);
-    if (deathTimer) { clearTimeout(deathTimer); deathTimer = null; }
-    if (!showPrice()) dismissOverlay();
+    dismissOverlay();
   }
 
   function closeAll() {
     setShowPrice(false);
-    setShowDeath(false);
     if (priceTimer) { clearTimeout(priceTimer); priceTimer = null; }
-    if (deathTimer) { clearTimeout(deathTimer); deathTimer = null; }
     dismissOverlay();
   }
 
@@ -86,21 +70,6 @@ export default function OverlayApp() {
         const dismiss = settings().overlayAutoDismiss;
         if (dismiss > 0) {
           priceTimer = setTimeout(() => closePrice(), dismiss * 1000);
-        }
-      })
-    );
-
-    unlisteners.push(
-      await listen<DeathAnalysis>("death-recap", async (event) => {
-        await loadSettings();
-        setDeathRecap(event.payload);
-        setShowDeath(true);
-
-        // Auto-dismiss timer for death recap
-        if (deathTimer) clearTimeout(deathTimer);
-        const dismiss = settings().deathRecapDismiss;
-        if (dismiss > 0) {
-          deathTimer = setTimeout(() => closeDeath(), dismiss * 1000);
         }
       })
     );
@@ -129,14 +98,6 @@ export default function OverlayApp() {
           result={priceResult()!}
           onClose={closePrice}
           maxListings={settings().maxListings}
-          opacity={opacity()}
-        />
-      </Show>
-      <Show when={showDeath() && deathRecap()}>
-        <DeathRecapToast
-          analysis={deathRecap()!}
-          onDismiss={closeDeath}
-          showGraceVerse={settings().showGraceVerses}
           opacity={opacity()}
         />
       </Show>

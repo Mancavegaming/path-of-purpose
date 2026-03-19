@@ -1,11 +1,11 @@
 {
-  "version": "0.8.8",
-  "notes": "v0.8.8: Fix stale clipboard, fix trade URL missing query ID",
-  "pub_date": "2026-03-19T11:30:00Z",
+  "version": "0.9.0",
+  "notes": "v0.9.0: Death Log tab replaces death recap popup",
+  "pub_date": "2026-03-19T12:30:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWhnZFlRRTArR1loQjNsa0JXOXhUb2VqbU5VY0ZRUXRoNk5Vbi9EZjc0OEsrYnVTaGVzbkNWWThpMWZDckNsMUJCSnVVMFFKTmNEZXZVRHJET2xGZEFnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczOTMyNjk3CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOC44X3g2NC1zZXR1cC5uc2lzLnppcAp1Ymh6OURka3FDZGtIcWI1azhweWxsZWNaOEJ3MnRzcXRUTm5URFVRVlhFc0ZiVEVaZml6dWJuRnc1aGhHNmMvUzQwbTJCOHI2dm8xWTZ6ZzgzUVFCZz09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.8.8/Path.of.Purpose_0.8.8_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWdiU2RvWjA5R2IrM3UwbUsyajVGZGdKeEZPN0tsV3NsZnFiMTlma0JZVy95dmtKaGRoM3UyL1UzTmI4K053K2NwWHhNVG9DS3Q3THkvVldGQWt5QWdZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczOTM1NzQ1CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOS4wX3g2NC1zZXR1cC5uc2lzLnppcApQUERLN0FTNndLMVRMZWVhdWtYMEtVeHJWTURmTmtMRXIxOTJCcVFjN1VNdXJLZWxzZktJc1hGNUJ3V2QxRmhMeUU4YnBGVUkrY3J3aVdVMXM4K1pEQT09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.9.0/Path.of.Purpose_0.9.0_x64-setup.nsis.zip"
     }
   }
 }

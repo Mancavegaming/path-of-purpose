@@ -1,22 +1,16 @@
-import { createSignal, createEffect, onMount, onCleanup, For, Show } from "solid-js";
+import { createSignal, createEffect, onCleanup, For, Show } from "solid-js";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-shell";
 
 const TWITCH_CLIENT_ID = "nxcpw276lnupq2pty6tuj9hwtthhxl";
 const TWITCH_REDIRECT_URI = "http://localhost:8460/callback";
-import { emitTo } from "@tauri-apps/api/event";
 import {
   loadTwitchToken,
   storeTwitchToken,
   clearTwitchToken,
   startOverlayServer,
   updateOverlayState,
-  logSnapshot,
-  analyzeDeath,
-  showOverlayAt,
 } from "../lib/commands";
-import { streamDpsResult } from "../lib/streamStore";
-import { settings as priceCheckSettings, loadPriceCheckSettings } from "../lib/priceCheckStore";
 
 import {
   chatLog,
@@ -27,12 +21,7 @@ import {
   stopSession,
   dismissSuggestion,
   getOverlayPayload,
-  logWatcherStats,
-  logWatcherOffset,
-  logWatcherPath,
-  updateLogWatcherStats,
   overlayShowDps, setOverlayShowDps,
-  overlayShowDeathRecap, setOverlayShowDeathRecap,
   overlayShowMapStats, setOverlayShowMapStats,
   overlayShowTradeWhispers, setOverlayShowTradeWhispers,
   overlayShowBossBar, setOverlayShowBossBar,
@@ -69,17 +58,7 @@ export default function StreamingPage() {
   const [overlayUrl, setOverlayUrl] = createSignal("");
   const [overlayRunning, setOverlayRunning] = createSignal(false);
 
-  // Death recap polling — also controlled by Price Check settings page
-  const [deathRecapEnabled, setDeathRecapEnabled] = createSignal(false);
-  const [logError, setLogError] = createSignal("");
 
-  // Sync death recap toggle from price check settings
-  onMount(async () => {
-    await loadPriceCheckSettings();
-    if (priceCheckSettings().deathRecapEnabled) {
-      setDeathRecapEnabled(true);
-    }
-  });
 
   // Command toggles (track in a signal for reactivity)
   const initStates = (): Record<string, boolean> => {
@@ -130,72 +109,8 @@ export default function StreamingPage() {
     }
   });
 
-  // Death recap polling — read Client.txt every 5s from last offset
-  let logTimer: ReturnType<typeof setInterval> | null = null;
-  let isPolling = false; // Guard against overlapping polls
-
-  createEffect(() => {
-    // Always clear old timer first to prevent duplicates
-    if (logTimer) {
-      clearInterval(logTimer);
-      logTimer = null;
-    }
-    if (deathRecapEnabled()) {
-      // Initial snapshot (full scan)
-      pollLogSnapshot();
-      logTimer = setInterval(pollLogSnapshot, 5000);
-    }
-  });
-
-  let isFirstPoll = true;
-
-  async function pollLogSnapshot() {
-    // Skip if a previous poll is still in flight — prevents process pileup
-    if (isPolling) return;
-    isPolling = true;
-    try {
-      const offset = logWatcherOffset();
-      const path = logWatcherPath() || undefined;
-      const snap = await logSnapshot(path, offset || undefined);
-      if (snap.error) {
-        setLogError(snap.error);
-      } else {
-        setLogError("");
-
-        // Detect new deaths — each snapshot creates a fresh watcher so
-        // total_deaths is only for the lines in this chunk, not cumulative.
-        // Skip the first poll (reads old log history, would false-trigger).
-        const newDeaths = snap.stats?.total_deaths ?? 0;
-        if (!isFirstPoll && newDeaths > 0 && snap.stats?.last_death) {
-          const dps = streamDpsResult();
-          const defence = dps?.defence;
-          if (defence) {
-            try {
-              const analysis = await analyzeDeath(
-                snap.stats.last_death as unknown as Record<string, unknown>,
-                defence as unknown as Record<string, unknown>,
-              );
-              await emitTo("price-overlay", "death-recap", analysis);
-              await showOverlayAt(100, 100);
-            } catch {
-              // Death analysis is non-critical
-            }
-          }
-        }
-        isFirstPoll = false;
-
-        updateLogWatcherStats(snap);
-      }
-    } catch (e) {
-      setLogError(String(e));
-    } finally {
-      isPolling = false;
-    }
-  }
-
   onCleanup(() => {
     if (overlayTimer) clearInterval(overlayTimer);
-    if (logTimer) clearInterval(logTimer);
   });
 
   async function handleTwitchLogin() {
@@ -474,10 +389,6 @@ export default function StreamingPage() {
                 <span class="stream-command-name">Boss Readiness</span>
               </label>
               <label class="stream-command-toggle">
-                <input type="checkbox" checked={overlayShowDeathRecap()} onChange={(e) => setOverlayShowDeathRecap(e.currentTarget.checked)} />
-                <span class="stream-command-name">Death Recap</span>
-              </label>
-              <label class="stream-command-toggle">
                 <input type="checkbox" checked={overlayShowMapStats()} onChange={(e) => setOverlayShowMapStats(e.currentTarget.checked)} />
                 <span class="stream-command-name">Map Analytics</span>
               </label>
@@ -600,119 +511,6 @@ export default function StreamingPage() {
             </div>
           </div>
 
-          {/* Death Recap / Log Watcher */}
-          <div class="stream-section">
-            <div class="stream-section-title">
-              Death Recap
-              <label class="stream-death-toggle">
-                <input
-                  type="checkbox"
-                  checked={deathRecapEnabled()}
-                  onChange={(e) => setDeathRecapEnabled(e.currentTarget.checked)}
-                />
-                <span>{deathRecapEnabled() ? "Tracking" : "Off"}</span>
-              </label>
-            </div>
-
-            <Show when={logError()}>
-              <div class="error-toast" style={{ "margin-bottom": "8px" }}>{logError()}</div>
-            </Show>
-
-            <Show when={deathRecapEnabled() && logWatcherPath()}>
-              <p class="stream-hint" style={{ "margin-bottom": "4px" }}>
-                Reading: {logWatcherPath()}
-              </p>
-            </Show>
-
-            <Show
-              when={deathRecapEnabled() && logWatcherStats()}
-              fallback={
-                <p class="stream-hint">
-                  Enable to auto-detect and parse your PoE Client.txt log.
-                  Shows deaths, map runs, and what killed you on the overlay.
-                </p>
-              }
-            >
-              {(() => {
-                const stats = logWatcherStats()!;
-                return (
-                  <>
-                    <div class="stream-session-stats" style={{ "margin-bottom": "12px" }}>
-                      <div class="stream-stat">
-                        <span class="stream-stat-label">Zone</span>
-                        <span class="stream-stat-value">{stats.current_zone || "—"}</span>
-                      </div>
-                      <div class="stream-stat">
-                        <span class="stream-stat-label">Maps</span>
-                        <span class="stream-stat-value">{stats.maps_completed}</span>
-                      </div>
-                      <div class="stream-stat">
-                        <span class="stream-stat-label">Deaths</span>
-                        <span class="stream-stat-value" style={{ color: stats.total_deaths > 0 ? "#f87171" : undefined }}>
-                          {stats.total_deaths}
-                        </span>
-                      </div>
-                      <div class="stream-stat">
-                        <span class="stream-stat-label">Levels</span>
-                        <span class="stream-stat-value">{stats.levels_gained}</span>
-                      </div>
-                      <div class="stream-stat">
-                        <span class="stream-stat-label">Maps/hr</span>
-                        <span class="stream-stat-value">{stats.maps_per_hour.toFixed(1)}</span>
-                      </div>
-                      <div class="stream-stat">
-                        <span class="stream-stat-label">Deaths/hr</span>
-                        <span class="stream-stat-value" style={{ color: stats.deaths_per_hour > 2 ? "#f87171" : undefined }}>
-                          {stats.deaths_per_hour.toFixed(1)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Current map info */}
-                    <Show when={stats.current_map}>
-                      {(map) => (
-                        <div class="stream-death-map">
-                          <div class="stream-death-map-header">
-                            <span>{map().zone_name}</span>
-                            <Show when={map().area_level}>
-                              <span class="stream-death-level">Lv{map().area_level}</span>
-                            </Show>
-                            <span class="stream-death-duration">{map().duration}</span>
-                            <Show when={map().deaths > 0}>
-                              <span class="stream-death-count">{map().deaths} death{map().deaths !== 1 ? "s" : ""}</span>
-                            </Show>
-                          </div>
-                          <Show when={map().death_recaps.length > 0}>
-                            <div class="stream-death-recaps">
-                              <For each={map().death_recaps}>
-                                {(recap) => (
-                                  <div class="stream-death-recap-entry">
-                                    <span class="stream-death-skull">&#x1F480;</span>
-                                    <span class="stream-death-killer">{recap.killer}</span>
-                                    <span class="stream-death-time">{recap.timestamp}</span>
-                                  </div>
-                                )}
-                              </For>
-                            </div>
-                          </Show>
-                        </div>
-                      )}
-                    </Show>
-
-                    {/* Last death */}
-                    <Show when={stats.last_death && !stats.current_map}>
-                      <div class="stream-death-last">
-                        <span class="stream-death-skull">&#x1F480;</span>
-                        Last death: <strong>{stats.last_death!.character}</strong> slain by{" "}
-                        <strong style={{ color: "#f87171" }}>{stats.last_death!.killer}</strong>
-                        {" "}in {stats.last_death!.zone}
-                      </div>
-                    </Show>
-                  </>
-                );
-              })()}
-            </Show>
-          </div>
         </div>
 
         {/* Right: Activity Feed */}
