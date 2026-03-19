@@ -19,7 +19,7 @@ export interface PriceCheckSettings {
 }
 
 const DEFAULT_SETTINGS: PriceCheckSettings = {
-  hotkey: "CmdOrCtrl+D",
+  hotkey: "Alt+D",
   league: "Standard",
   maxListings: 8,
   overlayOpacity: 94,

@@ -1,11 +1,11 @@
 {
-  "version": "0.8.4",
-  "notes": "v0.8.4: Hotkey fallback + manual price check",
-  "pub_date": "2026-03-18T20:54:25Z",
+  "version": "0.8.5",
+  "notes": "v0.8.5: Price check hotkey changed to Alt+D, removed manual button",
+  "pub_date": "2026-03-18T23:59:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYW1laTR0Qk45ci9NNUpvcjczOXlIZXlycmc2eHpmWTFhZEplQUhwVGVnSCtFOHlTZDFpYUwzbTZqRWdETlZEazlMMERJbTZYRFZCVjFwcVlnUW5zMVFVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczODY3MTQ0CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOC40X3g2NC1zZXR1cC5uc2lzLnppcAowZkhKU2JQd1Uyd0RNWDlMeHR2bWsrR29LQ2sxeklEMG5uT2s2dVFsQlhKYlJXbERpbDJlQnlaaVFsbDlTRVMwTHBQUUFlUENhdnRUOHpUeWlwU1hCZz09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.8.4/Path.of.Purpose_0.8.4_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUldUK3UySTZOcnVvYWhvU1BrK2FaeGZBRTN0WkxZbFU4NHRxYS81WDk0ZFhwQm1RTStnRENRamViY1pyenhPQ3dpbElKczZUVnh5Ylhmb3Y3ZnVMcnRlMkhlOG9QNzRvT2dRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczODgxMTQxCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOC41X3g2NC1zZXR1cC5uc2lzLnppcAowV2FweTlJOUdBUzRLa3AxVTNhUHY2NTB0WjdjcXVtaGRUbGQwMUFxWHZWTUxlcHlRK0RjdVFPRXFIZEYzVStUNmFEOGFyVXpOZkd4b080VWxrNU1Edz09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.8.5/Path.of.Purpose_0.8.5_x64-setup.nsis.zip"
     }
   }
 }

@@ -1,4 +1,4 @@
-import { createSignal, onMount, For, Show } from "solid-js";
+import { createSignal, onMount, For } from "solid-js";
 import {
   settings,
   updateSetting,
@@ -6,12 +6,10 @@ import {
   settingsLoaded,
 } from "../lib/priceCheckStore";
 import { fetchLeagues } from "../lib/commands";
-import { emit } from "@tauri-apps/api/event";
 
 export default function PriceCheckPage() {
   const [leagues, setLeagues] = createSignal<string[]>(["Standard"]);
   const [leagueLoading, setLeagueLoading] = createSignal(false);
-  const [testStatus, setTestStatus] = createSignal("");
 
   onMount(async () => {
     if (!settingsLoaded()) {
@@ -31,16 +29,6 @@ export default function PriceCheckPage() {
     }
   });
 
-  const HOTKEY_OPTIONS = [
-    { label: "Ctrl + D", value: "CmdOrCtrl+D" },
-    { label: "Ctrl + Shift + D", value: "CmdOrCtrl+Shift+D" },
-    { label: "Ctrl + P", value: "CmdOrCtrl+P" },
-    { label: "Ctrl + Shift + P", value: "CmdOrCtrl+Shift+P" },
-    { label: "Ctrl + F1", value: "CmdOrCtrl+F1" },
-    { label: "F5", value: "F5" },
-    { label: "F6", value: "F6" },
-  ];
-
   return (
     <div class="page-content">
       <h2 class="page-title">Price Check Settings</h2>
@@ -53,34 +41,10 @@ export default function PriceCheckPage() {
         <h3 class="settings-heading">Hotkey</h3>
         <div class="settings-row">
           <label class="settings-label">Price check trigger</label>
-          <select
-            class="settings-select"
-            value={settings().hotkey}
-            onChange={(e) => updateSetting("hotkey", e.currentTarget.value)}
-          >
-            <For each={HOTKEY_OPTIONS}>
-              {(opt) => <option value={opt.value}>{opt.label}</option>}
-            </For>
-          </select>
+          <span style={{ color: "#e8c56d", "font-weight": "bold", "font-size": "0.95rem" }}>Alt + D</span>
         </div>
         <div class="settings-hint">
           Press this key while hovering an item in PoE (borderless windowed mode).
-          Restart the app after changing the hotkey.
-        </div>
-        <div class="settings-row" style={{ "margin-top": "8px" }}>
-          <button
-            class="btn-primary"
-            onClick={async () => {
-              setTestStatus("Triggered! Hover an item in PoE first.");
-              await emit("price-check-triggered");
-              setTimeout(() => setTestStatus(""), 4000);
-            }}
-          >
-            Manual Price Check
-          </button>
-          <Show when={testStatus()}>
-            <span style={{ "margin-left": "8px", color: "#999", "font-size": "0.85rem" }}>{testStatus()}</span>
-          </Show>
         </div>
       </section>
 
