@@ -2437,9 +2437,10 @@ async fn price_check_trigger(
     // Simulate Ctrl+C to copy item info
     simulate_ctrl_c()?;
 
-    // Wait for clipboard to populate, retry if needed
+    // Wait for clipboard to populate — PoE can be slow under load.
+    // 6 retries with increasing delays (total ~1.65s worst case).
     let mut clipboard_text = String::new();
-    for delay_ms in &[200, 200, 300] {
+    for delay_ms in &[100, 150, 200, 300, 400, 500] {
         tokio::time::sleep(std::time::Duration::from_millis(*delay_ms)).await;
         if let Ok(text) = app.clipboard().read_text() {
             if text.contains("Rarity:") {
@@ -2450,7 +2451,7 @@ async fn price_check_trigger(
     }
 
     if clipboard_text.is_empty() || !clipboard_text.contains("Rarity:") {
-        return Err("No PoE item data found in clipboard. Hover over an item first.".to_string());
+        return Err("No item copied — hover over an item in PoE and try again.".to_string());
     }
 
     // Send to Python price_check command

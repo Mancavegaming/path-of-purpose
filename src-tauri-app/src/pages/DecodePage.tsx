@@ -1,4 +1,4 @@
-import { createSignal, createMemo, createEffect, untrack, onMount, Show, For, type Accessor, type Setter } from "solid-js";
+import { createSignal, createMemo, onMount, Show, For, type Accessor, type Setter } from "solid-js";
 import { decodeBuild, scrapeBuildGuide, resolveTreeUrls, saveBuildData, calculateDps, fetchLeagues } from "../lib/commands";
 import type { Build, BuildGuide, CalcResult, Item } from "../lib/types";
 import { guideToBuild, resolveVariantForCalc } from "../lib/buildUtils";
@@ -12,7 +12,7 @@ import BudgetOptimizer from "../components/BudgetOptimizer";
 import SkillSelector from "../components/SkillSelector";
 import { setStreamBuild } from "../lib/streamStore";
 import ConfigBar, { type CalcConfigState, DEFAULT_CONFIG } from "../components/ConfigBar";
-import FilterGenerator from "../components/FilterGenerator";
+
 
 function isMobalyticsUrl(input: string): boolean {
   return /mobalytics\.gg/i.test(input);

@@ -5,7 +5,10 @@ Reads existing DefenceResult fields and death event data from the log watcher.
 
 from __future__ import annotations
 
+import re
 import random
+
+from pop.log_watcher.monster_names import MONSTER_ELEMENTS, BOSS_ZONE_ELEMENTS
 
 # Grace verses for comfort after death — sourced from various translations
 _GRACE_VERSES = [
@@ -43,8 +46,8 @@ def analyze_death(
     killer_raw = death_event.get("killer_raw", "")
     zone = zone_name or death_event.get("zone", "Unknown")
 
-    # Infer damage element from killer metadata path and resolved name
-    damage_element = _infer_element(killer_raw, killer)
+    # Infer damage element from killer metadata path, resolved name, or zone
+    damage_element = _infer_element(killer_raw, killer, zone)
 
     weaknesses: list[dict] = []
     suggestions: list[str] = []
@@ -157,27 +160,39 @@ def analyze_death(
     }
 
 
-def _infer_element(killer_raw: str, killer_name: str) -> str:
-    """Infer the likely damage element from killer metadata path and name."""
+def _infer_element(killer_raw: str, killer_name: str, zone: str = "") -> str:
+    """Infer the likely damage element from killer metadata path, name, or zone."""
+    # 1. Direct lookup in MONSTER_ELEMENTS (authoritative)
+    if killer_raw:
+        clean = re.sub(r"@\d+$", "", killer_raw)
+        if clean in MONSTER_ELEMENTS:
+            return MONSTER_ELEMENTS[clean]
+        if killer_raw in MONSTER_ELEMENTS:
+            return MONSTER_ELEMENTS[killer_raw]
+
+    # 2. Keyword matching on killer path + resolved name
     combined = (killer_raw + " " + killer_name).lower()
+    if combined.strip():
+        fire_keywords = ["fire", "flame", "burn", "ignit", "magma", "lava", "searing", "infernal", "scorch"]
+        cold_keywords = ["cold", "frost", "ice", "chill", "freez", "blizzard", "avalanche", "glacial"]
+        lightning_keywords = ["lightning", "storm", "shock", "thunder", "spark", "electr"]
+        chaos_keywords = ["chaos", "caustic", "poison", "venom", "blight", "wither", "profane", "desecrat"]
+        physical_keywords = ["physical", "bleed", "impale", "bone", "crush", "slam"]
 
-    # Check for specific element keywords in order of specificity
-    fire_keywords = ["fire", "flame", "burn", "ignit", "magma", "lava", "searing", "infernal", "scorch"]
-    cold_keywords = ["cold", "frost", "ice", "chill", "freez", "blizzard", "avalanche", "glacial"]
-    lightning_keywords = ["lightning", "storm", "shock", "thunder", "spark", "electr"]
-    chaos_keywords = ["chaos", "caustic", "poison", "venom", "blight", "wither", "profane", "desecrat"]
-    physical_keywords = ["physical", "bleed", "impale", "bone", "crush", "slam"]
+        if any(kw in combined for kw in fire_keywords):
+            return "Fire"
+        if any(kw in combined for kw in cold_keywords):
+            return "Cold"
+        if any(kw in combined for kw in lightning_keywords):
+            return "Lightning"
+        if any(kw in combined for kw in chaos_keywords):
+            return "Chaos"
+        if any(kw in combined for kw in physical_keywords):
+            return "Physical"
 
-    if any(kw in combined for kw in fire_keywords):
-        return "Fire"
-    if any(kw in combined for kw in cold_keywords):
-        return "Cold"
-    if any(kw in combined for kw in lightning_keywords):
-        return "Lightning"
-    if any(kw in combined for kw in chaos_keywords):
-        return "Chaos"
-    if any(kw in combined for kw in physical_keywords):
-        return "Physical"
+    # 3. Zone-based fallback for boss arenas
+    if zone and zone in BOSS_ZONE_ELEMENTS:
+        return BOSS_ZONE_ELEMENTS[zone]
 
     return ""
 

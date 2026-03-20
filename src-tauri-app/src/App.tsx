@@ -63,18 +63,41 @@ function App() {
         const [x, y] = await getCursorPosition();
         const league = settings().league || "Standard";
         const result = await priceCheckTrigger(league);
-        // Emit to overlay window specifically
-        await emitTo("price-overlay", "price-check-result", result);
 
-        // Position based on settings
-        const pos = settings().overlayPosition;
-        if (pos === "top-left") {
-          await showOverlayAt(20, 20);
-        } else if (pos === "top-right") {
-          await showOverlayAt(1400, 20);
-        } else {
-          await showOverlayAt(x + 20, y + 20);
+        // Ensure overlay window exists before emitting (recreate if destroyed)
+        try {
+          await createOverlayWindow();
+        } catch {
+          // Already exists — fine
         }
+
+        // Emit result to overlay window
+        try {
+          await emitTo("price-overlay", "price-check-result", result);
+        } catch (emitErr) {
+          console.error("Failed to send result to overlay:", emitErr);
+          setPriceCheckStatus("Overlay not ready — try again");
+          setTimeout(() => setPriceCheckStatus(""), 3000);
+          return;
+        }
+
+        // Position and show overlay
+        try {
+          const pos = settings().overlayPosition;
+          if (pos === "top-left") {
+            await showOverlayAt(20, 20);
+          } else if (pos === "top-right") {
+            await showOverlayAt(1400, 20);
+          } else {
+            await showOverlayAt(x + 20, y + 20);
+          }
+        } catch (showErr) {
+          console.error("Failed to show overlay:", showErr);
+          setPriceCheckStatus("Could not display overlay — try again");
+          setTimeout(() => setPriceCheckStatus(""), 3000);
+          return;
+        }
+
         setPriceCheckStatus("");
       } catch (e) {
         const msg = String(e);

@@ -157,7 +157,7 @@ export default function FilterPage(props: FilterPageProps) {
   // Equipment
   const [showRareJewellery, setShowRareJewellery] = createSignal(true);
   const [showRareWeapons, setShowRareWeapons] = createSignal(true);
-  const [showSixLinks, setShowSixLinks] = createSignal(true);
+  const [showSixLinks, _setShowSixLinks] = createSignal(true);
   const [sixLinkSound, setSixLinkSound] = createSignal(1);
   const [showFiveLinks, setShowFiveLinks] = createSignal(true);
   const [showRgb, setShowRgb] = createSignal(false);

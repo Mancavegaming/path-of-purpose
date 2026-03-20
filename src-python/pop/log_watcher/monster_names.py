@@ -271,3 +271,224 @@ MONSTER_NAMES: dict[str, str] = {
     "Metadata/Monsters/LeagueAbyss/AbyssFlayerBoss": "Abyss Lich",
     "Metadata/Monsters/LeagueAbyss/AbyssBat": "Stygian Revenant",
 }
+
+
+# Primary damage element for known monsters.
+# Used to show "Killed by X (Fire)" even though PoE's log doesn't include damage type.
+MONSTER_ELEMENTS: dict[str, str] = {
+    # ── Ground effects & on-death ────────────────────────────────────
+    "Metadata/Monsters/InvisibleFire/InvisibleChaosstorm": "Chaos",
+    "Metadata/Monsters/InvisibleFire/InvisibleChaostorm": "Chaos",
+    "Metadata/Monsters/InvisibleFire/InvisibleFireAfterDeath": "Fire",
+    "Metadata/Monsters/InvisibleFire/AfterDeathFireDegen": "Fire",
+    "Metadata/Monsters/InvisibleFire/AfterDeathColdDegen": "Cold",
+    "Metadata/Monsters/InvisibleFire/AfterDeathChaosDegen": "Chaos",
+    "Metadata/Monsters/InvisibleFire/InvisibleFireDegen": "Fire",
+    "Metadata/Monsters/InvisibleFire/InvisibleCausticGround": "Chaos",
+    "Metadata/Monsters/InvisibleFire/InvisibleChilledGround": "Cold",
+    "Metadata/Monsters/InvisibleFire/InvisibleShockedGround": "Lightning",
+    "Metadata/Monsters/InvisibleFire/InvisibleDesecrate": "Chaos",
+    "Metadata/Monsters/InvisibleFire/InvisibleProfaneGround": "Chaos",
+    "Metadata/Monsters/InvisibleFire/InvisibleTarGround": "Physical",
+    "Metadata/Monsters/InvisibleFire/InvisibleSandstorm": "Physical",
+    "Metadata/Monsters/InvisibleFire/InvisibleFireRighteousFire": "Fire",
+    "Metadata/Monsters/InvisibleFire/InvisibleFireRighteousFireMetamorphosis": "Fire",
+    "Metadata/Monsters/InvisibleFire/InvisibleFireStormcallMapBoss": "Lightning",
+    "Metadata/Monsters/InvisibleFire/InvisibleFireColdSnapMap": "Cold",
+    "Metadata/Monsters/InvisibleFire/InvisibleFireAfflictionDemonColdDegen": "Cold",
+    "Metadata/Monsters/InvisibleFire/InvisibleFireAfflictionDemonFireDegen": "Fire",
+    "Metadata/Monsters/InvisibleFire/InvisibleFrostboltDegen": "Cold",
+    "Metadata/Monsters/InvisibleFire/InvisibleFireMortarDegen": "Fire",
+
+    # ── Bearers ──────────────────────────────────────────────────────
+    "Metadata/Monsters/Daemon/BearerOfTheGuardian": "Physical",
+    "Metadata/Monsters/Daemon/BearerOfTorment": "Chaos",
+    "Metadata/Monsters/Daemon/BearerOfBlessing": "Lightning",
+    "Metadata/Monsters/Daemon/BearerOfFragility": "Physical",
+    "Metadata/Monsters/Daemon/DaemonBearerOfFlame": "Fire",
+    "Metadata/Monsters/Daemon/DaemonBearerOfFrost": "Cold",
+    "Metadata/Monsters/Daemon/DaemonBearerOfLightning": "Lightning",
+    "Metadata/Monsters/Daemon/DaemonBearerOfBlood": "Physical",
+    "Metadata/Monsters/Daemon/DaemonBearerOfGuardians": "Physical",
+
+    # ── Volatiles ────────────────────────────────────────────────────
+    "Metadata/Monsters/Daemon/VolatileCoreFire": "Fire",
+    "Metadata/Monsters/Daemon/VolatileCoreCold": "Cold",
+    "Metadata/Monsters/Daemon/VolatileCoreLightning": "Lightning",
+    "Metadata/Monsters/Daemon/VolatileCorePhysical": "Physical",
+    "Metadata/Monsters/Daemon/VolatileCoreChaos": "Chaos",
+    "Metadata/Monsters/VolatileCore/VolatileCore": "Fire",
+    "Metadata/Monsters/VolatileCore/VolatileDeadCore": "Fire",
+
+    # ── Boss damage daemons ──────────────────────────────────────────
+    "Metadata/Monsters/Daemon/DaemonShaperBeam": "Cold",
+    "Metadata/Monsters/Daemon/DaemonShaperBall": "Cold",
+    "Metadata/Monsters/Daemon/DaemonSirusMeteor": "Physical",
+    "Metadata/Monsters/Daemon/DaemonMaven": "Fire",
+    "Metadata/Monsters/Daemon/DaemonElderShockNova": "Lightning",
+    "Metadata/Monsters/Daemon/MoltenShellDaemon": "Fire",
+    "Metadata/Monsters/Daemon/DaemonLabyrinthTrap": "Physical",
+    "Metadata/Monsters/Daemon/BreachBossFire": "Fire",
+
+    # ── Endgame bosses ───────────────────────────────────────────────
+    "Metadata/Monsters/AtlasBosses/TheShaperBoss": "Cold",
+    "Metadata/Monsters/AtlasBosses/TheShaperBossUberElder": "Cold",
+    "Metadata/Monsters/AtlasBosses/TheElder": "Physical",
+    "Metadata/Monsters/AtlasBosses/TheElderBoss": "Physical",
+    "Metadata/Monsters/AtlasBosses/TheElderBossEscaped": "Physical",
+    "Metadata/Monsters/AtlasBosses/TheElderUber": "Physical",
+    "Metadata/Monsters/AtlasExiles/AtlasExile1": "Chaos",       # Al-Hezmin
+    "Metadata/Monsters/AtlasExiles/AtlasExile2": "Cold",        # Veritania
+    "Metadata/Monsters/AtlasExiles/AtlasExile3": "Physical",    # Drox
+    "Metadata/Monsters/AtlasExiles/AtlasExile4": "Lightning",   # Baran
+    "Metadata/Monsters/AtlasExiles/AtlasExile5": "Physical",    # Sirus
+    "Metadata/Monsters/AtlasExiles/AtlasExile5Throne": "Physical",
+    "Metadata/Monsters/AtlasExiles/AtlasExile1Uber": "Chaos",
+    "Metadata/Monsters/AtlasExiles/AtlasExile2Uber": "Cold",
+    "Metadata/Monsters/AtlasExiles/AtlasExile3Uber": "Physical",
+    "Metadata/Monsters/AtlasExiles/AtlasExile4Uber": "Lightning",
+    "Metadata/Monsters/AtlasExiles/AtlasExile5Uber": "Physical",
+    "Metadata/Monsters/MavenBoss/TheMaven": "Fire",
+    "Metadata/Monsters/MavenBoss/TheMavenEnraged": "Fire",
+    "Metadata/Monsters/AtlasInvaders/CleansingBoss": "Fire",    # Searing Exarch
+    "Metadata/Monsters/AtlasInvaders/ConsumeBoss": "Physical",  # Eater of Worlds
+    "Metadata/Monsters/AtlasInvaders/BlackStarBoss": "Cold",
+    "Metadata/Monsters/AtlasInvaders/DoomBoss": "Chaos",        # Infinite Hunger
+    "Metadata/Monsters/AtlasBosses/SearingExarch": "Fire",
+    "Metadata/Monsters/AtlasBosses/EaterOfWorlds": "Physical",
+    "Metadata/Monsters/AtlasBosses/TheBlackStar": "Cold",
+    "Metadata/Monsters/AtlasBosses/TheInfiniteHunger": "Chaos",
+
+    # ── Shaper guardians ─────────────────────────────────────────────
+    "Metadata/Monsters/AtlasBosses/ShaperGuardianPhoenix": "Fire",
+    "Metadata/Monsters/AtlasBosses/ShaperGuardianMinotaur": "Lightning",
+    "Metadata/Monsters/AtlasBosses/ShaperGuardianChimera": "Physical",
+    "Metadata/Monsters/AtlasBosses/ShaperGuardianHydra": "Cold",
+    "Metadata/Monsters/AtlasBosses/PhoenixBoss": "Fire",
+    "Metadata/Monsters/AtlasBosses/MinotaurBoss": "Lightning",
+    "Metadata/Monsters/AtlasBosses/ChimeraBoss": "Physical",
+    "Metadata/Monsters/AtlasBosses/HydraBoss": "Cold",
+
+    # ── Elder guardians ──────────────────────────────────────────────
+    "Metadata/Monsters/AtlasBosses/ElderGuardianPurifier": "Fire",
+    "Metadata/Monsters/AtlasBosses/ElderGuardianConstrictor": "Chaos",
+    "Metadata/Monsters/AtlasBosses/ElderGuardianEnslaverBoss": "Physical",
+    "Metadata/Monsters/AtlasBosses/ElderGuardianEradicator": "Lightning",
+
+    # ── Atziri ───────────────────────────────────────────────────────
+    "Metadata/Monsters/Atziri/Atziri": "Fire",
+    "Metadata/Monsters/Atziri/Atziri2": "Fire",
+    "Metadata/Monsters/Atziri/AtziriUber": "Fire",
+
+    # ── Breach bosses ────────────────────────────────────────────────
+    "Metadata/Monsters/BreachBosses/BreachBossFireMap": "Fire",
+    "Metadata/Monsters/BreachBosses/BreachBossColdMap": "Cold",
+    "Metadata/Monsters/BreachBosses/BreachBossLightningMap": "Lightning",
+    "Metadata/Monsters/BreachBosses/BreachBossPhysicalMap": "Physical",
+    "Metadata/Monsters/BreachBosses/BreachBossChaosMap": "Chaos",
+    "Metadata/Monsters/BreachBosses/BreachBossFire": "Fire",
+    "Metadata/Monsters/BreachBosses/BreachBossCold": "Cold",
+    "Metadata/Monsters/BreachBosses/BreachBossLightning": "Lightning",
+    "Metadata/Monsters/BreachBosses/BreachBossPhysical": "Physical",
+    "Metadata/Monsters/BreachBosses/BreachBossChaos": "Chaos",
+    "Metadata/Monsters/Breach/WildBreachBoss": "Physical",
+
+    # ── Betrayal ─────────────────────────────────────────────────────
+    "Metadata/Monsters/LeagueBetrayal/BetrayalCatarina": "Chaos",
+    "Metadata/Monsters/LeagueBetrayal/BetrayalCatarinaMapBoss": "Chaos",
+    "Metadata/Monsters/LeagueBetrayal/BetrayalCatarina1": "Chaos",
+    "Metadata/Monsters/LeagueBetrayal/BetrayalCatarina2": "Chaos",
+
+    # ── Beyond demons ────────────────────────────────────────────────
+    "Metadata/Monsters/BeyondDemons/BeyondDemon1": "Physical",    # Na'em
+    "Metadata/Monsters/BeyondDemons/BeyondDemon2": "Cold",        # Haast
+    "Metadata/Monsters/BeyondDemons/BeyondDemon3": "Chaos",       # Bameth
+    "Metadata/Monsters/BeyondDemons/BeyondDemon4": "Fire",        # Tzteosh
+    "Metadata/Monsters/BeyondDemons/BeyondDemon5": "Lightning",   # Ephij
+    "Metadata/Monsters/BeyondDemons/BeyondDemonBoss": "Chaos",    # Abaxoth
+    "Metadata/Monsters/LeagueBeyond/BeyondDemonBoss1": "Chaos",
+    "Metadata/Monsters/LeagueBeyond/BeyondDemonBoss2": "Cold",
+    "Metadata/Monsters/LeagueBeyond/BeyondDemonBoss3": "Lightning",
+    "Metadata/Monsters/LeagueBeyond/BeyondDemonBoss4": "Fire",
+    "Metadata/Monsters/LeagueBeyond/BeyondDemonUberBoss": "Chaos",
+    "Metadata/Monsters/LeagueHellscape/DemonFaction/HellscapeDemonBoss": "Fire",
+    "Metadata/Monsters/LeagueHellscape/FleshFaction/HellscapeFleshBoss": "Physical",
+    "Metadata/Monsters/LeagueHellscape/PaleFaction/HellscapePaleBoss": "Cold",
+
+    # ── Delirium ─────────────────────────────────────────────────────
+    "Metadata/Monsters/LeagueAffliction/DoodadDaemon/AfflictionBossCold": "Cold",
+    "Metadata/Monsters/LeagueAffliction/DoodadDaemon/AfflictionBossFire": "Fire",
+    "Metadata/Monsters/LeagueDelirium/DeliriumBoss1": "Cold",
+    "Metadata/Monsters/LeagueDelirium/DeliriumBoss2": "Fire",
+
+    # ── Blight ───────────────────────────────────────────────────────
+    "Metadata/Monsters/LeagueBlight/BlightBossPhysical": "Physical",
+    "Metadata/Monsters/LeagueBlight/BlightBossFire": "Fire",
+    "Metadata/Monsters/LeagueBlight/BlightBossCold": "Cold",
+    "Metadata/Monsters/LeagueBlight/BlightBossLightning": "Lightning",
+    "Metadata/Monsters/LeagueBlight/BlightBossChaos": "Chaos",
+
+    # ── Ritual ───────────────────────────────────────────────────────
+    "Metadata/Monsters/LeagueRitual/RitualDaemonFire": "Fire",
+    "Metadata/Monsters/LeagueRitual/RitualDaemonCold": "Cold",
+    "Metadata/Monsters/LeagueRitual/RitualDaemonLightning": "Lightning",
+    "Metadata/Monsters/LeagueRitual/RitualDaemonPhysical": "Physical",
+
+    # ── Essence ──────────────────────────────────────────────────────
+    "Metadata/Monsters/LeagueEssence/EssenceMonsterCorrupted1": "Fire",
+    "Metadata/Monsters/LeagueEssence/EssenceMonsterCorrupted2": "Lightning",
+    "Metadata/Monsters/LeagueEssence/EssenceMonsterCorrupted3": "Cold",
+    "Metadata/Monsters/LeagueEssence/EssenceMonsterCorrupted4": "Chaos",
+
+    # ── Campaign bosses ──────────────────────────────────────────────
+    "Metadata/Monsters/Brutus/Brutus": "Physical",
+    "Metadata/Monsters/Merveil/Merveil": "Cold",
+    "Metadata/Monsters/Fidelitas/Fidelitas": "Lightning",
+    "Metadata/Monsters/VaalOversoul/VaalOversoul": "Physical",
+    "Metadata/Monsters/Piety/Piety": "Lightning",
+    "Metadata/Monsters/Dominus/Dominus": "Lightning",
+    "Metadata/Monsters/Daresso/Daresso": "Physical",
+    "Metadata/Monsters/Daresso/DaressoBoss": "Physical",
+    "Metadata/Monsters/KaomBoss/KaomBoss": "Fire",
+    "Metadata/Monsters/Malachai/Malachai": "Physical",
+    "Metadata/Monsters/Kitava/Kitava": "Fire",
+    "Metadata/Monsters/Kitava/KitavaBoss": "Fire",
+    "Metadata/Monsters/Kitava/KitavaFinal": "Fire",
+    "Metadata/Monsters/Avarius/Avarius": "Fire",
+    "Metadata/Monsters/Innocence/Innocence": "Fire",
+    "Metadata/Monsters/Doedre/Doedre": "Chaos",
+    "Metadata/Monsters/BrineKing/BrineKing": "Cold",
+    "Metadata/Monsters/Abberath/Abberath": "Fire",
+
+    # ── Labyrinth ────────────────────────────────────────────────────
+    "Metadata/Monsters/Izaro/Izaro": "Physical",
+    "Metadata/Monsters/Izaro/IzaroUber": "Physical",
+    "Metadata/Monsters/Labyrinth/LabyrinthTrap": "Physical",
+
+    # ── Metamorph / Scourge ──────────────────────────────────────────
+    "Metadata/Monsters/LeagueMetamorph/MetamorphBoss": "Physical",
+    "Metadata/Monsters/LeagueHellscape/HellscapeKrangBoss": "Physical",
+}
+
+
+# Boss zone → primary damage element (fallback when killer is unknown).
+BOSS_ZONE_ELEMENTS: dict[str, str] = {
+    "The Shaper's Realm": "Cold",
+    "Absence of Value and Meaning": "Physical",    # Sirus
+    "Eye of the Storm": "Physical",                 # Sirus
+    "The Maven's Crucible": "Fire",
+    "The Elder's Domain": "Physical",
+    "Absence of Symmetry and Harmony": "Physical",  # Uber Elder
+    "Searing Exarch Arena": "Fire",
+    "The Eater of Worlds' Arena": "Physical",
+    "Black Star Arena": "Cold",
+    "The Infinite Hunger Arena": "Chaos",
+    "Xoph's Domain": "Fire",
+    "Tul's Domain": "Cold",
+    "Esh's Domain": "Lightning",
+    "Uul-Netol's Domain": "Physical",
+    "Chayula's Domain": "Chaos",
+    "The Cathedral Rooftop": "Fire",       # Kitava
+    "The Feeding Trough": "Fire",          # Kitava Act 10
+    "The Arbiter of Ash Arena": "Fire",    # PoE 2
+}

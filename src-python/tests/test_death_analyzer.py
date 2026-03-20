@@ -128,3 +128,35 @@ class TestAnalyzeDeath:
         )
         weaknesses = result["weaknesses"]
         assert any(w["stat"] == "Armour" for w in weaknesses)
+
+    def test_element_from_monster_elements_dict(self):
+        """MONSTER_ELEMENTS lookup should override keyword matching."""
+        result = analyze_death(
+            {"killer": "The Shaper", "killer_raw": "Metadata/Monsters/AtlasBosses/TheShaperBoss", "zone": "The Shaper's Realm"},
+            self._make_defence(),
+        )
+        assert result["damage_element"] == "Cold"
+
+    def test_element_from_keywords(self):
+        result = analyze_death(
+            {"killer": "Unknown Frost Wraith", "killer_raw": "Metadata/Monsters/SomeNew/FrostWraith", "zone": "Strand Map"},
+            self._make_defence(),
+        )
+        assert result["damage_element"] == "Cold"
+
+    def test_element_from_boss_zone_fallback(self):
+        """When killer is unknown, element should come from boss zone."""
+        result = analyze_death(
+            {"killer": "Unknown", "killer_raw": "", "zone": "The Shaper's Realm"},
+            self._make_defence(),
+        )
+        assert result["damage_element"] == "Cold"
+
+    def test_element_suggestion_for_fire_death(self):
+        """Dying to fire damage with uncapped fire res should mention it."""
+        result = analyze_death(
+            {"killer": "Guardian of the Phoenix", "killer_raw": "Metadata/Monsters/AtlasBosses/PhoenixBoss", "zone": "Phoenix Map"},
+            self._make_defence(elemental_resistances={"fire": 50, "cold": 75, "lightning": 75}),
+        )
+        assert result["damage_element"] == "Fire"
+        assert any("Fire" in s and "fire" in s.lower() for s in result["suggestions"])

@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Callable
 
 from pop.log_watcher.grace_verses import DEATH_VERSES
+from pop.log_watcher.monster_names import MONSTER_ELEMENTS, BOSS_ZONE_ELEMENTS
 
 # --- Event models ---
 
@@ -38,6 +39,7 @@ class DeathEvent:
     character_name: str
     killer_raw: str = ""        # raw metadata path
     killer_name: str = ""       # human-readable name
+    damage_element: str = ""    # Fire, Cold, Lightning, Chaos, Physical, or ""
     zone_name: str = ""         # zone where death occurred
     grace_verse: str = ""       # encouraging Bible verse
     grace_ref: str = ""         # verse reference (e.g. "Psalm 23:4")
@@ -154,7 +156,9 @@ class SessionStats:
                 "deaths": self.current_map.deaths,
                 "death_recaps": [
                     {
-                        "killer": d.killer_name or d.killer_raw,
+                        "killer": d.killer_name or d.killer_raw or "Unknown",
+                        "killer_raw": d.killer_raw,
+                        "damage_element": d.damage_element,
                         "timestamp": d.timestamp,
                         "grace_verse": d.grace_verse,
                         "grace_ref": d.grace_ref,
@@ -169,6 +173,7 @@ class SessionStats:
                 "character": self.last_death.character_name,
                 "killer": self.last_death.killer_name or self.last_death.killer_raw or "Unknown",
                 "killer_raw": self.last_death.killer_raw,
+                "damage_element": self.last_death.damage_element,
                 "zone": self.last_death.zone_name,
                 "timestamp": self.last_death.timestamp,
                 "grace_verse": self.last_death.grace_verse,
@@ -361,6 +366,40 @@ class LogWatcher:
         self._pending_area_id: str = ""
         self._running = False
 
+    def _resolve_element(self, killer_raw: str, zone_name: str = "") -> str:
+        """Determine primary damage element from killer metadata or zone context."""
+        if killer_raw:
+            clean = re.sub(r"@\d+$", "", killer_raw)
+            if clean in MONSTER_ELEMENTS:
+                return MONSTER_ELEMENTS[clean]
+            if killer_raw in MONSTER_ELEMENTS:
+                return MONSTER_ELEMENTS[killer_raw]
+            # Keyword fallback on the raw path
+            lower = clean.lower()
+            for kw, elem in (
+                ("fire", "Fire"), ("flame", "Fire"), ("burn", "Fire"),
+                ("magma", "Fire"), ("lava", "Fire"), ("searing", "Fire"),
+                ("infernal", "Fire"), ("scorch", "Fire"),
+                ("cold", "Cold"), ("frost", "Cold"), ("ice", "Cold"),
+                ("chill", "Cold"), ("freez", "Cold"), ("glacial", "Cold"),
+                ("avalanche", "Cold"),
+                ("lightning", "Lightning"), ("storm", "Lightning"),
+                ("shock", "Lightning"), ("thunder", "Lightning"),
+                ("spark", "Lightning"), ("electr", "Lightning"),
+                ("chaos", "Chaos"), ("caustic", "Chaos"), ("poison", "Chaos"),
+                ("venom", "Chaos"), ("blight", "Chaos"), ("wither", "Chaos"),
+                ("profane", "Chaos"), ("desecrat", "Chaos"),
+                ("physical", "Physical"), ("bleed", "Physical"),
+                ("impale", "Physical"), ("crush", "Physical"),
+            ):
+                if kw in lower:
+                    return elem
+        # Zone-based fallback for unknown killers in boss arenas
+        zone = zone_name or self.stats.current_zone
+        if zone in BOSS_ZONE_ELEMENTS:
+            return BOSS_ZONE_ELEMENTS[zone]
+        return ""
+
     def _resolve_killer(self, raw: str) -> str:
         """Convert metadata path to readable name."""
         # Direct lookup
@@ -447,6 +486,7 @@ class LogWatcher:
 
     def _handle_death(self, timestamp: str, character_name: str, killer_raw: str = "") -> None:
         killer_name = self._resolve_killer(killer_raw) if killer_raw else ""
+        damage_element = self._resolve_element(killer_raw)
 
         ref, verse = random.choice(DEATH_VERSES)
         event = DeathEvent(
@@ -454,6 +494,7 @@ class LogWatcher:
             character_name=character_name,
             killer_raw=killer_raw,
             killer_name=killer_name,
+            damage_element=damage_element,
             zone_name=self.stats.current_zone,
             grace_verse=verse,
             grace_ref=ref,
@@ -500,11 +541,13 @@ class LogWatcher:
                 # Normal case: fill in killer for the death we just detected
                 self.stats.last_death.killer_raw = killer_raw
                 self.stats.last_death.killer_name = self._resolve_killer(killer_raw)
+                self.stats.last_death.damage_element = self._resolve_element(killer_raw)
                 # Also update the map's death recap
                 if self.stats.current_map and self.stats.current_map.death_recaps:
                     last = self.stats.current_map.death_recaps[-1]
                     last.killer_raw = killer_raw
                     last.killer_name = self.stats.last_death.killer_name
+                    last.damage_element = self.stats.last_death.damage_element
             elif not self.stats.last_death:
                 # "Player died" line arrived in a new poll without preceding "has been slain"
                 # (split across poll boundaries). Create a death event from the killer info.

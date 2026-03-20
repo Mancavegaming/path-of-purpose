@@ -128,6 +128,81 @@ class TestMonsterNameResolver:
         assert name == "Big Scary Demon"
 
 
+class TestDamageElement:
+    def test_known_boss_element(self, watcher):
+        watcher._process_line(
+            '2024/01/15 10:30:00 1 b46 [INFO Client 1] : You have entered Strand Map.'
+        )
+        watcher._process_line(
+            '2024/01/15 10:35:00 2 b46 [INFO Client 1] : X has been slain.'
+        )
+        watcher._process_line(
+            '2024/01/15 10:35:00 3 b46 Player died, killer=Metadata/Monsters/AtlasBosses/TheShaperBoss (0x123), killer var=x, killer deleted=false, killer destructing=false'
+        )
+        assert watcher.stats.last_death.damage_element == "Cold"
+
+    def test_ground_effect_element(self, watcher):
+        watcher._process_line(
+            '2024/01/15 10:35:00 2 b46 [INFO Client 1] : X has been slain.'
+        )
+        watcher._process_line(
+            '2024/01/15 10:35:00 3 b46 Player died, killer=Metadata/Monsters/InvisibleFire/InvisibleFireDegen (0x123), killer var=x, killer deleted=false, killer destructing=false'
+        )
+        assert watcher.stats.last_death.damage_element == "Fire"
+
+    def test_volatile_element(self, watcher):
+        watcher._process_line(
+            '2024/01/15 10:35:00 2 b46 [INFO Client 1] : X has been slain.'
+        )
+        watcher._process_line(
+            '2024/01/15 10:35:00 3 b46 Player died, killer=Metadata/Monsters/Daemon/VolatileCoreLightning (0x123), killer var=x, killer deleted=false, killer destructing=false'
+        )
+        assert watcher.stats.last_death.damage_element == "Lightning"
+
+    def test_keyword_fallback_element(self, watcher):
+        watcher._process_line(
+            '2024/01/15 10:35:00 2 b46 [INFO Client 1] : X has been slain.'
+        )
+        watcher._process_line(
+            '2024/01/15 10:35:00 3 b46 Player died, killer=Metadata/Monsters/SomeNew/FrostWraith (0x123), killer var=x, killer deleted=false, killer destructing=false'
+        )
+        assert watcher.stats.last_death.damage_element == "Cold"
+
+    def test_boss_zone_fallback_element(self, watcher):
+        """When killer is unknown, infer element from boss zone."""
+        watcher._process_line(
+            "2024/01/15 10:30:00 1 b46 [INFO Client 1] : You have entered The Shaper's Realm."
+        )
+        watcher._process_line(
+            '2024/01/15 10:35:00 2 b46 [INFO Client 1] : X has been slain.'
+        )
+        # No "Player died" line — killer stays unknown but element comes from zone
+        assert watcher.stats.last_death.damage_element == "Cold"
+
+    def test_element_in_to_dict(self, watcher):
+        watcher._process_line(
+            '2024/01/15 10:30:00 1 b46 [INFO Client 1] : You have entered Strand Map.'
+        )
+        watcher._process_line(
+            '2024/01/15 10:35:00 2 b46 [INFO Client 1] : X has been slain.'
+        )
+        watcher._process_line(
+            '2024/01/15 10:35:00 3 b46 Player died, killer=Metadata/Monsters/Daemon/VolatileCoreFire (0x123), killer var=x, killer deleted=false, killer destructing=false'
+        )
+        d = watcher.stats.to_dict()
+        assert d["last_death"]["damage_element"] == "Fire"
+        assert d["current_map"]["death_recaps"][0]["damage_element"] == "Fire"
+
+    def test_element_with_at_suffix(self, watcher):
+        watcher._process_line(
+            '2024/01/15 10:35:00 2 b46 [INFO Client 1] : X has been slain.'
+        )
+        watcher._process_line(
+            '2024/01/15 10:35:00 3 b46 Player died, killer=Metadata/Monsters/BreachBosses/BreachBossFireMap@82 (0x123), killer var=x, killer deleted=false, killer destructing=false'
+        )
+        assert watcher.stats.last_death.damage_element == "Fire"
+
+
 class TestBossEncounters:
     def test_boss_zone_starts_encounter(self, watcher):
         watcher._process_line(

@@ -47,7 +47,7 @@ export async function calculateAllDps(
 
 export async function generateFilter(
   build?: Build | null,
-  config?: Partial<FilterConfig>,
+  config?: Partial<FilterConfig> | Record<string, unknown>,
 ): Promise<FilterResult> {
   return await invoke<FilterResult>("generate_filter", {
     build: build ?? null,
