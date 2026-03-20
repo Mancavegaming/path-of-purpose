@@ -1,11 +1,11 @@
 {
-  "version": "0.9.2",
-  "notes": "v0.9.2: Fix death killer detection, grace verses, log path display",
-  "pub_date": "2026-03-19T14:30:00Z",
+  "version": "0.9.3",
+  "notes": "Death element detection + price check overlay reliability",
+  "pub_date": "2026-03-20T10:40:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXRSczYyKy83cHpwclh2M3FzeVRBOHY2VVI4WlFmbVVYaSticHZEQm1QWXFmM0FGTXM2cEs4eEovaXRyUHRLYXhhbWp1eHljU1FHVXBNYTFacG5vQVFzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczOTQzNjg5CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOS4yX3g2NC1zZXR1cC5uc2lzLnppcApIVXgzWFZMMHU3amZneHFkSkRMV0llRjN1SWxHenRSZy9pL01jSDZOVnk5bTBUckVVQUFvNVN2cnV4b2Q2bWpCU1RhRXJCeU95N0w0MlR6eERPM3JBUT09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.9.2/Path.of.Purpose_0.9.2_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWhJR3lJazhyMExCYnBwRWI1RlovekVZaFEzRGh6WW05NmhINDg1K3hzeStXMnlUSTM5N2pPbCtiWG92V1h0YTh1eGVKdEg1clB0MFpzVncyYmFnU0FRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MDIxNTgyCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOS4zX3g2NC1zZXR1cC5uc2lzLnppcApzVTRuSVBSS1E3cVkrZTVFbXMxY3JheUhCQklDWXZYVVpIdjdMQXd4c2V4c2RLNDRjWGxxNVc4U2VKK1BxcmJNaEZqdjEwZGFmR04ydXBWbzlYVk9Cdz09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.9.3/Path.of.Purpose_0.9.3_x64-setup.nsis.zip"
     }
   }
 }
