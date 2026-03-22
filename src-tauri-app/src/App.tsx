@@ -10,8 +10,9 @@ import CharacterPage from "./pages/CharacterPage";
 import StreamingPage from "./pages/StreamingPage";
 import FilterPage from "./pages/FilterPage";
 import PriceCheckPage from "./pages/PriceCheckPage";
-import DeathPage from "./pages/DeathPage";
-import "./lib/deathStore"; // Start death log polling on app launch
+// Death Log disabled until Client.txt parsing is fixed
+// import DeathPage from "./pages/DeathPage";
+// import "./lib/deathStore";
 import type { Build, BuildGuide } from "./lib/types";
 import {
   createOverlayWindow,
@@ -190,9 +191,6 @@ function App() {
         </div>
         <div style={{ display: page() === "streaming" ? "block" : "none" }}>
           <StreamingPage />
-        </div>
-        <div style={{ display: page() === "death" ? "block" : "none" }}>
-          <DeathPage />
         </div>
       </main>
       <Show when={priceCheckStatus()}>
