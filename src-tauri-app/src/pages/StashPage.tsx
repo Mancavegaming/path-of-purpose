@@ -36,14 +36,18 @@ export default function StashPage() {
 
   async function handleLogin() {
     setError("");
+    setLoading("Waiting for PoE authorization...");
     try {
       await poeLogin();
-    } catch {
-      // poeLogin may throw even on success (timeout waiting for callback)
+    } catch (e) {
+      console.error("poeLogin error:", e);
+      setError(String(e));
     }
+    setLoading("");
     // Always re-check login status after attempting login
     await checkLogin();
     if (loggedIn()) {
+      setError("");
       await loadLeagues();
     }
   }

@@ -18,6 +18,7 @@ import base64
 import hashlib
 import http.server
 import secrets
+import sys
 import threading
 import time
 import urllib.parse
@@ -256,8 +257,8 @@ async def login(
     # Start callback server in background, then open browser
     result = _CallbackResult()
 
-    print(f"Opening browser for PoE authorization...")
-    print(f"If the browser doesn't open, visit:\n{auth_url}\n")
+    print(f"Opening browser for PoE authorization...", file=sys.stderr)
+    print(f"If the browser doesn't open, visit:\n{auth_url}\n", file=sys.stderr)
     webbrowser.open(auth_url)
 
     # Block until callback
@@ -271,7 +272,7 @@ async def login(
     tokens = await _exchange_code(client_id, code, code_verifier)
     save_tokens(tokens)
 
-    print("Login successful!")
+    print("Login successful!", file=sys.stderr)
     return tokens
 
 
