@@ -1,11 +1,11 @@
 {
-  "version": "0.9.4",
-  "notes": "PoE-inspired visual overhaul + disable Death Log",
-  "pub_date": "2026-03-22T12:00:00Z",
+  "version": "0.9.5",
+  "notes": "Stash Value scanner + SocketedGem colour fix",
+  "pub_date": "2026-03-22T14:30:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYW8wZngyb3NqVWdqRGF3SkE2Q3BpbVZaYVMzbVl2MlJ2MUZETFRPMTB4ek5EYkEyMXJsS1Q5a21GTHlyU3dwYVY4NUl1OUxXTHgvNVM0eEVndWh4ZXdnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MjI0NTY1CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOS40X3g2NC1zZXR1cC5uc2lzLnppcAp1S2R6d3VSS0tSOVZOMGpYNlpyUG1EZ00zZ1VyK1VTZDU5UUlCMlUzMEJLU09hdStadnloTUJWbUx2cFFDU1BFVXMrMlRLWWlVOUlhOGxLWlpOV0tCdz09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.9.4/Path.of.Purpose_0.9.4_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUldUK3UySTZOcnVvYWlXQXBhenhRS1hOb29JcjRycEV5M0s5bzVQWlBqRmFHSFBOeVhaUnhVTHZ1VHJMcVFKV3RLV0tMRHNOcTNJaXJXVk5ZRGNObWoxV2EvcWhIWlVGeWdnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MjI5ODE2CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOS41X3g2NC1zZXR1cC5uc2lzLnppcAp6Vzl1NmEwMFMzd2RYS0l2ek9NQS9iRXhBZm04cjhFNWtpeTJnejhuWDArUTlTYmxaWklzM3Y4WEZyeG1FanlOSWJNdVF4RjdtNjY5TWlSdnJSakhDQT09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.9.5/Path.of.Purpose_0.9.5_x64-setup.nsis.zip"
     }
   }
 }

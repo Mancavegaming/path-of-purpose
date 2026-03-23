@@ -17,6 +17,8 @@ import type {
   TradeSearchResult,
   FilterConfig,
   FilterResult,
+  StashTab,
+  StashTabValuation,
 } from "./types";
 
 export async function decodeBuild(code: string): Promise<Build> {
@@ -707,4 +709,28 @@ export async function showOverlayAt(x: number, y: number): Promise<void> {
 
 export async function hideOverlay(): Promise<void> {
   await invoke("hide_overlay");
+}
+
+// --- Stash Value ---
+
+export async function stashListTabs(league: string): Promise<{ tabs: StashTab[] }> {
+  return await invoke<{ tabs: StashTab[] }>("stash_list_tabs", { league });
+}
+
+export async function stashScanTab(
+  league: string,
+  tabId: string,
+  currencyRates?: Record<string, number>,
+  divineRatio?: number,
+): Promise<StashTabValuation> {
+  return await invoke<StashTabValuation>("stash_scan_tab", {
+    league,
+    tabId,
+    currencyRates: currencyRates ?? null,
+    divineRatio: divineRatio ?? null,
+  });
+}
+
+export async function stashCurrencyRates(league: string): Promise<{ rates: Record<string, number>; divine_ratio: number }> {
+  return await invoke<{ rates: Record<string, number>; divine_ratio: number }>("stash_currency_rates", { league });
 }

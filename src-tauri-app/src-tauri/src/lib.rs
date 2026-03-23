@@ -2513,6 +2513,52 @@ async fn analyze_death(
         .map_err(|e| format!("Failed to parse death_analyze output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))
 }
 
+/// List stash tabs for a league via PoE OAuth API.
+#[tauri::command]
+async fn stash_list_tabs(league: String) -> Result<serde_json::Value, String> {
+    let input = serde_json::json!({ "league": league });
+    let stdout = run_python_command(
+        &["-m", "pop.main", "stash_list_tabs", "--stdin"],
+        Some(&input.to_string()),
+    )?;
+    serde_json::from_str::<serde_json::Value>(&stdout)
+        .map_err(|e| format!("Failed to parse stash_list_tabs output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))
+}
+
+/// Scan a single stash tab and price its contents.
+#[tauri::command]
+async fn stash_scan_tab(
+    league: String,
+    tab_id: String,
+    currency_rates: Option<serde_json::Value>,
+    divine_ratio: Option<f64>,
+) -> Result<serde_json::Value, String> {
+    let input = serde_json::json!({
+        "league": league,
+        "tab_id": tab_id,
+        "currency_rates": currency_rates.unwrap_or(serde_json::json!({})),
+        "divine_ratio": divine_ratio.unwrap_or(180.0),
+    });
+    let stdout = run_python_command(
+        &["-m", "pop.main", "stash_scan_tab", "--stdin"],
+        Some(&input.to_string()),
+    )?;
+    serde_json::from_str::<serde_json::Value>(&stdout)
+        .map_err(|e| format!("Failed to parse stash_scan_tab output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))
+}
+
+/// Fetch currency exchange rates from poe.ninja.
+#[tauri::command]
+async fn stash_currency_rates(league: String) -> Result<serde_json::Value, String> {
+    let input = serde_json::json!({ "league": league });
+    let stdout = run_python_command(
+        &["-m", "pop.main", "stash_currency_rates", "--stdin"],
+        Some(&input.to_string()),
+    )?;
+    serde_json::from_str::<serde_json::Value>(&stdout)
+        .map_err(|e| format!("Failed to parse stash_currency_rates output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))
+}
+
 /// Save price check settings to app data directory.
 #[tauri::command]
 async fn save_price_check_settings(app: tauri::AppHandle, settings: serde_json::Value) -> Result<(), String> {
@@ -2724,6 +2770,9 @@ pub fn run() {
             price_check_trigger,
             price_check_refine,
             analyze_death,
+            stash_list_tabs,
+            stash_scan_tab,
+            stash_currency_rates,
             create_overlay_window,
             show_overlay_at,
             hide_overlay,

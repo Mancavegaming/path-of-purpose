@@ -564,3 +564,36 @@ export interface AccountFilter {
   realm: string;
   public: boolean;
 }
+
+// --- Stash Value models ---
+
+export interface StashTab {
+  id: string;
+  name: string;
+  type: string;
+  index: number;
+  colour: { r: number; g: number; b: number };
+  children: StashTab[];
+}
+
+export interface PricedItem {
+  item_id: string;
+  name: string;
+  icon: string;
+  rarity: string;
+  stack_size: number;
+  unit_price_chaos: number;
+  total_price_chaos: number;
+  price_source: string;
+  confidence: string;
+}
+
+export interface StashTabValuation {
+  tab_id: string;
+  tab_name: string;
+  total_chaos: number;
+  total_divine: number;
+  item_count: number;
+  priced_count: number;
+  items: PricedItem[];
+}

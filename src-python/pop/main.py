@@ -1865,6 +1865,91 @@ def cmd_death_analyze(args: argparse.Namespace) -> None:
         print(json.dumps({"error": str(exc)}))
 
 
+def cmd_stash_list_tabs(args: argparse.Namespace) -> None:
+    """List stash tabs for a league via PoE OAuth API."""
+    from pop.poe_api import PoeClient
+
+    raw = _safe_stdin_read()
+    data = json.loads(raw) if raw else {}
+    league = data.get("league", "Standard")
+
+    async def _run() -> None:
+        async with PoeClient(client_id=args.client_id) as poe:
+            tabs = await poe.list_stash_tabs(league)
+            print(json.dumps({
+                "tabs": [t.model_dump(mode="json") for t in tabs],
+            }))
+
+    try:
+        asyncio.run(_run())
+    except Exception as exc:
+        print(json.dumps({"error": str(exc)}))
+
+
+def cmd_stash_scan_tab(args: argparse.Namespace) -> None:
+    """Scan a single stash tab and price its contents."""
+    from pop.poe_api import PoeClient
+    from pop.stash.pricer import price_stash_items
+
+    raw = _safe_stdin_read()
+    if not raw:
+        print(json.dumps({"error": "No input. Send JSON with 'league' and 'tab_id'."}))
+        return
+
+    data = json.loads(raw)
+    league = data.get("league", "Standard")
+    tab_id = data.get("tab_id", "")
+    currency_rates = data.get("currency_rates", {})
+    divine_ratio = data.get("divine_ratio", 180.0)
+
+    if not tab_id:
+        print(json.dumps({"error": "Missing 'tab_id' in input."}))
+        return
+
+    async def _run() -> None:
+        async with PoeClient(client_id=args.client_id) as poe:
+            contents = await poe.get_stash_tab(league, tab_id)
+            # Flatten child tab items into the main list
+            all_items = list(contents.items)
+            for child in contents.children:
+                all_items.extend(child.items)
+
+            valuation = price_stash_items(
+                all_items,
+                currency_rates,
+                divine_ratio,
+                tab_id=contents.id or tab_id,
+                tab_name=contents.name,
+            )
+            print(json.dumps(valuation.model_dump(mode="json")))
+
+    try:
+        asyncio.run(_run())
+    except Exception as exc:
+        print(json.dumps({"error": str(exc)}))
+
+
+def cmd_stash_currency_rates(args: argparse.Namespace) -> None:
+    """Fetch currency exchange rates from poe.ninja."""
+    from pop.stash.currency_rates import fetch_currency_rates
+
+    raw = _safe_stdin_read()
+    data = json.loads(raw) if raw else {}
+    league = data.get("league", "Standard")
+
+    async def _run() -> None:
+        rates, divine_ratio = await fetch_currency_rates(league)
+        print(json.dumps({
+            "rates": rates,
+            "divine_ratio": divine_ratio,
+        }))
+
+    try:
+        asyncio.run(_run())
+    except Exception as exc:
+        print(json.dumps({"error": str(exc)}))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog="pop",
@@ -2072,6 +2157,21 @@ def main() -> None:
     p_death = subparsers.add_parser("death_analyze", help="Analyze a death event against player defences")
     p_death.add_argument("--stdin", action="store_true", default=True)
     p_death.set_defaults(func=cmd_death_analyze)
+
+    # --- stash_list_tabs ---
+    p_stash_tabs = subparsers.add_parser("stash_list_tabs", help="List stash tabs for a league")
+    p_stash_tabs.add_argument("--stdin", action="store_true", default=True)
+    p_stash_tabs.set_defaults(func=cmd_stash_list_tabs)
+
+    # --- stash_scan_tab ---
+    p_stash_scan = subparsers.add_parser("stash_scan_tab", help="Scan a stash tab and price its contents")
+    p_stash_scan.add_argument("--stdin", action="store_true", default=True)
+    p_stash_scan.set_defaults(func=cmd_stash_scan_tab)
+
+    # --- stash_currency_rates ---
+    p_stash_rates = subparsers.add_parser("stash_currency_rates", help="Fetch currency exchange rates")
+    p_stash_rates.add_argument("--stdin", action="store_true", default=True)
+    p_stash_rates.set_defaults(func=cmd_stash_currency_rates)
 
     args = parser.parse_args()
     args.func(args)

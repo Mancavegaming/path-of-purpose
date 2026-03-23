@@ -19,6 +19,8 @@ from pop.poe_api.models import (
     League,
     PassiveData,
     Profile,
+    StashTab,
+    StashTabContents,
 )
 from pop.poe_api.rate_limiter import RateLimiter
 
@@ -231,3 +233,23 @@ class PoeClient:
     async def delete_filter(self, filter_id: str) -> None:
         """Delete a filter from the account."""
         await self._request("DELETE", f"/item-filter/{filter_id}")
+
+    # ------------------------------------------------------------------
+    # Stash tab methods
+    # ------------------------------------------------------------------
+
+    async def list_stash_tabs(self, league: str) -> list[StashTab]:
+        """Fetch the list of stash tabs for a league (metadata only, no items)."""
+        resp = await self._request("GET", f"/stash/{league}")
+        data = resp.json()
+        tabs = data.get("stashes", data.get("tabs", data)) if isinstance(data, dict) else data
+        if isinstance(tabs, list):
+            return [StashTab.model_validate(t) for t in tabs]
+        return []
+
+    async def get_stash_tab(self, league: str, stash_id: str) -> StashTabContents:
+        """Fetch the contents of a single stash tab."""
+        resp = await self._request("GET", f"/stash/{league}/{stash_id}")
+        data = resp.json()
+        stash_data = data.get("stash", data) if isinstance(data, dict) else data
+        return StashTabContents.model_validate(stash_data)

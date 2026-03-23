@@ -50,7 +50,7 @@ class ItemSocket(BaseModel):
     """A single socket on an item."""
 
     group: int = 0
-    colour: str = ""  # R, G, B, W, A (abyss)
+    colour: str | None = ""  # R, G, B, W, A (abyss)
 
 
 class ItemProperty(BaseModel):
@@ -67,7 +67,7 @@ class SocketedGem(BaseModel):
     type_line: str = Field(default="", alias="typeLine")
     support: bool = False  # True for support gems
     socket: int = 0  # Index into the parent item's sockets array
-    colour: str = ""  # S for skill, D for support
+    colour: str | None = ""  # S for skill, D for support
     properties: list[ItemProperty] = Field(default_factory=list)
     icon: str = ""
 
@@ -242,3 +242,75 @@ class AccountFilter(BaseModel):
     description: str = ""
     realm: str = "pc"
     public: bool = False
+
+
+# ---------------------------------------------------------------------------
+# Stash tab models
+# ---------------------------------------------------------------------------
+
+
+class StashTab(BaseModel):
+    """A stash tab from GET /api/stash/{league}."""
+
+    id: str = ""
+    name: str = ""
+    type: str = ""  # NormalStash, PremiumStash, QuadStash, CurrencyStash, etc.
+    index: int = 0
+    colour: dict = Field(default_factory=dict)  # {"r": 124, "g": 84, "b": 54}
+    children: list["StashTab"] = Field(default_factory=list)
+
+    model_config = {"populate_by_name": True}
+
+
+class StashItem(BaseModel):
+    """An item inside a stash tab from the PoE API."""
+
+    id: str = ""
+    name: str = ""
+    type_line: str = Field(default="", alias="typeLine")
+    base_type: str = Field(default="", alias="baseType")
+    ilvl: int = 0
+    icon: str = ""
+    stack_size: int = Field(default=1, alias="stackSize")
+    max_stack_size: int = Field(default=1, alias="maxStackSize")
+    frame_type: int = Field(default=0, alias="frameType")
+    identified: bool = True
+    corrupted: bool = False
+
+    # Mods
+    implicit_mods: list[str] = Field(default_factory=list, alias="implicitMods")
+    explicit_mods: list[str] = Field(default_factory=list, alias="explicitMods")
+    crafted_mods: list[str] = Field(default_factory=list, alias="craftedMods")
+
+    # Properties
+    properties: list[ItemProperty] = Field(default_factory=list)
+
+    # Note (price tag from public stash tab)
+    note: str = ""
+
+    model_config = {"populate_by_name": True}
+
+    @property
+    def rarity_name(self) -> str:
+        return {
+            0: "Normal", 1: "Magic", 2: "Rare", 3: "Unique",
+            5: "Currency", 6: "Divination Card", 4: "Gem",
+        }.get(self.frame_type, "Unknown")
+
+    @property
+    def display_name(self) -> str:
+        if self.name and self.type_line:
+            return f"{self.name} {self.type_line}"
+        return self.name or self.type_line or self.base_type
+
+
+class StashTabContents(BaseModel):
+    """Full stash tab with items from GET /api/stash/{league}/{id}."""
+
+    id: str = ""
+    name: str = ""
+    type: str = ""
+    items: list[StashItem] = Field(default_factory=list)
+    children: list["StashTabContents"] = Field(default_factory=list)
+
+    model_config = {"populate_by_name": True}
