@@ -142,6 +142,15 @@ fn run_python_command(
     args: &[&str],
     stdin_data: Option<&str>,
 ) -> Result<String, String> {
+    run_python_command_with_timeout(args, stdin_data, 30)
+}
+
+/// Like run_python_command but with a custom timeout (seconds).
+fn run_python_command_with_timeout(
+    args: &[&str],
+    stdin_data: Option<&str>,
+    timeout_secs: u64,
+) -> Result<String, String> {
     let (python_exe, python_cwd, is_sidecar) = resolve_python_paths();
 
     // For the compiled sidecar, strip the `-m pop.main` prefix from args
@@ -190,7 +199,7 @@ fn run_python_command(
         let _ = tx.send(child.wait_with_output());
     });
 
-    match rx.recv_timeout(std::time::Duration::from_secs(30)) {
+    match rx.recv_timeout(std::time::Duration::from_secs(timeout_secs)) {
         Ok(result) => {
             let output = result.map_err(|e| format!("Failed to wait for Python engine: {}", e))?;
             if output.status.success() {
@@ -214,7 +223,7 @@ fn run_python_command(
                     .creation_flags(0x08000000) // CREATE_NO_WINDOW
                     .output();
             }
-            Err(format!("Python engine timed out after 30 seconds (PID {})", child_pid))
+            Err(format!("Python engine timed out after {} seconds (PID {})", timeout_secs, child_pid))
         }
     }
 }
@@ -2202,9 +2211,11 @@ async fn poe_login() -> Result<serde_json::Value, String> {
     let stdin_data = serde_json::to_string(&input)
         .map_err(|e| format!("Failed to serialize input: {}", e))?;
 
-    let stdout = run_python_command(
+    // OAuth flow needs up to 120s for user to authorize in browser
+    let stdout = run_python_command_with_timeout(
         &["-m", "pop.main", "poe_login", "--stdin"],
         Some(&stdin_data),
+        120,
     )?;
 
     serde_json::from_str::<serde_json::Value>(&stdout)

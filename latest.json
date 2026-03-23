@@ -1,11 +1,11 @@
 {
-  "version": "0.9.6",
-  "notes": "Fix PoE login on Stash page",
-  "pub_date": "2026-03-22T16:00:00Z",
+  "version": "0.9.7",
+  "notes": "Fix PoE OAuth login timeout",
+  "pub_date": "2026-03-23T10:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWdUN3NxVVgrTTVvTmpBUkkvb3JIMGw1My8wdUttK2VJLytZV2FoYlFzNk1JeUxqOSsyOWpZY3ZTaDl2enFhdlpFaldTdWJWWi84YW1UdkxYdDg0S3c0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MjMyMzk2CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOS42X3g2NC1zZXR1cC5uc2lzLnppcApvVXRnZlNBY3hhZWFFdnV4ckpsY0Z2ZWQxZ1p5R2tvQ2Y1ekg3aGJLQjZZbXE1eDRuUUlWd3RoUmpmdHgyZjFMTkJnNmZIUFdWQ2ovRXRzSFRDdW1EQT09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.9.6/Path.of.Purpose_0.9.6_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXM0WFJQeDhQTlJOYzFuLzAxTDJkd091L1VFY2FURnZQT0Q4SVBhRGl5aC9IcmRXVncrNmc1SnZmU21sb2d2WGMrbXJaNVFsV3pGV2ZOQmxBTHUzbHdNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0Mjc1MzAwCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOS43X3g2NC1zZXR1cC5uc2lzLnppcAphTVA1NUhIVlN4SU92OExpc1dQdGZOMGpRUmNPL21TUUpoZHhNc1R0YkdQeEY1WHptbmtFaXFEaklxenNrMGlzemFSUnI1d2ErTGJJenkrMkY1NWRDUT09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.9.7/Path.of.Purpose_0.9.7_x64-setup.nsis.zip"
     }
   }
 }
