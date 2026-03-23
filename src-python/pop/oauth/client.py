@@ -185,7 +185,7 @@ async def _exchange_code(
 
     return StoredTokens(
         access_token=data["access_token"],
-        refresh_token=data["refresh_token"],
+        refresh_token=data.get("refresh_token", ""),
         expires_at=time.time() + data.get("expires_in", 3600),
         scope=data.get("scope", ""),
     )
