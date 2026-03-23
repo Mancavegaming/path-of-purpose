@@ -38,10 +38,13 @@ export default function StashPage() {
     setError("");
     try {
       await poeLogin();
-      setLoggedIn(true);
+    } catch {
+      // poeLogin may throw even on success (timeout waiting for callback)
+    }
+    // Always re-check login status after attempting login
+    await checkLogin();
+    if (loggedIn()) {
       await loadLeagues();
-    } catch (e) {
-      setError(String(e));
     }
   }
 

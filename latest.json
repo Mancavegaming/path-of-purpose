@@ -1,11 +1,11 @@
 {
-  "version": "0.9.5",
-  "notes": "Stash Value scanner + SocketedGem colour fix",
-  "pub_date": "2026-03-22T14:30:00Z",
+  "version": "0.9.6",
+  "notes": "Fix PoE login on Stash page",
+  "pub_date": "2026-03-22T16:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWlXQXBhenhRS1hOb29JcjRycEV5M0s5bzVQWlBqRmFHSFBOeVhaUnhVTHZ1VHJMcVFKV3RLV0tMRHNOcTNJaXJXVk5ZRGNObWoxV2EvcWhIWlVGeWdnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MjI5ODE2CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOS41X3g2NC1zZXR1cC5uc2lzLnppcAp6Vzl1NmEwMFMzd2RYS0l2ek9NQS9iRXhBZm04cjhFNWtpeTJnejhuWDArUTlTYmxaWklzM3Y4WEZyeG1FanlOSWJNdVF4RjdtNjY5TWlSdnJSakhDQT09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.9.5/Path.of.Purpose_0.9.5_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWdUN3NxVVgrTTVvTmpBUkkvb3JIMGw1My8wdUttK2VJLytZV2FoYlFzNk1JeUxqOSsyOWpZY3ZTaDl2enFhdlpFaldTdWJWWi84YW1UdkxYdDg0S3c0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MjMyMzk2CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOS42X3g2NC1zZXR1cC5uc2lzLnppcApvVXRnZlNBY3hhZWFFdnV4ckpsY0Z2ZWQxZ1p5R2tvQ2Y1ekg3aGJLQjZZbXE1eDRuUUlWd3RoUmpmdHgyZjFMTkJnNmZIUFdWQ2ovRXRzSFRDdW1EQT09Cg==",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.9.6/Path.of.Purpose_0.9.6_x64-setup.nsis.zip"
     }
   }
 }
