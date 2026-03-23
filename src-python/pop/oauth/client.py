@@ -171,9 +171,16 @@ async def _exchange_code(
                 "redirect_uri": REDIRECT_URI,
                 "code_verifier": code_verifier,
             },
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            headers={
+                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": "OAuth pathofpurpose/0.10.0 (contact: pathofpurpose@mancavegaming.com)",
+            },
         )
-        resp.raise_for_status()
+        if resp.status_code >= 400:
+            body = resp.text
+            raise RuntimeError(
+                f"Token exchange failed ({resp.status_code}): {body[:500]}"
+            )
         data = resp.json()
 
     return StoredTokens(
@@ -197,9 +204,16 @@ async def refresh_access_token(
                 "client_id": client_id,
                 "refresh_token": refresh_token,
             },
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            headers={
+                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": "OAuth pathofpurpose/0.10.0 (contact: pathofpurpose@mancavegaming.com)",
+            },
         )
-        resp.raise_for_status()
+        if resp.status_code >= 400:
+            body = resp.text
+            raise RuntimeError(
+                f"Token refresh failed ({resp.status_code}): {body[:500]}"
+            )
         data = resp.json()
 
     tokens = StoredTokens(
