@@ -176,12 +176,20 @@ export default function StashPage() {
       <h1 class="page-title">Stash Value</h1>
       <p class="page-subtitle">Scan your stash tabs and see what your items are worth.</p>
 
+      <Show when={error()}>
+        <div class="card" style={{ "border-color": "var(--severity-critical)", background: "rgba(224, 80, 80, 0.08)" }}>
+          <div style={{ color: "var(--severity-critical)", "font-size": "13px", "word-break": "break-word" }}>{error()}</div>
+        </div>
+      </Show>
+
       <Show when={!loggedIn()}>
         <div class="card">
           <p style={{ color: "var(--text-secondary)", "margin-bottom": "12px" }}>
             Log in with your PoE account to access your stash tabs.
           </p>
-          <button onClick={handleLogin}>Login with PoE</button>
+          <button onClick={handleLogin} disabled={!!loading()}>
+            {loading() || "Login with PoE"}
+          </button>
         </div>
       </Show>
 
@@ -243,9 +251,6 @@ export default function StashPage() {
           </div>
         </Show>
 
-        <Show when={error()}>
-          <div style={{ color: "var(--severity-critical)", "margin-bottom": "12px", "font-size": "13px" }}>{error()}</div>
-        </Show>
 
         {/* Two-column layout: tab list + item detail */}
         <Show when={tabs().length > 0}>
