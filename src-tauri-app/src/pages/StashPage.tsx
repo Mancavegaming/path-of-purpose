@@ -38,10 +38,13 @@ export default function StashPage() {
     setError("");
     setLoading("Waiting for PoE authorization...");
     try {
-      await poeLogin();
+      const result = await poeLogin();
+      // Python returns {"error": "..."} as valid JSON — check for it
+      if (result.error) {
+        setError(`Login failed: ${result.error}`);
+      }
     } catch (e) {
-      console.error("poeLogin error:", e);
-      setError(String(e));
+      setError(`Login error: ${String(e)}`);
     }
     setLoading("");
     // Always re-check login status after attempting login

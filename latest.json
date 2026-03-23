@@ -1,11 +1,11 @@
 {
-  "version": "0.9.9",
-  "notes": "Show login errors on Stash page",
-  "pub_date": "2026-03-23T11:30:00Z",
+  "version": "0.10.0",
+  "notes": "Show actual login error from PoE OAuth",
+  "pub_date": "2026-03-23T12:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXFmLzRuY0M3YSt4TWd4enlRd3ZpWm5QQ1pZTlVEK2E4TEYwNVRSbnF6U1djQUdFUThYM0NEN3pxNTFrSDV6WEczQjNBdUV0Nk5Pb1dLeHVNZkJrTUFFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0Mjc5NTgxCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuOS45X3g2NC1zZXR1cC5uc2lzLnppcAozemorVyt4eERXSzVxUThBVENQaWdKTC9DSlZLMktUTGZwV2hTdWRwUzVzd2lVclIrdWF0SGM3V3BrcmZ6VGZxNHduRkd2cFpRYkM1bW5xcExZNVhBQT09Cg==",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.9.9/Path.of.Purpose_0.9.9_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWdQWHg5ejZVSm96aXRlaGpmSHJvSk9pcHN1UllYOVZsWVdYMGdiU3IvMUhaNEZlNjZZSnFjQnRaU3BUVVFKRU1DeHFCNDlreW1NcW5sUjRLWUJHaHcwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MjgwNTYxCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTAuMF94NjQtc2V0dXAubnNpcy56aXAKa0UycHU3U3pwRE1jUmJKN25BOWY3dy9kU1kyYmpvYVRpcXl0UHBCV2ZKMENDMzF1QVhOTjNGa3lJV0RqalhaL0I3YTV6OGJnQnNieDBWb2V3S2VmQUE9PQo=",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.10.0/Path.of.Purpose_0.10.0_x64-setup.nsis.zip"
     }
   }
 }
