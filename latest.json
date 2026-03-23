@@ -1,11 +1,11 @@
 {
-  "version": "0.10.1",
-  "notes": "Fix OAuth token exchange 403 — add User-Agent header",
-  "pub_date": "2026-03-23T13:00:00Z",
+  "version": "0.10.2",
+  "notes": "Fix OAuth crash when refresh_token missing from response",
+  "pub_date": "2026-03-23T20:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYW5XWFRpbmd0UWpvbmlkbTdlQUFXbCthL0xVK0JMVzhJMzJoajFVaElMVzdjOFQxbWNoWUNSTmVscGNaY2NVZERiaGpVOTYyRXJHdTZsdUFVMTRlVXdNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MjgyNjI3CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTAuMV94NjQtc2V0dXAubnNpcy56aXAKaGRZSzh2N1F0OHVlcW5jQ3pBTk54YUJabXhVMFA2UWRkaHpaOWRBUENsS0N5c29kRVNPVlR1SEl1Z0R0NVNReU4rbXB5dVV4RGp3N2FUV0ZkVUo3Q2c9PQo=",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.10.1/Path.of.Purpose_0.10.1_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUldUK3UySTZOcnVvYXNWVjc0RW5TY0x6aElYM1hTUHA3dm90WG9CZWNTaDhWOTQ3ZzdLU2RIUnlYblkvcGl3YUpHVDBKN0RvV2t4RUdDNnlTcnNIY2RDdXBHTWlYdUhyL0FRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MzA5MzAzCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTAuMl94NjQtc2V0dXAubnNpcy56aXAKS2tYOFZ3NTdGN01HUzJFcFRCTGNyd2x3SUUyaGFLcVU0L0pZMS83T210ZUFySGFFbjVwRWxxNk5hakFyVVZFMmxaWUxLeVdZMmE5aTNMMGhIVS8yRHc9PQo=",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.10.2/Path.of.Purpose_0.10.2_x64-setup.nsis.zip"
     }
   }
 }
