@@ -157,8 +157,10 @@ def _section_hot_items(lines: list[str], cfg: FilterConfig) -> None:
                 conditions = ['Class == "Divination Cards"', f"BaseType == {base_list}"]
             elif itype == "gem":
                 conditions = ['Class == "Skill Gems"', f"BaseType == {base_list}"]
-            elif itype == "base":
-                conditions = [f"BaseType == {base_list}"]
+            elif itype == "currency":
+                conditions = ['Class == "Currency"', f"BaseType == {base_list}"]
+            elif itype == "fragment":
+                conditions = ['Class == "Map Fragments" "Misc Map Items"', f"BaseType == {base_list}"]
             else:
                 conditions = [f"BaseType == {base_list}"]
             _block(lines, "Show", conditions, text=text, bg=bg, border=border,

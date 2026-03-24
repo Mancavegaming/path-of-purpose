@@ -1,11 +1,11 @@
 {
-  "version": "0.12.0",
-  "notes": "Hot Items — poe.ninja price alerts in your loot filter",
-  "pub_date": "2026-03-24T14:00:00Z",
+  "version": "0.12.1",
+  "notes": "Fix poe.ninja API + fetch all item categories",
+  "pub_date": "2026-03-24T15:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXEvMGJsMTlHRDgycjBib0NucmdBN3FVRm9SYnc2VnpSV1RQWTlGZFRuUWNqb3dyTmlUYnV0SHVZUFNROWY3TUxhckRIRUFOKzUrWVBHQ095ekxQcEFBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MzgzNDMzCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTIuMF94NjQtc2V0dXAubnNpcy56aXAKUGdNMTJ2RG9sRHV0aXREbFJ5UnNCbU1WM2M2ZWdsMlBSR0R3anFkSm5GSncrS3RRamJ6QUxzMm5ET0xoS2V0TkpnY1N1WkU3NmRnVEJ5REQvTWFVRGc9PQo=",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.12.0/Path.of.Purpose_0.12.0_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXZ4ZUc5N1hSTG9XbHU1V1h3T3JtbnVZMmRuRS9RR3RkVFNxY2l1K00rTHFlcWxxQ2wrekp3cUp3dXNjVmlzdlpRNzFjNjFSdk5xemdGcTF0VGI5SWdvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0Mzg2NjEzCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTIuMV94NjQtc2V0dXAubnNpcy56aXAKdjdyVTk0WnlaQjR6UG8xc2Q1czBsRW9KV21zb1YxbGtyZ2d5MzBKN1NqR2huTkV6TEhYNnVQVzUrOEliZUdBWjJyN3JITWU1T0dTTXp3Q2h4M0dGQUE9PQo=",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.12.1/Path.of.Purpose_0.12.1_x64-setup.nsis.zip"
     }
   }
 }

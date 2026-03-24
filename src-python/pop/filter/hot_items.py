@@ -8,19 +8,45 @@ import datetime
 import httpx
 from pydantic import BaseModel, Field
 
-NINJA_BASE = "https://poe.ninja/api/data"
+NINJA_BASE = "https://poe.ninja/poe1/api/economy/stash/current"
 USER_AGENT = "PathOfPurpose/0.11.0"
 
-# poe.ninja categories and what we call them
+# poe.ninja item/overview categories and what filter item_type they map to
 ITEM_CATEGORIES = [
+    # Uniques (all slots)
     ("UniqueWeapon", "unique"),
     ("UniqueArmour", "unique"),
     ("UniqueAccessory", "unique"),
     ("UniqueJewel", "unique"),
     ("UniqueFlask", "unique"),
+    ("UniqueMap", "unique"),
+    # Cards, gems, bases
     ("DivinationCard", "divcard"),
     ("SkillGem", "gem"),
     ("BaseType", "base"),
+    ("ClusterJewel", "base"),
+    # Crafting materials
+    ("Scarab", "base"),
+    ("Fossil", "base"),
+    ("Essence", "base"),
+    ("Oil", "base"),
+    ("Resonator", "base"),
+    ("Incubator", "base"),
+    ("Vial", "base"),
+    ("DeliriumOrb", "base"),
+    # Maps & misc
+    ("Map", "base"),
+    ("Invitation", "base"),
+    ("Beast", "base"),
+    ("Tattoo", "base"),
+    ("Omen", "base"),
+    ("Artifact", "base"),
+]
+
+# currency/overview categories (different response format)
+CURRENCY_CATEGORIES = [
+    ("Currency", "currency"),
+    ("Fragment", "fragment"),
 ]
 
 
@@ -44,16 +70,18 @@ async def _fetch_category(
 ) -> list[tuple[str, str, float]]:
     """Fetch one poe.ninja category. Returns [(name, item_type, chaosValue)]."""
     try:
-        url = f"{NINJA_BASE}/ItemOverview"
         if ninja_type == "Currency":
-            url = f"{NINJA_BASE}/CurrencyOverview"
+            url = f"{NINJA_BASE}/currency/overview"
+        else:
+            url = f"{NINJA_BASE}/item/overview"
         resp = await client.get(url, params={"league": league, "type": ninja_type})
         resp.raise_for_status()
         data = resp.json()
         lines = data.get("lines", [])
         results = []
         for line in lines:
-            name = line.get("name", "")
+            # Currency uses "currencyTypeName", items use "name"
+            name = line.get("name", line.get("currencyTypeName", ""))
             chaos = line.get("chaosValue", line.get("chaosEquivalent", 0))
             if name and chaos and chaos > 0:
                 results.append((name, item_type, float(chaos)))
@@ -82,6 +110,11 @@ async def fetch_hot_items(
             _fetch_category(client, league, ninja_type, item_type)
             for ninja_type, item_type in ITEM_CATEGORIES
         ]
+        # Also fetch currency categories
+        tasks.extend([
+            _fetch_category(client, league, ninja_type, item_type)
+            for ninja_type, item_type in CURRENCY_CATEGORIES
+        ])
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
     # Flatten and de-duplicate (keep highest value per name)
