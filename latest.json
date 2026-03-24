@@ -1,11 +1,11 @@
 {
-  "version": "0.11.2",
-  "notes": "Custom filter names + stash league diagnostics",
-  "pub_date": "2026-03-24T09:00:00Z",
+  "version": "0.11.3",
+  "notes": "Stash league debug: frontend vs backend comparison",
+  "pub_date": "2026-03-24T10:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXRyWWVRU1Ryd2FxNW5sMGJMclE3S00xdjdtUElWbDgydkczOFU0cUpodUNwQmtsY054MndOamlSZWVaT3Vuek5sTDg5dmxKUEpIYlJvUW9PN3ZVMUFrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MzcxNjQyCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTEuMl94NjQtc2V0dXAubnNpcy56aXAKbmZjZjNMS3JhTEt3ZnJiUFlkb3ZXaFhiY0NXcU5wd1g5enh0MVR5ekVudnZ3MGhQcldISXpTQTRqaE12WDQ4VWUwaG1DTTJtSS9tRDFzWHFBZ3p6QVE9PQo=",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.11.2/Path.of.Purpose_0.11.2_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWpIV0xUa0lXc3NPaU5vSjFMVElXSzZ6M09MRktHdXlBdXI4dllZbXVRUDZkUXNiK2UrUXhOV1BudWdYSWN0enlEd2duVkwvOVduTFdoTkh6dE5PbHc4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MzcyNDUwCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTEuM194NjQtc2V0dXAubnNpcy56aXAKMWlQTXN1d2thTFlRMWY0SXRVd1I2d1JtQjlmUkdiZTJQV2tZQ0ZtRFNEd01wQXFZQ3FwQUQ0WENubTZZL2E1K0FWYlB5UEhuU3ZiUTF3bUlKT2tnQkE9PQo=",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.11.3/Path.of.Purpose_0.11.3_x64-setup.nsis.zip"
     }
   }
 }

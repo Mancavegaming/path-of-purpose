@@ -123,7 +123,7 @@ export default function StashPage() {
       // Show debug info if available
       const dbg = (result as unknown as Record<string, unknown>)._debug as { queried_league?: string; raw_item_count?: number; item_leagues?: string[] } | undefined;
       if (dbg) {
-        setDebugInfo(`API queried: "${dbg.queried_league}" | Items returned: ${dbg.raw_item_count} | Item leagues: [${dbg.item_leagues?.join(", ") || "none"}]`);
+        setDebugInfo(`Frontend league(): "${league()}" | API received: "${dbg.queried_league}" | Items: ${dbg.raw_item_count} | Item leagues: [${dbg.item_leagues?.join(", ") || "none"}]`);
       }
       setValuations((prev) => ({ ...prev, [tabId]: result }));
       setSelectedTabId(tabId);
@@ -238,6 +238,7 @@ export default function StashPage() {
           <button onClick={handleLoadStash} disabled={!!loading() || scanning()}>
             {loading() || "Load Stash Tabs"}
           </button>
+          <span style={{ "font-size": "11px", color: "var(--text-muted)" }}>Signal: {league()}</span>
 
           <Show when={tabs().length > 0}>
             <button onClick={scanAllTabs} disabled={scanning()} style={{ "margin-left": "auto" }}>
