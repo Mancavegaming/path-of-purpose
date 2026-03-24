@@ -141,15 +141,15 @@ async def fetch_hot_items(
         else:
             tier3.append(item)
 
-    # Sort each tier by value descending, cap at 50 per tier
+    # Sort each tier by value descending
     tier1.sort(key=lambda x: x.chaos_value, reverse=True)
     tier2.sort(key=lambda x: x.chaos_value, reverse=True)
     tier3.sort(key=lambda x: x.chaos_value, reverse=True)
 
     return HotItemsResult(
-        tier1=tier1[:50],
-        tier2=tier2[:50],
-        tier3=tier3[:50],
+        tier1=tier1,
+        tier2=tier2,
+        tier3=tier3,
         divine_ratio=divine_ratio,
         fetched_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
         total_count=len(tier1[:50]) + len(tier2[:50]) + len(tier3[:50]),
