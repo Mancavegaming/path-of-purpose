@@ -1865,6 +1865,55 @@ def cmd_death_analyze(args: argparse.Namespace) -> None:
         print(json.dumps({"error": str(exc)}))
 
 
+def cmd_quick_price(args: argparse.Namespace) -> None:
+    """Quick price check by item name for chat commands."""
+    from pop.trade.client import TradeClient
+    from pop.trade.models import TradeQuery, TradeSearchRequest
+
+    raw = _safe_stdin_read()
+    data = json.loads(raw) if raw else {}
+    item_name = data.get("item_name", "").strip()
+    league = data.get("league", "Standard")
+
+    if not item_name:
+        print(json.dumps({"error": "No item name provided."}))
+        return
+
+    async def _run() -> None:
+        query = TradeQuery(name=item_name, status={"option": "online"})
+        request = TradeSearchRequest(query=query, sort={"price": "asc"})
+        async with TradeClient(league=league) as client:
+            result = await client.search(request, max_fetch=10)
+            prices = [
+                l.price.amount for l in result.listings
+                if l.price and l.price.amount > 0
+            ]
+            if not prices:
+                print(json.dumps({
+                    "item_name": item_name, "min": 0, "max": 0,
+                    "median": 0, "currency": "chaos", "count": result.total,
+                    "error": None,
+                }))
+                return
+            currency = result.listings[0].price.currency if result.listings[0].price else "chaos"
+            prices.sort()
+            median = prices[len(prices) // 2]
+            print(json.dumps({
+                "item_name": item_name,
+                "min": round(prices[0], 1),
+                "max": round(prices[-1], 1),
+                "median": round(median, 1),
+                "currency": currency,
+                "count": result.total,
+                "error": None,
+            }))
+
+    try:
+        asyncio.run(_run())
+    except Exception as exc:
+        print(json.dumps({"error": str(exc)}))
+
+
 def cmd_stash_list_tabs(args: argparse.Namespace) -> None:
     """List stash tabs for a league via PoE OAuth API."""
     from pop.poe_api import PoeClient
@@ -2157,6 +2206,11 @@ def main() -> None:
     p_death = subparsers.add_parser("death_analyze", help="Analyze a death event against player defences")
     p_death.add_argument("--stdin", action="store_true", default=True)
     p_death.set_defaults(func=cmd_death_analyze)
+
+    # --- quick_price ---
+    p_qprice = subparsers.add_parser("quick_price", help="Quick price check by item name")
+    p_qprice.add_argument("--stdin", action="store_true", default=True)
+    p_qprice.set_defaults(func=cmd_quick_price)
 
     # --- stash_list_tabs ---
     p_stash_tabs = subparsers.add_parser("stash_list_tabs", help="List stash tabs for a league")

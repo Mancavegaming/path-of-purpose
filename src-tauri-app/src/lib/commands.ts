@@ -713,8 +713,8 @@ export async function hideOverlay(): Promise<void> {
 
 // --- Stash Value ---
 
-export async function stashListTabs(league: string): Promise<{ tabs: StashTab[] }> {
-  return await invoke<{ tabs: StashTab[] }>("stash_list_tabs", { league });
+export async function stashListTabs(league: string): Promise<{ tabs: StashTab[]; error?: string }> {
+  return await invoke<{ tabs: StashTab[]; error?: string }>("stash_list_tabs", { league });
 }
 
 export async function stashScanTab(
@@ -733,4 +733,20 @@ export async function stashScanTab(
 
 export async function stashCurrencyRates(league: string): Promise<{ rates: Record<string, number>; divine_ratio: number }> {
   return await invoke<{ rates: Record<string, number>; divine_ratio: number }>("stash_currency_rates", { league });
+}
+
+// --- Quick Price (chat command) ---
+
+export interface QuickPriceResult {
+  item_name: string;
+  min: number;
+  max: number;
+  median: number;
+  currency: string;
+  count: number;
+  error: string | null;
+}
+
+export async function quickPrice(itemName: string, league: string): Promise<QuickPriceResult> {
+  return await invoke<QuickPriceResult>("quick_price", { itemName, league });
 }

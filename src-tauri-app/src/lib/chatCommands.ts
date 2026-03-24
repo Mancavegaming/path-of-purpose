@@ -8,7 +8,10 @@ import {
   streamDpsResult,
   addChatLogEntry,
   addViewerSuggestion,
+  logWatcherStats,
+  currencyDrops,
 } from "./streamStore";
+import { quickPrice } from "./commands";
 
 function formatDps(v: number): string {
   if (v >= 1_000_000) return (v / 1_000_000).toFixed(1) + "M";
@@ -200,8 +203,61 @@ const handlers: Record<string, CommandHandler> = {
       : `Challenge: ${boss.name}! Need ${formatDps(boss.dps)} DPS but only have ${formatDps(dps.combined_dps)} — risky!`;
   },
 
+  deaths: () => {
+    const stats = logWatcherStats();
+    if (!stats) return "Log watcher not running — no death data yet.";
+    const total = stats.total_deaths || 0;
+    if (total === 0) return "No deaths this session! Stay blessed.";
+    const dph = stats.deaths_per_hour ? stats.deaths_per_hour.toFixed(1) : "0";
+    return `Deaths: ${total} | Deaths/hr: ${dph}`;
+  },
+
+  map: () => {
+    const stats = logWatcherStats();
+    if (!stats) return "Log watcher not running yet.";
+    const m = stats.current_map;
+    if (!m || !m.zone_name) return `Currently in: ${stats.current_zone || "Hideout"}`;
+    const parts = [m.zone_name];
+    if (m.area_level) parts.push(`T${Math.max(1, m.area_level - 67)}`);
+    if (m.duration) parts.push(m.duration);
+    if (m.deaths > 0) parts.push(`${m.deaths} death${m.deaths > 1 ? "s" : ""}`);
+    return parts.join(" | ");
+  },
+
+  verse: () => {
+    const verses: [string, string][] = [
+      ["Psalm 23:4", "Though I walk through the valley of the shadow of death, I will fear no evil, for You are with me."],
+      ["Romans 8:28", "And we know that in all things God works for the good of those who love Him."],
+      ["Isaiah 40:31", "But those who hope in the Lord will renew their strength. They will soar on wings like eagles."],
+      ["Philippians 4:13", "I can do all things through Christ who strengthens me."],
+      ["Joshua 1:9", "Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go."],
+      ["Psalm 46:1", "God is our refuge and strength, an ever-present help in trouble."],
+      ["2 Corinthians 4:9", "Persecuted, but not abandoned; struck down, but not destroyed."],
+      ["Romans 8:37", "In all these things we are more than conquerors through Him who loved us."],
+      ["Proverbs 24:16", "For though the righteous fall seven times, they rise again."],
+      ["Isaiah 41:10", "So do not fear, for I am with you; do not be dismayed, for I am your God. I will strengthen you and help you."],
+      ["Psalm 34:18", "The Lord is close to the brokenhearted and saves those who are crushed in spirit."],
+      ["2 Timothy 1:7", "For God has not given us a spirit of fear, but of power, love, and a sound mind."],
+      ["Romans 5:3-4", "Suffering produces perseverance; perseverance, character; and character, hope."],
+      ["2 Corinthians 12:9", "My grace is sufficient for you, for My power is made perfect in weakness."],
+      ["Romans 8:31", "If God is for us, who can be against us?"],
+      ["John 16:33", "In this world you will have trouble. But take heart! I have overcome the world."],
+      ["Galatians 6:9", "Let us not become weary in doing good, for at the proper time we will reap a harvest if we do not give up."],
+    ];
+    const [ref, text] = verses[Math.floor(Math.random() * verses.length)];
+    return `"${text}" — ${ref}`;
+  },
+
+  drops: () => {
+    const drops = currencyDrops();
+    if (drops.length === 0) return "No notable drops recorded this session.";
+    const parts = drops.map((d) => `${d.name} x${d.count}`);
+    const total = drops.reduce((sum, d) => sum + d.count * d.chaosValue, 0);
+    return parts.join(", ") + ` | Total: ~${Math.round(total)}c`;
+  },
+
   help: () => {
-    return "Commands: !build !dps !gear !boss !tree !skills !defences !suggest !whatif !challenge";
+    return "Commands: !build !dps !gear !boss !tree !skills !defences !deaths !map !verse !drops !price !suggest !whatif !challenge";
   },
 };
 
@@ -221,8 +277,33 @@ export function getCommandNames(): string[] {
   return Object.keys(handlers);
 }
 
+/** Async command handlers (for commands that need Tauri invoke). */
+type AsyncCommandHandler = (user: string, args: string) => Promise<string | null>;
+
+const asyncHandlers: Record<string, AsyncCommandHandler> = {
+  price: async (_user, args) => {
+    if (!args) return "Usage: !price <item name> (e.g. !price Divine Orb)";
+    try {
+      const result = await quickPrice(args, "Standard");
+      if (result.error) return `Price check error: ${result.error}`;
+      if (result.count === 0) return `No listings found for "${args}".`;
+      return `${result.item_name}: ~${result.median} ${result.currency} (${result.count} listed, ${result.min}-${result.max})`;
+    } catch {
+      return `Price check failed for "${args}".`;
+    }
+  },
+};
+
+// Register async command names so they show in the toggle list
+for (const cmd of Object.keys(asyncHandlers)) {
+  if (!(cmd in handlers)) {
+    handlers[cmd] = () => null; // placeholder so getCommandNames() includes them
+  }
+}
+
 /** Process a chat command. Returns the response to send, or null. */
 export function handleCommand(user: string, command: string, args: string): string | null {
+  if (asyncHandlers[command]) return null; // handled by handleCommandAsync
   const handler = handlers[command];
   if (!handler || !enabledCommands.has(command)) return null;
 
@@ -236,4 +317,26 @@ export function handleCommand(user: string, command: string, args: string): stri
     });
   }
   return response;
+}
+
+/** Process an async chat command. Calls sendFn with the response when ready. Returns true if handled. */
+export function handleCommandAsync(
+  user: string, command: string, args: string,
+  sendFn: (msg: string) => void,
+): boolean {
+  const handler = asyncHandlers[command];
+  if (!handler || !enabledCommands.has(command)) return false;
+
+  handler(user, args).then((response) => {
+    if (response) {
+      addChatLogEntry({
+        timestamp: Date.now(),
+        user,
+        command: `!${command}${args ? " " + args : ""}`,
+        response,
+      });
+      sendFn(response);
+    }
+  });
+  return true;
 }

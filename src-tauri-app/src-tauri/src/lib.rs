@@ -1643,6 +1643,21 @@ body {
 }
 .session-stats .stat-value { color: #e6edf3; font-weight: 600; }
 
+.currency-ticker {
+  position: absolute;
+  top: 260px;
+  right: 12px;
+  font-size: 12px;
+  max-width: 220px;
+  pointer-events: none;
+}
+.currency-ticker .ticker-title { font-weight: 700; margin-bottom: 4px; color: #fbbf24; font-size: 13px; }
+.currency-drop-row { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; }
+.currency-drop-row .currency-name { color: #fbbf24; font-weight: 600; }
+.currency-drop-row .currency-count { color: #e6edf3; }
+.currency-ticker .ticker-total { border-top: 1px solid rgba(255,255,255,0.1); margin-top: 4px; padding-top: 4px; display: flex; justify-content: space-between; }
+.currency-ticker .ticker-total .total-value { color: #4ade80; font-weight: 600; }
+
 .build-info {
   font-size: 12px;
   color: #8b949e;
@@ -1881,6 +1896,7 @@ body {
 <div class="grace-verse panel hidden" id="grace-verse"></div>
 <div id="boss-kill-container"></div>
 <div class="session-dashboard panel hidden" id="session-dashboard"></div>
+<div class="currency-ticker panel hidden" id="currency-ticker"></div>
 
 <div class="overlay-bottom">
   <div class="suggestions" id="suggestions"></div>
@@ -2160,6 +2176,23 @@ async function poll() {
       } else {
         dashEl.classList.add('hidden');
       }
+    }
+
+    // Currency drop ticker
+    const tickerEl = document.getElementById('currency-ticker');
+    if (data.show_currency_ticker !== false && data.currency_drops && data.currency_drops.length > 0) {
+      let html = '<div class="ticker-title">Currency Drops</div>';
+      let totalChaos = 0;
+      for (const d of data.currency_drops) {
+        const val = d.count * d.chaosValue;
+        totalChaos += val;
+        html += '<div class="currency-drop-row"><span class="currency-name">' + d.name + '</span><span class="currency-count">x' + d.count + '</span></div>';
+      }
+      html += '<div class="ticker-total"><span>Total</span><span class="total-value">~' + Math.round(totalChaos) + 'c</span></div>';
+      tickerEl.innerHTML = html;
+      tickerEl.classList.remove('hidden');
+    } else if (tickerEl) {
+      tickerEl.classList.add('hidden');
     }
 
   } catch (e) {
@@ -2536,6 +2569,18 @@ async fn stash_list_tabs(league: String) -> Result<serde_json::Value, String> {
         .map_err(|e| format!("Failed to parse stash_list_tabs output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))
 }
 
+/// Quick price check by item name (for chat commands).
+#[tauri::command]
+async fn quick_price(item_name: String, league: String) -> Result<serde_json::Value, String> {
+    let input = serde_json::json!({ "item_name": item_name, "league": league });
+    let stdout = run_python_command(
+        &["-m", "pop.main", "quick_price", "--stdin"],
+        Some(&input.to_string()),
+    )?;
+    serde_json::from_str::<serde_json::Value>(&stdout)
+        .map_err(|e| format!("Failed to parse quick_price output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))
+}
+
 /// Scan a single stash tab and price its contents.
 #[tauri::command]
 async fn stash_scan_tab(
@@ -2781,6 +2826,7 @@ pub fn run() {
             price_check_trigger,
             price_check_refine,
             analyze_death,
+            quick_price,
             stash_list_tabs,
             stash_scan_tab,
             stash_currency_rates,

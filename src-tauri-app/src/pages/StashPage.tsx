@@ -29,7 +29,7 @@ export default function StashPage() {
   async function checkLogin() {
     try {
       const result = await poeCheckLogin();
-      setLoggedIn(result.logged_in === true);
+      setLoggedIn(result.logged_in === true && !result.expired);
     } catch {
       setLoggedIn(false);
     }
@@ -73,6 +73,10 @@ export default function StashPage() {
     setLoading("Loading stash tabs...");
     try {
       const result = await stashListTabs(league());
+      if (result.error) {
+        setError(String(result.error));
+        return;
+      }
       // Flatten folder children into top-level list for simplicity
       const flatTabs: StashTab[] = [];
       for (const tab of result.tabs || []) {

@@ -30,6 +30,10 @@ import {
   overlayShowGraceVerses, setOverlayShowGraceVerses,
   bossKillSoundPath, setBossKillSoundPath,
   bossKillSoundEnabled, setBossKillSoundEnabled,
+  currencyDrops,
+  addCurrencyDrop,
+  clearCurrencyDrops,
+  overlayShowCurrencyTicker, setOverlayShowCurrencyTicker,
 } from "../lib/streamStore";
 import {
   connect as ircConnect,
@@ -41,6 +45,7 @@ import {
 } from "../lib/twitchIrc";
 import {
   handleCommand,
+  handleCommandAsync,
   getCommandNames,
   isCommandEnabled,
   toggleCommand,
@@ -81,11 +86,13 @@ export default function StreamingPage() {
   };
   loadToken();
 
-  // Wire up command handler
+  // Wire up command handler (sync + async)
   setCommandHandler((user, command, args) => {
     const response = handleCommand(user, command, args);
     if (response) {
       sendMessage(response);
+    } else {
+      handleCommandAsync(user, command, args, (msg) => sendMessage(msg));
     }
   });
 
@@ -408,7 +415,57 @@ export default function StreamingPage() {
                 <input type="checkbox" checked={overlayShowGraceVerses()} onChange={(e) => setOverlayShowGraceVerses(e.currentTarget.checked)} />
                 <span class="stream-command-name">Grace Verses</span>
               </label>
+              <label class="stream-command-toggle">
+                <input type="checkbox" checked={overlayShowCurrencyTicker()} onChange={(e) => setOverlayShowCurrencyTicker(e.currentTarget.checked)} />
+                <span class="stream-command-name">Currency Ticker</span>
+              </label>
             </div>
+          </div>
+
+          {/* Currency Drop Tracker */}
+          <div class="stream-section">
+            <div class="stream-section-title">Currency Drops</div>
+            <p class="stream-hint" style={{ "margin-bottom": "8px" }}>
+              Track notable currency drops this session. Viewers can see the tally on the overlay and use !drops in chat.
+            </p>
+            <div style={{ display: "flex", gap: "6px", "flex-wrap": "wrap", "margin-bottom": "8px" }}>
+              {[
+                { name: "Divine Orb", chaos: 180 },
+                { name: "Exalted Orb", chaos: 8 },
+                { name: "Annulment Orb", chaos: 15 },
+                { name: "Chaos Orb", chaos: 1 },
+                { name: "Vaal Orb", chaos: 2 },
+                { name: "Mirror Shard", chaos: 2000 },
+              ].map((c) => (
+                <button
+                  style={{ "font-size": "12px", padding: "4px 10px" }}
+                  onClick={() => addCurrencyDrop(c.name, c.chaos)}
+                >
+                  + {c.name}
+                </button>
+              ))}
+            </div>
+            <Show when={currencyDrops().length > 0}>
+              <div style={{ display: "flex", "flex-direction": "column", gap: "2px", "margin-bottom": "8px" }}>
+                <For each={currencyDrops()}>
+                  {(d) => (
+                    <div style={{ display: "flex", "justify-content": "space-between", "font-size": "13px", padding: "2px 0" }}>
+                      <span style={{ color: "var(--accent)" }}>{d.name} x{d.count}</span>
+                      <span style={{ color: "var(--text-muted)" }}>~{Math.round(d.count * d.chaosValue)}c</span>
+                    </div>
+                  )}
+                </For>
+                <div style={{ display: "flex", "justify-content": "space-between", "font-size": "13px", "border-top": "1px solid var(--border)", "padding-top": "4px", "margin-top": "4px" }}>
+                  <span style={{ "font-weight": "600" }}>Total</span>
+                  <span style={{ color: "var(--accent)", "font-weight": "600" }}>
+                    ~{Math.round(currencyDrops().reduce((s, d) => s + d.count * d.chaosValue, 0))}c
+                  </span>
+                </div>
+              </div>
+              <button style={{ "font-size": "12px", padding: "4px 10px" }} onClick={clearCurrencyDrops}>
+                Clear Session Drops
+              </button>
+            </Show>
           </div>
 
           {/* Boss Kill Sound */}

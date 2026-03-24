@@ -24,6 +24,13 @@ export interface ChatLogEntry {
   response: string;
 }
 
+export interface CurrencyDrop {
+  name: string;
+  count: number;
+  chaosValue: number;
+  timestamp: number;
+}
+
 // --- Signals ---
 
 const [streamBuild, setStreamBuildSignal] = createSignal<Build | null>(null);
@@ -47,6 +54,8 @@ const [overlayShowSessionDash, setOverlayShowSessionDash] = createSignal(true);
 const [overlayShowGraceVerses, setOverlayShowGraceVerses] = createSignal(true);
 const [bossKillSoundPath, setBossKillSoundPath] = createSignal<string>("");
 const [bossKillSoundEnabled, setBossKillSoundEnabled] = createSignal(false);
+const [currencyDrops, setCurrencyDrops] = createSignal<CurrencyDrop[]>([]);
+const [overlayShowCurrencyTicker, setOverlayShowCurrencyTicker] = createSignal(true);
 
 export {
   streamBuild,
@@ -68,6 +77,8 @@ export {
   overlayShowGraceVerses, setOverlayShowGraceVerses,
   bossKillSoundPath, setBossKillSoundPath,
   bossKillSoundEnabled, setBossKillSoundEnabled,
+  currencyDrops,
+  overlayShowCurrencyTicker, setOverlayShowCurrencyTicker,
 };
 
 /** Called by DecodePage / CharacterPage when DPS is calculated. */
@@ -92,11 +103,26 @@ export function addChatLogEntry(entry: ChatLogEntry): void {
   setCommandsHandled((c) => c + 1);
 }
 
+export function addCurrencyDrop(name: string, chaosValue: number): void {
+  setCurrencyDrops((prev) => {
+    const existing = prev.find((d) => d.name === name);
+    if (existing) {
+      return prev.map((d) => d.name === name ? { ...d, count: d.count + 1, timestamp: Date.now() } : d);
+    }
+    return [...prev, { name, count: 1, chaosValue, timestamp: Date.now() }];
+  });
+}
+
+export function clearCurrencyDrops(): void {
+  setCurrencyDrops([]);
+}
+
 export function startSession(): void {
   setSessionStartTime(Date.now());
   setCommandsHandled(0);
   setChatLog([]);
   setViewerSuggestions([]);
+  setCurrencyDrops([]);
 }
 
 export function stopSession(): void {
@@ -176,5 +202,7 @@ export function getOverlayPayload(): Record<string, unknown> {
     show_session_dash: overlayShowSessionDash(),
     show_grace_verses: overlayShowGraceVerses(),
     boss_kill_sound: bossKillSoundEnabled() ? bossKillSoundPath() : "",
+    currency_drops: currencyDrops(),
+    show_currency_ticker: overlayShowCurrencyTicker(),
   };
 }
