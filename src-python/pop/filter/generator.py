@@ -124,20 +124,15 @@ def _section_currency(lines: list[str], cfg: FilterConfig) -> None:
     lines.append("")
 
     # Tier 1
-    _currency_tier_block(lines, "Tier 1 — Mirror, Divine, Exalt", c.tier1, _CURRENCY_T1,
-                         text="255 0 0", bg="255 255 255 255", border="255 0 0")
+    _currency_tier_block(lines, "Tier 1 — Mirror, Divine, Exalt", c.tier1, _CURRENCY_T1)
     # Tier 2
-    _currency_tier_block(lines, "Tier 2 — Chaos, Vaal, Regal, GCP", c.tier2, _CURRENCY_T2,
-                         text="255 170 0", bg="0 0 0 220", border="255 170 0")
+    _currency_tier_block(lines, "Tier 2 — Chaos, Vaal, Regal, GCP", c.tier2, _CURRENCY_T2)
     # Tier 3
-    _currency_tier_block(lines, "Tier 3 — Alchemy, Chisel, Jeweller", c.tier3, _CURRENCY_T3,
-                         text="200 200 100", bg="0 0 0 200", border="200 200 100")
+    _currency_tier_block(lines, "Tier 3 — Alchemy, Chisel, Jeweller", c.tier3, _CURRENCY_T3)
     # Tier 4
-    _currency_tier_block(lines, "Tier 4 — Alteration, Augmentation", c.tier4, _CURRENCY_T4,
-                         text="170 158 130")
+    _currency_tier_block(lines, "Tier 4 — Alteration, Augmentation", c.tier4, _CURRENCY_T4)
     # Tier 5
-    _currency_tier_block(lines, "Tier 5 — Scrolls, Scraps", c.tier5, _CURRENCY_T5,
-                         text="120 120 120")
+    _currency_tier_block(lines, "Tier 5 — Scrolls, Scraps", c.tier5, _CURRENCY_T5)
 
 
 def _section_special_currency(lines: list[str], cfg: FilterConfig) -> None:
@@ -401,16 +396,14 @@ def _currency_tier_block(
     label: str,
     tier: CurrencyTierConfig,
     base_types: str,
-    text: str = "",
-    bg: str = "",
-    border: str = "",
 ) -> None:
     lines.append(f"# {label}")
     block_type = "Show" if tier.show else "Hide"
     _block(lines, block_type, [
         'Class == "Currency"',
         f'BaseType == {base_types}',
-    ], text=text, bg=bg, border=border, font_size=tier.font_size,
+    ], text=tier.text_color, bg=tier.bg_color, border=tier.border_color,
+        font_size=tier.font_size,
         sound=tier.sound if tier.show else 0,
         volume=tier.volume,
         beam=tier.beam if tier.show else "",

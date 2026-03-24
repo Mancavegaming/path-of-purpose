@@ -11,6 +11,24 @@ interface FilterPageProps {
 
 const BEAMS = ["", "Red", "Green", "Blue", "Yellow", "White", "Orange", "Cyan", "Purple", "Pink", "Brown", "Grey"];
 const SOUNDS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+const MINIMAP_ICONS = ["", "0 Red Star", "0 Yellow Star", "0 Green Star", "0 Blue Star", "0 White Star", "1 Red Circle", "1 Yellow Circle", "1 Green Circle", "1 Blue Circle", "1 White Circle", "2 Red Diamond", "2 Yellow Diamond", "2 White Diamond"];
+
+function poeToHex(poe: string): string {
+  const p = poe.split(" ").map(Number);
+  return "#" + [p[0] ?? 0, p[1] ?? 0, p[2] ?? 0].map((v) => v.toString(16).padStart(2, "0")).join("");
+}
+
+function hexToPoe(hex: string, alpha?: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return alpha !== undefined ? `${r} ${g} ${b} ${alpha}` : `${r} ${g} ${b}`;
+}
+
+function poeAlpha(poe: string): number {
+  const p = poe.split(" ");
+  return p.length >= 4 ? Number(p[3]) : 255;
+}
 
 /** Create a convolver node that simulates a reverb tail. */
 function createReverb(ctx: AudioContext, duration: number, decay: number): ConvolverNode {
@@ -147,6 +165,13 @@ export default function FilterPage(props: FilterPageProps) {
   const [t3Sound, setT3Sound] = createSignal(0);
   const [showT4, setShowT4] = createSignal(true);
   const [showT5, setShowT5] = createSignal(false);
+  // Currency colors (PoE format "R G B" / "R G B A")
+  const [t1Colors, setT1Colors] = createSignal({ text: "255 0 0", bg: "255 255 255 255", border: "255 0 0" });
+  const [t2Colors, setT2Colors] = createSignal({ text: "255 170 0", bg: "0 0 0 220", border: "255 170 0" });
+  const [t3Colors, setT3Colors] = createSignal({ text: "200 200 100", bg: "0 0 0 200", border: "200 200 100" });
+  const [t1Icon, setT1Icon] = createSignal("0 Red Star");
+  const [t2Icon, setT2Icon] = createSignal("1 Yellow Circle");
+
   const [showEssences, setShowEssences] = createSignal(true);
   const [showFossils, setShowFossils] = createSignal(true);
   const [showCatalysts, setShowCatalysts] = createSignal(true);
@@ -198,11 +223,11 @@ export default function FilterPage(props: FilterPageProps) {
     return {
       strictness: strictness(),
       currency: {
-        tier1: { show: true, sound: t1Sound(), volume: 300, beam: t1Beam(), icon: "0 Red Star", font_size: 45 },
-        tier2: { show: true, sound: t2Sound(), volume: 300, beam: t2Beam(), icon: "1 Yellow Circle", font_size: 38 },
-        tier3: { show: true, sound: t3Sound(), volume: 200, beam: "", icon: "", font_size: 32 },
-        tier4: { show: showT4(), sound: 0, volume: 0, beam: "", icon: "", font_size: 26 },
-        tier5: { show: showT5(), sound: 0, volume: 0, beam: "", icon: "", font_size: 20 },
+        tier1: { show: true, sound: t1Sound(), volume: 300, beam: t1Beam(), icon: t1Icon(), font_size: 45, text_color: t1Colors().text, bg_color: t1Colors().bg, border_color: t1Colors().border },
+        tier2: { show: true, sound: t2Sound(), volume: 300, beam: t2Beam(), icon: t2Icon(), font_size: 38, text_color: t2Colors().text, bg_color: t2Colors().bg, border_color: t2Colors().border },
+        tier3: { show: true, sound: t3Sound(), volume: 200, beam: "", icon: "", font_size: 32, text_color: t3Colors().text, bg_color: t3Colors().bg, border_color: t3Colors().border },
+        tier4: { show: showT4(), sound: 0, volume: 0, beam: "", icon: "", font_size: 26, text_color: "170 158 130", bg_color: "", border_color: "" },
+        tier5: { show: showT5(), sound: 0, volume: 0, beam: "", icon: "", font_size: 20, text_color: "120 120 120", bg_color: "", border_color: "" },
         show_essences: showEssences(), show_fossils: showFossils(),
         show_catalysts: showCatalysts(), show_oils: showOils(),
         show_delirium_orbs: showDeliriumOrbs(), show_fragments: showFragments(),
@@ -294,6 +319,54 @@ export default function FilterPage(props: FilterPageProps) {
     </select>
   );
 
+  const IconSelect = (p: { value: string; onChange: (v: string) => void }) => (
+    <select class="filter-select" value={p.value} onChange={(e) => p.onChange(e.currentTarget.value)}>
+      {MINIMAP_ICONS.map((i) => <option value={i}>{i || "None"}</option>)}
+    </select>
+  );
+
+  const ColorRow = (p: {
+    colors: { text: string; bg: string; border: string };
+    onChange: (c: { text: string; bg: string; border: string }) => void;
+  }) => {
+    const [open, setOpen] = createSignal(false);
+    return (
+      <div>
+        <button class="filter-color-toggle" onClick={() => setOpen(!open())}>
+          {open() ? "Hide" : "Appearance"}
+          <span class="filter-color-swatches-inline">
+            <span class="filter-swatch-dot" style={{ background: poeToHex(p.colors.text) }} />
+            <span class="filter-swatch-dot" style={{ background: p.colors.bg ? poeToHex(p.colors.bg) : "#000" }} />
+            <span class="filter-swatch-dot" style={{ background: p.colors.border ? poeToHex(p.colors.border) : "transparent" }} />
+          </span>
+        </button>
+        <Show when={open()}>
+          <div class="filter-color-row">
+            <label class="filter-color-item">
+              <span class="filter-color-label">Text</span>
+              <input type="color" value={poeToHex(p.colors.text)} onChange={(e) => p.onChange({ ...p.colors, text: hexToPoe(e.currentTarget.value) })} />
+            </label>
+            <label class="filter-color-item">
+              <span class="filter-color-label">Background</span>
+              <input type="color" value={p.colors.bg ? poeToHex(p.colors.bg) : "#000000"} onChange={(e) => p.onChange({ ...p.colors, bg: hexToPoe(e.currentTarget.value, poeAlpha(p.colors.bg)) })} />
+            </label>
+            <label class="filter-color-item">
+              <span class="filter-color-label">Opacity</span>
+              <input type="range" min="0" max="255" value={poeAlpha(p.colors.bg)} class="filter-opacity-slider" onChange={(e) => {
+                const hex = p.colors.bg ? poeToHex(p.colors.bg) : "#000000";
+                p.onChange({ ...p.colors, bg: hexToPoe(hex, Number(e.currentTarget.value)) });
+              }} />
+            </label>
+            <label class="filter-color-item">
+              <span class="filter-color-label">Border</span>
+              <input type="color" value={p.colors.border ? poeToHex(p.colors.border) : "#000000"} onChange={(e) => p.onChange({ ...p.colors, border: hexToPoe(e.currentTarget.value) })} />
+            </label>
+          </div>
+        </Show>
+      </div>
+    );
+  };
+
   return (
     <div class="filter-page">
       <h2>Loot Filter Generator</h2>
@@ -323,15 +396,18 @@ export default function FilterPage(props: FilterPageProps) {
         <div class="filter-grid-rows">
           <div class="filter-row-item">
             <span class="filter-row-label">T1 — Mirror, Divine, Exalt</span>
-            <span class="filter-row-controls">Sound: <SoundSelect value={t1Sound()} onChange={setT1Sound} /> Beam: <BeamSelect value={t1Beam()} onChange={setT1Beam} /></span>
+            <span class="filter-row-controls">Sound: <SoundSelect value={t1Sound()} onChange={setT1Sound} /> Beam: <BeamSelect value={t1Beam()} onChange={setT1Beam} /> Icon: <IconSelect value={t1Icon()} onChange={setT1Icon} /></span>
+            <ColorRow colors={t1Colors()} onChange={setT1Colors} />
           </div>
           <div class="filter-row-item">
             <span class="filter-row-label">T2 — Chaos, Vaal, Regal, GCP</span>
-            <span class="filter-row-controls">Sound: <SoundSelect value={t2Sound()} onChange={setT2Sound} /> Beam: <BeamSelect value={t2Beam()} onChange={setT2Beam} /></span>
+            <span class="filter-row-controls">Sound: <SoundSelect value={t2Sound()} onChange={setT2Sound} /> Beam: <BeamSelect value={t2Beam()} onChange={setT2Beam} /> Icon: <IconSelect value={t2Icon()} onChange={setT2Icon} /></span>
+            <ColorRow colors={t2Colors()} onChange={setT2Colors} />
           </div>
           <div class="filter-row-item">
             <span class="filter-row-label">T3 — Alchemy, Chisel, Jeweller</span>
             <span class="filter-row-controls">Sound: <SoundSelect value={t3Sound()} onChange={setT3Sound} /></span>
+            <ColorRow colors={t3Colors()} onChange={setT3Colors} />
           </div>
           <div class="filter-row-item">
             <span class="filter-row-label">T4 — Alteration, Augmentation</span>

@@ -23,6 +23,9 @@ class CurrencyTierConfig(BaseModel):
     beam: str = ""         # "Red", "Yellow", etc. or "" for none
     icon: str = ""         # "0 Red Star", "1 Yellow Circle", etc. or ""
     font_size: int = 38
+    text_color: str = ""   # PoE format "R G B", empty = no SetTextColor
+    bg_color: str = ""     # PoE format "R G B A", empty = no SetBackgroundColor
+    border_color: str = "" # PoE format "R G B", empty = no SetBorderColor
 
 
 class CurrencyConfig(BaseModel):
@@ -32,23 +35,28 @@ class CurrencyConfig(BaseModel):
         default_factory=lambda: CurrencyTierConfig(
             show=True, sound=1, volume=300, beam="Red",
             icon="0 Red Star", font_size=45,
+            text_color="255 0 0", bg_color="255 255 255 255", border_color="255 0 0",
         ))
     tier2: CurrencyTierConfig = Field(
         default_factory=lambda: CurrencyTierConfig(
             show=True, sound=2, volume=300, beam="Yellow",
             icon="1 Yellow Circle", font_size=38,
+            text_color="255 170 0", bg_color="0 0 0 220", border_color="255 170 0",
         ))
     tier3: CurrencyTierConfig = Field(
         default_factory=lambda: CurrencyTierConfig(
             show=True, sound=0, beam="", font_size=32,
+            text_color="200 200 100", bg_color="0 0 0 200", border_color="200 200 100",
         ))
     tier4: CurrencyTierConfig = Field(
         default_factory=lambda: CurrencyTierConfig(
             show=True, sound=0, font_size=26,
+            text_color="170 158 130",
         ))
     tier5: CurrencyTierConfig = Field(
         default_factory=lambda: CurrencyTierConfig(
             show=False, sound=0, font_size=20,
+            text_color="120 120 120",
         ))
     show_essences: bool = True
     show_fossils: bool = True

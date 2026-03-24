@@ -24,7 +24,7 @@ from pop.poe_api.models import (
 )
 from pop.poe_api.rate_limiter import RateLimiter
 
-POE_API_BASE = "https://www.pathofexile.com/api"
+POE_API_BASE = "https://api.pathofexile.com"
 
 
 class PoeApiError(Exception):

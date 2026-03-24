@@ -420,6 +420,9 @@ export interface CurrencyTierConfig {
   beam: string;
   icon: string;
   font_size: number;
+  text_color: string;
+  bg_color: string;
+  border_color: string;
 }
 
 export interface CurrencyConfig {
