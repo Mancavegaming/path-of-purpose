@@ -94,9 +94,19 @@ body {
 }
 
 .sidebar-brand {
-  padding: var(--space-lg) var(--space-md);
+  padding: var(--space-md);
   border-bottom: 1px solid var(--border);
   background: linear-gradient(135deg, rgba(200, 162, 82, 0.06) 0%, transparent 60%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.sidebar-logo {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .sidebar-brand h1 {

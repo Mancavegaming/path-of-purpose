@@ -1,4 +1,5 @@
 import { createSignal, onMount, For, Show } from "solid-js";
+import logoImg from "../assets/logo.png";
 import type { Accessor, Setter } from "solid-js";
 import type { SavedBuildEntry } from "../lib/commands";
 import {
@@ -118,8 +119,11 @@ export default function Sidebar(props: SidebarProps) {
   return (
     <aside class="sidebar">
       <div class="sidebar-brand">
-        <h1>Path of Purpose</h1>
-        <p>Build mentor for exiles</p>
+        <img src={logoImg} alt="Path of Purpose" class="sidebar-logo" />
+        <div>
+          <h1>Path of Purpose</h1>
+          <p>Build mentor for exiles</p>
+        </div>
       </div>
       <nav class="sidebar-nav">
         <button
