@@ -111,6 +111,8 @@ export default function StashPage() {
     await loadTabs();
   }
 
+  const [debugInfo, setDebugInfo] = createSignal("");
+
   async function scanTab(tabId: string) {
     setError("");
     setScanning(true);
@@ -118,6 +120,11 @@ export default function StashPage() {
     setScanProgress({ current: 0, total: 1, tabName: tab?.name || tabId });
     try {
       const result = await stashScanTab(league(), tabId, rates(), divineRatio());
+      // Show debug info if available
+      const dbg = (result as unknown as Record<string, unknown>)._debug as { queried_league?: string; raw_item_count?: number; item_leagues?: string[] } | undefined;
+      if (dbg) {
+        setDebugInfo(`API queried: "${dbg.queried_league}" | Items returned: ${dbg.raw_item_count} | Item leagues: [${dbg.item_leagues?.join(", ") || "none"}]`);
+      }
       setValuations((prev) => ({ ...prev, [tabId]: result }));
       setSelectedTabId(tabId);
     } catch (e) {
@@ -360,6 +367,11 @@ export default function StashPage() {
 
             {/* Right: Selected tab items */}
             <div style={{ flex: "1", "min-width": "0" }}>
+              <Show when={debugInfo()}>
+                <div style={{ "font-size": "11px", color: "var(--text-muted)", padding: "4px 8px", "margin-bottom": "8px", background: "rgba(255,255,255,0.03)", "border-radius": "4px" }}>
+                  {debugInfo()}
+                </div>
+              </Show>
               <Show when={selectedValuation()} fallback={
                 <div class="card" style={{ "text-align": "center", color: "var(--text-muted)", padding: "40px" }}>
                   Click a tab to scan and view its contents

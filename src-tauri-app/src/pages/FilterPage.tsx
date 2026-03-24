@@ -200,6 +200,9 @@ export default function FilterPage(props: FilterPageProps) {
   const [showUtilFlasks, setShowUtilFlasks] = createSignal(true);
   const [showLifeMana, setShowLifeMana] = createSignal(false);
 
+  // Filter name
+  const [filterName, setFilterName] = createSignal("PathOfPurpose");
+
   // Sounds
   const [uniqueSound, setUniqueSound] = createSignal(3);
   const [buildGearSound, setBuildGearSound] = createSignal(6);
@@ -253,7 +256,7 @@ export default function FilterPage(props: FilterPageProps) {
         highlight_resist_fillers: hlResists(),
         highlight_cluster_jewels: hlClusters(),
       },
-      filter_name: "PathOfPurpose",
+      filter_name: filterName() || "PathOfPurpose",
     };
   }
 
@@ -275,7 +278,8 @@ export default function FilterPage(props: FilterPageProps) {
   async function handleInstall() {
     if (!filterText()) return;
     try {
-      const path = await saveFilterFile(filterText(), "PathOfPurpose");
+      const name = filterName() || "PathOfPurpose";
+      const path = await saveFilterFile(filterText(), name);
       setSavedPath(path);
     } catch (e) {
       setError(String(e));
@@ -284,11 +288,12 @@ export default function FilterPage(props: FilterPageProps) {
 
   function handleDownload() {
     if (!filterText()) return;
+    const name = filterName() || "PathOfPurpose";
     const blob = new Blob([filterText()], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "PathOfPurpose.filter";
+    a.download = `${name}.filter`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -532,8 +537,22 @@ export default function FilterPage(props: FilterPageProps) {
         </Show>
       </div>
 
-      {/* Actions */}
+      {/* Filter Name + Actions */}
       <div class="filter-section">
+        <div class="filter-row-item" style={{ "margin-bottom": "12px" }}>
+          <span class="filter-row-label">Filter Name</span>
+          <input
+            type="text"
+            value={filterName()}
+            onInput={(e) => setFilterName(e.currentTarget.value.replace(/[^a-zA-Z0-9_\- ]/g, ""))}
+            placeholder="PathOfPurpose"
+            style={{
+              background: "var(--bg-input)", border: "1px solid var(--border)",
+              "border-radius": "var(--radius)", color: "var(--text-primary)",
+              padding: "6px 12px", "font-size": "13px", width: "200px",
+            }}
+          />
+        </div>
         <div class="filter-main-actions">
           <button class="filter-generate-main-btn" onClick={handleGenerate} disabled={loading()}>
             {loading() ? "Generating..." : "Generate Filter"}
@@ -546,7 +565,7 @@ export default function FilterPage(props: FilterPageProps) {
         </div>
         <Show when={error()}><div class="filter-error">{error()}</div></Show>
         <Show when={savedPath()}>
-          <div class="filter-success">Installed to: {savedPath()}<br />In-game: Options &gt; UI &gt; Item Filter &gt; select "PathOfPurpose"</div>
+          <div class="filter-success">Installed to: {savedPath()}<br />In-game: Options &gt; UI &gt; Item Filter &gt; select "{filterName() || "PathOfPurpose"}"</div>
         </Show>
       </div>
 

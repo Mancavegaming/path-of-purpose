@@ -1,11 +1,11 @@
 {
-  "version": "0.11.1",
-  "notes": "Fix stash league filtering + FilterBlade-style visual options for loot filters",
-  "pub_date": "2026-03-24T08:00:00Z",
+  "version": "0.11.2",
+  "notes": "Custom filter names + stash league diagnostics",
+  "pub_date": "2026-03-24T09:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYW0zZzRYSVNVU2kvUWMvVWhnanFHeEJJNThKL0hsOHo4aFZpQ1FKenIxTEhna3JyVlF3WUhSRjRXcU0yM3BkaS8vOGZ1M3NLVkZqSExwOTdQcjdmQ1FjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MzY3OTA5CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTEuMV94NjQtc2V0dXAubnNpcy56aXAKRHlScmNKNHBwZmcrY3dQcVpyRytVejArdmxRcTZBR2dTeVJOY01BZGF1ajdHRkR1Z0dyOE03Y2w2VEp1bzZIMTgydEZiSEt5ZVA5dlhISnBST0wxQ2c9PQo=",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.11.1/Path.of.Purpose_0.11.1_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXRyWWVRU1Ryd2FxNW5sMGJMclE3S00xdjdtUElWbDgydkczOFU0cUpodUNwQmtsY054MndOamlSZWVaT3Vuek5sTDg5dmxKUEpIYlJvUW9PN3ZVMUFrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MzcxNjQyCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTEuMl94NjQtc2V0dXAubnNpcy56aXAKbmZjZjNMS3JhTEt3ZnJiUFlkb3ZXaFhiY0NXcU5wd1g5enh0MVR5ekVudnZ3MGhQcldISXpTQTRqaE12WDQ4VWUwaG1DTTJtSS9tRDFzWHFBZ3p6QVE9PQo=",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.11.2/Path.of.Purpose_0.11.2_x64-setup.nsis.zip"
     }
   }
 }

@@ -24,7 +24,7 @@ from pop.poe_api.models import (
 )
 from pop.poe_api.rate_limiter import RateLimiter
 
-POE_API_BASE = "https://api.pathofexile.com"
+POE_API_BASE = "https://www.pathofexile.com/api"
 
 
 class PoeApiError(Exception):
@@ -253,3 +253,8 @@ class PoeClient:
         data = resp.json()
         stash_data = data.get("stash", data) if isinstance(data, dict) else data
         return StashTabContents.model_validate(stash_data)
+
+    async def get_stash_tab_raw(self, league: str, stash_id: str) -> dict:
+        """Fetch stash tab contents as raw JSON (for debugging)."""
+        resp = await self._request("GET", f"/stash/{league}/{stash_id}")
+        return resp.json()
