@@ -17,6 +17,7 @@ import type {
   TradeSearchResult,
   FilterConfig,
   FilterResult,
+  HotItemsResult,
   StashTab,
   StashTabValuation,
 } from "./types";
@@ -749,4 +750,10 @@ export interface QuickPriceResult {
 
 export async function quickPrice(itemName: string, league: string): Promise<QuickPriceResult> {
   return await invoke<QuickPriceResult>("quick_price", { itemName, league });
+}
+
+// --- Hot Items (poe.ninja) ---
+
+export async function fetchHotItems(league: string, divineRatio?: number): Promise<HotItemsResult> {
+  return await invoke<HotItemsResult>("fetch_hot_items", { league, divineRatio: divineRatio ?? null });
 }

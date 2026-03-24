@@ -494,7 +494,30 @@ export interface FilterConfig {
   flasks: FlaskConfig;
   sounds: SoundConfig;
   build_tailored: BuildTailoredConfig;
+  hot_items?: HotItemsConfig;
   filter_name: string;
+}
+
+export interface HotItem {
+  name: string;
+  item_type: string;
+  chaos_value: number;
+}
+
+export interface HotItemsResult {
+  tier1: HotItem[];
+  tier2: HotItem[];
+  tier3: HotItem[];
+  divine_ratio: number;
+  fetched_at: string;
+  total_count: number;
+}
+
+export interface HotItemsConfig {
+  enabled: boolean;
+  tier1: HotItem[];
+  tier2: HotItem[];
+  tier3: HotItem[];
 }
 
 export interface FilterResult {

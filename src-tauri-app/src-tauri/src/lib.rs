@@ -2569,6 +2569,22 @@ async fn stash_list_tabs(league: String) -> Result<serde_json::Value, String> {
         .map_err(|e| format!("Failed to parse stash_list_tabs output: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))
 }
 
+/// Fetch hot items from poe.ninja for filter generation.
+#[tauri::command]
+async fn fetch_hot_items(league: String, divine_ratio: Option<f64>) -> Result<serde_json::Value, String> {
+    let mut input = serde_json::json!({ "league": league });
+    if let Some(dr) = divine_ratio {
+        input["divine_ratio"] = serde_json::json!(dr);
+    }
+    let stdout = run_python_command_with_timeout(
+        &["-m", "pop.main", "fetch_hot_items", "--stdin"],
+        Some(&input.to_string()),
+        60,
+    )?;
+    serde_json::from_str::<serde_json::Value>(&stdout)
+        .map_err(|e| format!("Failed to parse hot items: {} — raw: {}", e, &stdout[..stdout.len().min(200)]))
+}
+
 /// Quick price check by item name (for chat commands).
 #[tauri::command]
 async fn quick_price(item_name: String, league: String) -> Result<serde_json::Value, String> {
@@ -2826,6 +2842,7 @@ pub fn run() {
             price_check_trigger,
             price_check_refine,
             analyze_death,
+            fetch_hot_items,
             quick_price,
             stash_list_tabs,
             stash_scan_tab,

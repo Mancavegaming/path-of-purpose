@@ -1,11 +1,11 @@
 {
-  "version": "0.11.6",
-  "notes": "New MCS Scripts logo — app icon + sidebar",
-  "pub_date": "2026-03-24T13:00:00Z",
+  "version": "0.12.0",
+  "notes": "Hot Items — poe.ninja price alerts in your loot filter",
+  "pub_date": "2026-03-24T14:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWcxSlBKY3RxRk54dEExajRWcXFUNnBGZE9mUW9DMk93UUZSR3hCUWRlL1pISFlQVDFHejhZdWlBY1dEY1FPeW1xMlJxTStUNjVrVTNWOXlJWXhIUVFBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0Mzc4ODM0CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTEuNl94NjQtc2V0dXAubnNpcy56aXAKY3BHajd2SVg2ci9JeGdWS2JKNkFWTHN4WkQvNFl3akw0NGZteEVDdGE5cEcxK1hBdGVudmFzT29hVkdRVVBxbG5SSG0yekVhK1puc2daRFI4RVhIRHc9PQo=",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.11.6/Path.of.Purpose_0.11.6_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXEvMGJsMTlHRDgycjBib0NucmdBN3FVRm9SYnc2VnpSV1RQWTlGZFRuUWNqb3dyTmlUYnV0SHVZUFNROWY3TUxhckRIRUFOKzUrWVBHQ095ekxQcEFBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MzgzNDMzCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTIuMF94NjQtc2V0dXAubnNpcy56aXAKUGdNMTJ2RG9sRHV0aXREbFJ5UnNCbU1WM2M2ZWdsMlBSR0R3anFkSm5GSncrS3RRamJ6QUxzMm5ET0xoS2V0TkpnY1N1WkU3NmRnVEJ5REQvTWFVRGc9PQo=",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.12.0/Path.of.Purpose_0.12.0_x64-setup.nsis.zip"
     }
   }
 }

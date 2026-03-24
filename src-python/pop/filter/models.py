@@ -124,6 +124,15 @@ class BuildTailoredConfig(BaseModel):
     highlight_cluster_jewels: bool = True
 
 
+class HotItemsConfig(BaseModel):
+    """Hot items from poe.ninja, pre-categorized by price tier."""
+
+    enabled: bool = False
+    tier1: list[dict] = Field(default_factory=list)  # 10+ div
+    tier2: list[dict] = Field(default_factory=list)  # 1-10 div
+    tier3: list[dict] = Field(default_factory=list)  # 50c - 1 div
+
+
 class FilterConfig(BaseModel):
     """Complete configuration for filter generation."""
 
@@ -135,4 +144,5 @@ class FilterConfig(BaseModel):
     flasks: FlaskConfig = Field(default_factory=FlaskConfig)
     sounds: SoundConfig = Field(default_factory=SoundConfig)
     build_tailored: BuildTailoredConfig = Field(default_factory=BuildTailoredConfig)
+    hot_items: HotItemsConfig = Field(default_factory=HotItemsConfig)
     filter_name: str = "PathOfPurpose"

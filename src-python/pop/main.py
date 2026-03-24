@@ -1865,6 +1865,22 @@ def cmd_death_analyze(args: argparse.Namespace) -> None:
         print(json.dumps({"error": str(exc)}))
 
 
+def cmd_fetch_hot_items(args: argparse.Namespace) -> None:
+    """Fetch high-value items from poe.ninja for filter generation."""
+    from pop.filter.hot_items import fetch_hot_items
+
+    raw = _safe_stdin_read()
+    data = json.loads(raw) if raw else {}
+    league = data.get("league", "Standard")
+    divine_ratio = data.get("divine_ratio")
+
+    try:
+        result = asyncio.run(fetch_hot_items(league, divine_ratio))
+        print(json.dumps(result.model_dump(mode="json")))
+    except Exception as exc:
+        print(json.dumps({"error": str(exc)}))
+
+
 def cmd_quick_price(args: argparse.Namespace) -> None:
     """Quick price check by item name for chat commands."""
     from pop.trade.client import TradeClient
@@ -2224,6 +2240,11 @@ def main() -> None:
     p_death = subparsers.add_parser("death_analyze", help="Analyze a death event against player defences")
     p_death.add_argument("--stdin", action="store_true", default=True)
     p_death.set_defaults(func=cmd_death_analyze)
+
+    # --- fetch_hot_items ---
+    p_hot = subparsers.add_parser("fetch_hot_items", help="Fetch hot item prices from poe.ninja")
+    p_hot.add_argument("--stdin", action="store_true", default=True)
+    p_hot.set_defaults(func=cmd_fetch_hot_items)
 
     # --- quick_price ---
     p_qprice = subparsers.add_parser("quick_price", help="Quick price check by item name")

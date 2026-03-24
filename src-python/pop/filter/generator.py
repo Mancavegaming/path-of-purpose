@@ -14,6 +14,7 @@ from pop.filter.build_analysis import BuildFilterData, analyze_build_for_filter
 from pop.filter.models import (
     CurrencyTierConfig,
     FilterConfig,
+    HotItemsConfig,
     Strictness,
 )
 
@@ -67,6 +68,8 @@ def generate_filter(
     lines: list[str] = []
 
     _section_header(lines, cfg, data, build)
+    if cfg.hot_items.enabled and (cfg.hot_items.tier1 or cfg.hot_items.tier2 or cfg.hot_items.tier3):
+        _section_hot_items(lines, cfg)
     _section_currency(lines, cfg)
     _section_special_currency(lines, cfg)
     if data and cfg.build_tailored.highlight_build_gems:
@@ -115,6 +118,52 @@ def _section_header(
             lines.append(f"# Resist gaps: {', '.join(gaps)}")
     lines.append("# =====================================================")
     lines.append("")
+
+
+def _section_hot_items(lines: list[str], cfg: FilterConfig) -> None:
+    """Generate filter rules for high-value items from poe.ninja."""
+    hi = cfg.hot_items
+    lines.append("# ========== HOT ITEMS (poe.ninja prices) ==========")
+    lines.append("")
+
+    # Visual styles per tier — deliberately different from currency tiers
+    tiers = [
+        ("Tier 1 — Jackpot (10+ Divine)", hi.tier1,
+         "255 0 200", "60 0 40 240", "255 0 200", 45, 1, 300, "Red", "0 Red Star"),
+        ("Tier 2 — Valuable (1-10 Divine)", hi.tier2,
+         "0 220 220", "0 30 40 230", "0 220 220", 38, 5, 200, "Yellow", "1 Yellow Circle"),
+        ("Tier 3 — Notable (50c+)", hi.tier3,
+         "120 255 120", "0 0 0 200", "120 255 120", 32, 0, 0, "", ""),
+    ]
+
+    for label, items, text, bg, border, font, sound, vol, beam, icon in tiers:
+        if not items:
+            continue
+        # Group items by type for proper PoE filter conditions
+        by_type: dict[str, list[str]] = {}
+        for item in items:
+            itype = item.get("item_type", "unique") if isinstance(item, dict) else "unique"
+            name = item.get("name", "") if isinstance(item, dict) else str(item)
+            if name:
+                by_type.setdefault(itype, []).append(name)
+
+        lines.append(f"# {label}")
+        for itype, names in by_type.items():
+            base_list = " ".join(f'"{n}"' for n in names)
+            conditions: list[str] = []
+            if itype == "unique":
+                conditions = ["Rarity == Unique", f"BaseType == {base_list}"]
+            elif itype == "divcard":
+                conditions = ['Class == "Divination Cards"', f"BaseType == {base_list}"]
+            elif itype == "gem":
+                conditions = ['Class == "Skill Gems"', f"BaseType == {base_list}"]
+            elif itype == "base":
+                conditions = [f"BaseType == {base_list}"]
+            else:
+                conditions = [f"BaseType == {base_list}"]
+            _block(lines, "Show", conditions, text=text, bg=bg, border=border,
+                   font_size=font, sound=sound, volume=vol, beam=beam, icon=icon)
+        lines.append("")
 
 
 def _section_currency(lines: list[str], cfg: FilterConfig) -> None:

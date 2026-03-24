@@ -1,8 +1,10 @@
-import { createSignal, Show, type Accessor } from "solid-js";
-import type { Build, FilterStrictness } from "../lib/types";
+import { createSignal, Show, onCleanup, type Accessor } from "solid-js";
+import type { Build, FilterStrictness, HotItemsResult } from "../lib/types";
 import {
   generateFilter,
   saveFilterFile,
+  fetchHotItems,
+  fetchLeagues,
 } from "../lib/commands";
 
 interface FilterPageProps {
@@ -203,6 +205,46 @@ export default function FilterPage(props: FilterPageProps) {
   // Filter name
   const [filterName, setFilterName] = createSignal("PathOfPurpose");
 
+  // Hot Items (poe.ninja)
+  const [hotEnabled, setHotEnabled] = createSignal(false);
+  const [hotItems, setHotItems] = createSignal<HotItemsResult | null>(null);
+  const [hotLoading, setHotLoading] = createSignal(false);
+  const [hotError, setHotError] = createSignal("");
+  const [hotToast, setHotToast] = createSignal("");
+  const [hotLeague, setHotLeague] = createSignal("Standard");
+  const [hotLeagues, setHotLeagues] = createSignal<string[]>(["Standard"]);
+  let hotTimer: ReturnType<typeof setInterval> | null = null;
+
+  // Load leagues for hot items
+  fetchLeagues().then((r) => { if (r.length > 0) setHotLeagues(r); }).catch(() => {});
+
+  async function refreshHotPrices() {
+    setHotLoading(true);
+    setHotError("");
+    try {
+      const result = await fetchHotItems(hotLeague());
+      setHotItems(result);
+      setHotToast(`${result.total_count} hot items loaded`);
+      setTimeout(() => setHotToast(""), 4000);
+    } catch (e) {
+      setHotError(String(e));
+    } finally {
+      setHotLoading(false);
+    }
+  }
+
+  function toggleHot(enabled: boolean) {
+    setHotEnabled(enabled);
+    if (enabled) {
+      refreshHotPrices();
+      hotTimer = setInterval(refreshHotPrices, 6 * 60 * 60 * 1000); // 6 hours
+    } else {
+      if (hotTimer) { clearInterval(hotTimer); hotTimer = null; }
+    }
+  }
+
+  onCleanup(() => { if (hotTimer) clearInterval(hotTimer); });
+
   // Sounds
   const [uniqueSound, setUniqueSound] = createSignal(3);
   const [buildGearSound, setBuildGearSound] = createSignal(6);
@@ -255,6 +297,12 @@ export default function FilterPage(props: FilterPageProps) {
         highlight_build_gems: hlGems(),
         highlight_resist_fillers: hlResists(),
         highlight_cluster_jewels: hlClusters(),
+      },
+      hot_items: {
+        enabled: hotEnabled(),
+        tier1: hotItems()?.tier1 ?? [],
+        tier2: hotItems()?.tier2 ?? [],
+        tier3: hotItems()?.tier3 ?? [],
       },
       filter_name: filterName() || "PathOfPurpose",
     };
@@ -505,6 +553,39 @@ export default function FilterPage(props: FilterPageProps) {
             <SoundSelect value={uniqueSound()} onChange={setUniqueSound} />
           </div>
         </div>
+      </div>
+
+      {/* Hot Items (poe.ninja) */}
+      <div class="filter-section">
+        <h3>
+          <label>
+            <input type="checkbox" checked={hotEnabled()} onChange={(e) => toggleHot(e.currentTarget.checked)} />
+            {" "}Hot Items — poe.ninja Prices
+          </label>
+        </h3>
+        <Show when={hotEnabled()}>
+          <div class="filter-row-item" style={{ "margin-bottom": "8px" }}>
+            <span class="filter-row-label">League</span>
+            <select class="filter-select" value={hotLeague()} onChange={(e) => setHotLeague(e.currentTarget.value)}>
+              {hotLeagues().map((l) => <option value={l}>{l}</option>)}
+            </select>
+            <button style={{ "font-size": "12px", padding: "4px 12px", "margin-left": "8px" }} onClick={refreshHotPrices} disabled={hotLoading()}>
+              {hotLoading() ? "Fetching..." : "Refresh Prices"}
+            </button>
+          </div>
+          <Show when={hotError()}><div class="filter-error">{hotError()}</div></Show>
+          <Show when={hotToast()}><div class="filter-success">{hotToast()}</div></Show>
+          <Show when={hotItems()}>
+            <div style={{ "font-size": "12px", color: "var(--text-secondary)", display: "flex", gap: "16px", "flex-wrap": "wrap", padding: "4px 0" }}>
+              <span style={{ color: "#ff00c8", "font-weight": "600" }}>T1 (10+ div): {hotItems()!.tier1.length} items</span>
+              <span style={{ color: "#00dcdc", "font-weight": "600" }}>T2 (1-10 div): {hotItems()!.tier2.length} items</span>
+              <span style={{ color: "#78ff78", "font-weight": "600" }}>T3 (50c+): {hotItems()!.tier3.length} items</span>
+            </div>
+            <div style={{ "font-size": "11px", color: "var(--text-muted)", "margin-top": "4px" }}>
+              Last updated: {new Date(hotItems()!.fetched_at).toLocaleTimeString()} | Divine: {Math.round(hotItems()!.divine_ratio)}c
+            </div>
+          </Show>
+        </Show>
       </div>
 
       {/* Build Tailored */}
