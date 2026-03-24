@@ -24,7 +24,6 @@ ITEM_CATEGORIES = [
     ("DivinationCard", "divcard"),
     ("SkillGem", "gem"),
     ("BaseType", "base"),
-    ("ClusterJewel", "base"),
     # Crafting materials
     ("Scarab", "base"),
     ("Fossil", "base"),
@@ -34,13 +33,10 @@ ITEM_CATEGORIES = [
     ("Incubator", "base"),
     ("Vial", "base"),
     ("DeliriumOrb", "base"),
-    # Maps & misc
-    ("Map", "base"),
+    # Misc
     ("Invitation", "base"),
-    ("Beast", "base"),
     ("Tattoo", "base"),
     ("Omen", "base"),
-    ("Artifact", "base"),
 ]
 
 # currency/overview categories (different response format)
@@ -83,8 +79,23 @@ async def _fetch_category(
             # Currency uses "currencyTypeName", items use "name"
             name = line.get("name", line.get("currencyTypeName", ""))
             chaos = line.get("chaosValue", line.get("chaosEquivalent", 0))
-            if name and chaos and chaos > 0:
-                results.append((name, item_type, float(chaos)))
+            if not name or not chaos or chaos <= 0:
+                continue
+            # Clean up names that aren't valid PoE filter BaseTypes
+            # Skip enchantment text (cluster jewels, etc.)
+            if "%" in name or "increased" in name.lower() or "reduced" in name.lower():
+                continue
+            # Strip transfigured gem suffixes: "Bladefall of Trarthus" -> skip
+            # (PoE filter BaseType is just "Bladefall", but we can't reliably strip)
+            if item_type == "gem" and " of " in name:
+                continue
+            # Strip map tier suffixes: "The Enslaver Map (Tier 14)" -> "The Enslaver Map"
+            import re
+            name = re.sub(r"\s*\(Tier \d+\)", "", name).strip()
+            # Skip names with weird characters
+            if '"' in name:
+                continue
+            results.append((name, item_type, float(chaos)))
         return results
     except Exception:
         return []

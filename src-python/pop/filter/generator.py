@@ -149,22 +149,25 @@ def _section_hot_items(lines: list[str], cfg: FilterConfig) -> None:
 
         lines.append(f"# {label}")
         for itype, names in by_type.items():
-            base_list = " ".join(f'"{n}"' for n in names)
-            conditions: list[str] = []
-            if itype == "unique":
-                conditions = ["Rarity == Unique", f"BaseType == {base_list}"]
-            elif itype == "divcard":
-                conditions = ['Class == "Divination Cards"', f"BaseType == {base_list}"]
-            elif itype == "gem":
-                conditions = ['Class == "Skill Gems"', f"BaseType == {base_list}"]
-            elif itype == "currency":
-                conditions = ['Class == "Currency"', f"BaseType == {base_list}"]
-            elif itype == "fragment":
-                conditions = ['Class == "Map Fragments" "Misc Map Items"', f"BaseType == {base_list}"]
-            else:
-                conditions = [f"BaseType == {base_list}"]
-            _block(lines, "Show", conditions, text=text, bg=bg, border=border,
-                   font_size=font, sound=sound, volume=vol, beam=beam, icon=icon)
+            # Split into chunks of 20 to avoid PoE filter line length limits
+            for i in range(0, len(names), 20):
+                chunk = names[i:i + 20]
+                base_list = " ".join(f'"{n}"' for n in chunk)
+                conditions: list[str] = []
+                if itype == "unique":
+                    conditions = ["Rarity == Unique", f"BaseType == {base_list}"]
+                elif itype == "divcard":
+                    conditions = ['Class == "Divination Cards"', f"BaseType == {base_list}"]
+                elif itype == "gem":
+                    conditions = ['Class == "Skill Gems"', f"BaseType == {base_list}"]
+                elif itype == "currency":
+                    conditions = ['Class == "Currency"', f"BaseType == {base_list}"]
+                elif itype == "fragment":
+                    conditions = ['Class == "Map Fragments" "Misc Map Items"', f"BaseType == {base_list}"]
+                else:
+                    conditions = [f"BaseType == {base_list}"]
+                _block(lines, "Show", conditions, text=text, bg=bg, border=border,
+                       font_size=font, sound=sound, volume=vol, beam=beam, icon=icon)
         lines.append("")
 
 
