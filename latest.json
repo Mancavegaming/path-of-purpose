@@ -1,11 +1,11 @@
 {
-  "version": "0.10.2",
-  "notes": "Fix OAuth crash when refresh_token missing from response",
-  "pub_date": "2026-03-23T20:00:00Z",
+  "version": "0.10.3",
+  "notes": "Filter remove-only tabs from stash list",
+  "pub_date": "2026-03-23T21:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXNWVjc0RW5TY0x6aElYM1hTUHA3dm90WG9CZWNTaDhWOTQ3ZzdLU2RIUnlYblkvcGl3YUpHVDBKN0RvV2t4RUdDNnlTcnNIY2RDdXBHTWlYdUhyL0FRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MzA5MzAzCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTAuMl94NjQtc2V0dXAubnNpcy56aXAKS2tYOFZ3NTdGN01HUzJFcFRCTGNyd2x3SUUyaGFLcVU0L0pZMS83T210ZUFySGFFbjVwRWxxNk5hakFyVVZFMmxaWUxLeVdZMmE5aTNMMGhIVS8yRHc9PQo=",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.10.2/Path.of.Purpose_0.10.2_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYW5lblVtRk5EbzBNZXFMSUJDNC83NW4vdlhhWDFUNk9xSEVNcEtvOGJKSXNtVzh2WDcxaHlRa3BYbzdLcytPeG95M1ExQk5sWkV2a0Y5U3pBRFFCakFrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MzEwODgzCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTAuM194NjQtc2V0dXAubnNpcy56aXAKWHR4VStzTWxxQ2JnbWMwODVhTzNPcVJMV1FXYVJBRVNkMVU4bitETmEwSjdScnVUanRMbDRBdjBwY3RqbklkZ0QwSkdQUU9OUWp5OTRFaGNPOEEyQXc9PQo=",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.10.3/Path.of.Purpose_0.10.3_x64-setup.nsis.zip"
     }
   }
 }

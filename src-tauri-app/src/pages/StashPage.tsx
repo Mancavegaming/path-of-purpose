@@ -21,6 +21,7 @@ export default function StashPage() {
   const [loading, setLoading] = createSignal("");
   const [scanning, setScanning] = createSignal(false);
   const [scanProgress, setScanProgress] = createSignal({ current: 0, total: 0, tabName: "" });
+  const [hideRemoveOnly, setHideRemoveOnly] = createSignal(true);
   const [error, setError] = createSignal("");
 
   // No polling intervals — all user-initiated. Nothing to clean up.
@@ -126,9 +127,7 @@ export default function StashPage() {
   async function scanAllTabs() {
     setError("");
     setScanning(true);
-    const tabList = tabs();
-    // Filter out remove-only tabs (they have "(Remove-only)" in name typically)
-    const toScan = tabList.filter((t) => !t.name.includes("Remove-only"));
+    const toScan = displayedTabs();
     setValuations({});
 
     for (let i = 0; i < toScan.length; i++) {
@@ -161,6 +160,15 @@ export default function StashPage() {
   function selectedValuation(): StashTabValuation | null {
     const id = selectedTabId();
     return id ? valuations()[id] || null : null;
+  }
+
+  function displayedTabs() {
+    if (!hideRemoveOnly()) return tabs();
+    return tabs().filter((t) => !t.name.includes("(Remove-only)"));
+  }
+
+  function removeOnlyCount() {
+    return tabs().filter((t) => t.name.includes("(Remove-only)")).length;
   }
 
   // Format price display
@@ -260,9 +268,32 @@ export default function StashPage() {
           <div style={{ display: "flex", gap: "16px" }}>
             {/* Left: Tab list */}
             <div style={{ width: "280px", "flex-shrink": "0" }}>
-              <div class="section-title">Stash Tabs</div>
+              <div class="section-title" style={{ display: "flex", "justify-content": "space-between", "align-items": "center" }}>
+                <span>Stash Tabs</span>
+                <span style={{ "font-size": "11px", color: "var(--text-muted)", "font-weight": "400", "text-transform": "none", "letter-spacing": "0" }}>
+                  {displayedTabs().length} tabs
+                </span>
+              </div>
+              <Show when={removeOnlyCount() > 0}>
+                <label style={{
+                  display: "flex",
+                  "align-items": "center",
+                  gap: "6px",
+                  "font-size": "11px",
+                  color: "var(--text-muted)",
+                  padding: "4px 0 8px",
+                  cursor: "pointer",
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={hideRemoveOnly()}
+                    onChange={(e) => setHideRemoveOnly(e.currentTarget.checked)}
+                  />
+                  Hide Remove-only tabs ({removeOnlyCount()})
+                </label>
+              </Show>
               <div style={{ display: "flex", "flex-direction": "column", gap: "4px" }}>
-                <For each={tabs()}>
+                <For each={displayedTabs()}>
                   {(tab) => {
                     const val = () => valuations()[tab.id];
                     const isSelected = () => selectedTabId() === tab.id;
