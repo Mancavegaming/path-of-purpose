@@ -169,8 +169,9 @@ export default function StashPage() {
   // Computed totals across all scanned tabs
   function totalValue() {
     const vals = Object.values(valuations());
-    const chaos = vals.reduce((sum, v) => sum + v.total_chaos, 0);
-    const divine = divineRatio() > 0 ? chaos / divineRatio() : 0;
+    const chaos = vals.reduce((sum, v) => sum + (v?.total_chaos ?? 0), 0);
+    const dr = divineRatio() || 180;
+    const divine = dr > 0 ? chaos / dr : 0;
     return { chaos: Math.round(chaos * 100) / 100, divine: Math.round(divine * 100) / 100 };
   }
 
@@ -189,9 +190,10 @@ export default function StashPage() {
   }
 
   // Format price display
-  function formatPrice(chaos: number): string {
-    if (chaos >= 1000) return `${(chaos / divineRatio()).toFixed(1)} div`;
-    return `${chaos.toFixed(1)}c`;
+  function formatPrice(chaos: number | undefined): string {
+    const v = chaos ?? 0;
+    if (v >= 1000) return `${(v / (divineRatio() || 180)).toFixed(1)} div`;
+    return `${v.toFixed(1)}c`;
   }
 
   // Init
@@ -273,7 +275,7 @@ export default function StashPage() {
             <div>
               <div style={{ "font-size": "11px", color: "var(--text-muted)", "text-transform": "uppercase", "letter-spacing": "0.5px" }}>Total Value</div>
               <div style={{ "font-size": "28px", "font-weight": "700", color: "var(--accent)" }}>
-                {totalValue().divine.toFixed(1)} <span style={{ "font-size": "16px", color: "var(--text-secondary)" }}>divine</span>
+                {(totalValue().divine ?? 0).toFixed(1)} <span style={{ "font-size": "16px", color: "var(--text-secondary)" }}>divine</span>
               </div>
             </div>
             <div style={{ color: "var(--text-muted)", "font-size": "14px" }}>

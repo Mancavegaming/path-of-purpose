@@ -1957,17 +1957,19 @@ def cmd_stash_scan_tab(args: argparse.Namespace) -> None:
 
     async def _run() -> None:
         async with PoeClient(client_id=args.client_id) as poe:
-            # Fetch raw response to check item leagues
+            # Single fetch — get raw for debug, parse for pricing
             raw = await poe.get_stash_tab_raw(league, tab_id)
             stash_data = raw.get("stash", raw) if isinstance(raw, dict) else raw
             raw_items = stash_data.get("items", []) if isinstance(stash_data, dict) else []
-            # Check what league the items report
             item_leagues = set()
             for it in raw_items:
                 if "league" in it:
                     item_leagues.add(it["league"])
 
-            contents = await poe.get_stash_tab(league, tab_id)
+            # Parse into model from the same raw data
+            from pop.poe_api.models import StashTabContents
+            contents = StashTabContents.model_validate(stash_data if isinstance(stash_data, dict) else {})
+
             # Flatten child tab items into the main list
             all_items = list(contents.items)
             for child in contents.children:
@@ -1981,7 +1983,6 @@ def cmd_stash_scan_tab(args: argparse.Namespace) -> None:
                 tab_name=contents.name,
             )
             result = valuation.model_dump(mode="json")
-            # Add debug info
             result["_debug"] = {
                 "queried_league": league,
                 "raw_item_count": len(raw_items),

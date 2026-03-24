@@ -1,11 +1,11 @@
 {
-  "version": "0.11.4",
-  "notes": "Fix stash league selection — sync DOM select with signal",
-  "pub_date": "2026-03-24T11:00:00Z",
+  "version": "0.11.5",
+  "notes": "Fix toFixed crash + remove double API call",
+  "pub_date": "2026-03-24T12:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXNtcnA1d3RJMVZlR0xHcG8ySUVldE1iblcvN3E4WmM0dXBnbUsvZlhDN3pGT3lBRm5DNHBrYjJLY0pxQmM3NlhjK2xjV1ZLTXorUkhRMGdPZEJBQnd3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0Mzc0Nzc4CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTEuNF94NjQtc2V0dXAubnNpcy56aXAKYmNKcjRNdjdsaHIyNUxUSm1IY0pWOWdTbDkxTnUweGh3aGcrenNuZXp1MEFtcVdhWVVxVUl5aG53a25mNlFoZWI1YnhPUUNNK2ZxN3creXhVMU9TREE9PQo=",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.11.4/Path.of.Purpose_0.11.4_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXFWNUNlTDg2c0JyR0o4ZzNsa2NhblZlSTJ2ZVloNzlxalpkbFJkQU1Zekp6eFdweE40QVZTU0hHbG9aZ2dCN0l1UCtJbGNqUlZjdjNQM1U3dkN1WGdrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0Mzc2NjgxCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTEuNV94NjQtc2V0dXAubnNpcy56aXAKNVRMdEV3STMwallhVFFhV1o2bStMNzVLRkozdy9qaXlIYlNIMXZmYXJyaHZyY2tORFdPQzV0ckVnUmxXZnlYN21aWHJNOVY2U3NHSWhZcmcvN3ZhQVE9PQo=",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.11.5/Path.of.Purpose_0.11.5_x64-setup.nsis.zip"
     }
   }
 }
