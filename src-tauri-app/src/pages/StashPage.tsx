@@ -106,7 +106,13 @@ export default function StashPage() {
     }
   }
 
+  let leagueSelectRef: HTMLSelectElement | undefined;
+
   async function handleLoadStash() {
+    // Sync signal from DOM in case WebView restored form state without onChange
+    if (leagueSelectRef && leagueSelectRef.value !== league()) {
+      setLeague(leagueSelectRef.value);
+    }
     await loadRates();
     await loadTabs();
   }
@@ -222,7 +228,13 @@ export default function StashPage() {
             League
           </label>
           <select
+            ref={(el) => {
+              leagueSelectRef = el;
+              // Sync signal from DOM on mount — WebView may restore form state without firing onChange
+              queueMicrotask(() => { if (el.value && el.value !== league()) setLeague(el.value); });
+            }}
             value={league()}
+            onInput={(e) => setLeague(e.currentTarget.value)}
             onChange={(e) => setLeague(e.currentTarget.value)}
             style={{
               background: "var(--bg-input)",
@@ -238,7 +250,6 @@ export default function StashPage() {
           <button onClick={handleLoadStash} disabled={!!loading() || scanning()}>
             {loading() || "Load Stash Tabs"}
           </button>
-          <span style={{ "font-size": "11px", color: "var(--text-muted)" }}>Signal: {league()}</span>
 
           <Show when={tabs().length > 0}>
             <button onClick={scanAllTabs} disabled={scanning()} style={{ "margin-left": "auto" }}>
