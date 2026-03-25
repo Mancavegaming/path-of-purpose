@@ -1,11 +1,11 @@
 {
-  "version": "0.12.4",
-  "notes": "Fix hot items — use actual base types for uniques",
-  "pub_date": "2026-03-25T06:00:00Z",
+  "version": "0.13.0",
+  "notes": "Atlas Passive Tree planner — interactive canvas with search and strategy presets",
+  "pub_date": "2026-03-25T08:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXBsbGFneXBPclBLZEVuSFdjazBjclRuSkdEVE5qK2ZqQTdjR1hPNXg0UEgreFZ4SFhuSWd5TDd0MU5ZbWVhaWNSNTA2ZlBlL0FLbStVS3hPWjBQOXdNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0NDUxNTQ1CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTIuNF94NjQtc2V0dXAubnNpcy56aXAKMmREWGNUYWdSWHpDT1A4SEJZODA5dlVQZFU2LzY0a2NCclpwOTh1Z3cvUDNwSkpHQnlIRHFOa1JsVmlqalQ3anE3R2llY05PRU8rV3YvdUU0Z3JCQ0E9PQo=",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.12.4/Path.of.Purpose_0.12.4_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXJWZm1qc2pZOEtrc1NpVWxPZ2VVTXI4WU1HS29GRDBTTTBqUkk2QjFyb3pYajRNVGsrUHFzcjhnaEVrL1E1RUYrSm9hRHpIR1VlTVVGaldDYVBSb0FZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0NDU2NTgwCWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTMuMF94NjQtc2V0dXAubnNpcy56aXAKdi96Umo2dzZGYzFwcm9xM0pjd3BwWEdyZjFQV3N6ckZ0WEtGUEp0WVJhTnBBdE01Z296SnBIVVFUTm0zdlBPRTcra0JHenBvUHdHT25vekk2UjdIQXc9PQo=",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.13.0/Path.of.Purpose_0.13.0_x64-setup.nsis.zip"
     }
   }
 }

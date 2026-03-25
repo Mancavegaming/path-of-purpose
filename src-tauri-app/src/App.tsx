@@ -11,6 +11,7 @@ import StreamingPage from "./pages/StreamingPage";
 import FilterPage from "./pages/FilterPage";
 import PriceCheckPage from "./pages/PriceCheckPage";
 import StashPage from "./pages/StashPage";
+import AtlasPage from "./pages/AtlasPage";
 // Death Log disabled until Client.txt parsing is fixed
 // import DeathPage from "./pages/DeathPage";
 // import "./lib/deathStore";
@@ -192,6 +193,9 @@ function App() {
         </div>
         <div style={{ display: page() === "stash" ? "block" : "none" }}>
           <StashPage />
+        </div>
+        <div style={{ display: page() === "atlas" ? "block" : "none" }}>
+          <AtlasPage />
         </div>
         <div style={{ display: page() === "streaming" ? "block" : "none" }}>
           <StreamingPage />
