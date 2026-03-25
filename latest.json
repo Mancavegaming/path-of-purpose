@@ -1,11 +1,11 @@
 {
-  "version": "0.12.3",
-  "notes": "Fix hot items filter errors — clean invalid BaseTypes",
-  "pub_date": "2026-03-24T17:00:00Z",
+  "version": "0.12.4",
+  "notes": "Fix hot items — use actual base types for uniques",
+  "pub_date": "2026-03-25T06:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYWdCV0Q4NFd4cnUwSDROKytYMnJrWnVENXFsVHEyKzJRVkJPUnFpdWhVMVJWRFF4UjdhWmZRUXY1RlhWWmtDM0w0ZjFPUS80dE1iUiszR3I2Wm9zZXdjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MzkzNTY5CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTIuM194NjQtc2V0dXAubnNpcy56aXAKVXNKOUVQNE42akRndHlMMytNWklZMWM1SkN1OC9EdVhTRGhiSTZSK3psNGYzTU5IcE1FajFaT1V4dXYvT1daRjlEd1NPcnZMWmV6eEw4Q3oyL0ZwQ2c9PQo=",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.12.3/Path.of.Purpose_0.12.3_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXBsbGFneXBPclBLZEVuSFdjazBjclRuSkdEVE5qK2ZqQTdjR1hPNXg0UEgreFZ4SFhuSWd5TDd0MU5ZbWVhaWNSNTA2ZlBlL0FLbStVS3hPWjBQOXdNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0NDUxNTQ1CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTIuNF94NjQtc2V0dXAubnNpcy56aXAKMmREWGNUYWdSWHpDT1A4SEJZODA5dlVQZFU2LzY0a2NCclpwOTh1Z3cvUDNwSkpHQnlIRHFOa1JsVmlqalQ3anE3R2llY05PRU8rV3YvdUU0Z3JCQ0E9PQo=",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.12.4/Path.of.Purpose_0.12.4_x64-setup.nsis.zip"
     }
   }
 }

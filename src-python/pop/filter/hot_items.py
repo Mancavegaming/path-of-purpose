@@ -77,22 +77,24 @@ async def _fetch_category(
         results = []
         for line in lines:
             # Currency uses "currencyTypeName", items use "name"
-            name = line.get("name", line.get("currencyTypeName", ""))
             chaos = line.get("chaosValue", line.get("chaosEquivalent", 0))
-            if not name or not chaos or chaos <= 0:
+            if not chaos or chaos <= 0:
                 continue
-            # Clean up names that aren't valid PoE filter BaseTypes
-            # Skip enchantment text (cluster jewels, etc.)
-            if "%" in name or "increased" in name.lower() or "reduced" in name.lower():
+            # For uniques: use baseType (actual item base), not the unique name
+            # "Mageblood" -> baseType "Leather Belt"
+            if item_type == "unique":
+                name = line.get("baseType", "")
+            else:
+                name = line.get("name", line.get("currencyTypeName", ""))
+            if not name:
                 continue
-            # Strip transfigured gem suffixes: "Bladefall of Trarthus" -> skip
-            # (PoE filter BaseType is just "Bladefall", but we can't reliably strip)
+            # Skip gem variants: "Bladefall of Trarthus" isn't a valid BaseType
             if item_type == "gem" and " of " in name:
                 continue
-            # Strip map tier suffixes: "The Enslaver Map (Tier 14)" -> "The Enslaver Map"
-            import re
-            name = re.sub(r"\s*\(Tier \d+\)", "", name).strip()
-            # Skip names with weird characters
+            # Skip names with stat text (enchantments etc.)
+            if "%" in name:
+                continue
+            # Skip names with embedded quotes
             if '"' in name:
                 continue
             results.append((name, item_type, float(chaos)))
