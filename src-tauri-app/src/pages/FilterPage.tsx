@@ -303,6 +303,7 @@ export default function FilterPage(props: FilterPageProps) {
         tier1: hotItems()?.tier1 ?? [],
         tier2: hotItems()?.tier2 ?? [],
         tier3: hotItems()?.tier3 ?? [],
+        tier4: hotItems()?.tier4 ?? [],
       },
       filter_name: filterName() || "PathOfPurpose",
     };
@@ -577,9 +578,10 @@ export default function FilterPage(props: FilterPageProps) {
           <Show when={hotToast()}><div class="filter-success">{hotToast()}</div></Show>
           <Show when={hotItems()}>
             <div style={{ "font-size": "12px", color: "var(--text-secondary)", display: "flex", gap: "16px", "flex-wrap": "wrap", padding: "4px 0" }}>
-              <span style={{ color: "#ff00c8", "font-weight": "600" }}>T1 (10+ div): {hotItems()!.tier1.length} items</span>
-              <span style={{ color: "#00dcdc", "font-weight": "600" }}>T2 (1-10 div): {hotItems()!.tier2.length} items</span>
-              <span style={{ color: "#78ff78", "font-weight": "600" }}>T3 (50c+): {hotItems()!.tier3.length} items</span>
+              <span style={{ color: "#ff00c8", "font-weight": "600" }}>T1 Jackpot: {hotItems()!.tier1.length}</span>
+              <span style={{ color: "#00dcdc", "font-weight": "600" }}>T2 Valuable: {hotItems()!.tier2.length}</span>
+              <span style={{ color: "#78ff78", "font-weight": "600" }}>T3 Notable: {hotItems()!.tier3.length}</span>
+              <span style={{ color: "#ff9632", "font-weight": "600" }}>T4 Check: {hotItems()!.tier4.length}</span>
             </div>
             <div style={{ "font-size": "11px", color: "var(--text-muted)", "margin-top": "4px" }}>
               Last updated: {new Date(hotItems()!.fetched_at).toLocaleTimeString()} | Divine: {Math.round(hotItems()!.divine_ratio)}c

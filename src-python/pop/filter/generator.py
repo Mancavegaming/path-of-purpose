@@ -68,7 +68,8 @@ def generate_filter(
     lines: list[str] = []
 
     _section_header(lines, cfg, data, build)
-    if cfg.hot_items.enabled and (cfg.hot_items.tier1 or cfg.hot_items.tier2 or cfg.hot_items.tier3):
+    hi = cfg.hot_items
+    if hi.enabled and (hi.tier1 or hi.tier2 or hi.tier3 or hi.tier4):
         _section_hot_items(lines, cfg)
     _section_currency(lines, cfg)
     _section_special_currency(lines, cfg)
@@ -127,6 +128,7 @@ def _section_hot_items(lines: list[str], cfg: FilterConfig) -> None:
     lines.append("")
 
     # Visual styles per tier — deliberately different from currency tiers
+    # T1: Magenta (jackpot), T2: Cyan (valuable), T3: Green (notable), T4: Orange (price check)
     tiers = [
         ("Tier 1 — Jackpot (10+ Divine)", hi.tier1,
          "255 0 200", "60 0 40 240", "255 0 200", 45, 1, 300, "Red", "0 Red Star"),
@@ -134,41 +136,78 @@ def _section_hot_items(lines: list[str], cfg: FilterConfig) -> None:
          "0 220 220", "0 30 40 230", "0 220 220", 38, 5, 200, "Yellow", "1 Yellow Circle"),
         ("Tier 3 — Notable (50c+)", hi.tier3,
          "120 255 120", "0 0 0 200", "120 255 120", 32, 0, 0, "", ""),
+        ("Tier 4 — Price Check (mixed value uniques)", hi.tier4,
+         "255 150 50", "30 20 10 220", "255 150 50", 34, 0, 0, "", ""),
     ]
 
     for label, items, text, bg, border, font, sound, vol, beam, icon in tiers:
         if not items:
             continue
-        # Group items by type for proper PoE filter conditions
-        by_type: dict[str, list[str]] = {}
-        for item in items:
-            itype = item.get("item_type", "unique") if isinstance(item, dict) else "unique"
-            name = item.get("name", "") if isinstance(item, dict) else str(item)
-            if name:
-                by_type.setdefault(itype, []).append(name)
-
-        lines.append(f"# {label}")
-        for itype, names in by_type.items():
-            # Split into chunks of 20 to avoid PoE filter line length limits
-            for i in range(0, len(names), 20):
-                chunk = names[i:i + 20]
-                base_list = " ".join(f'"{n}"' for n in chunk)
-                conditions: list[str] = []
-                if itype == "unique":
-                    conditions = ["Rarity == Unique", f"BaseType == {base_list}"]
-                elif itype == "divcard":
-                    conditions = ['Class == "Divination Cards"', f"BaseType == {base_list}"]
-                elif itype == "gem":
-                    conditions = ['Class == "Skill Gems"', f"BaseType == {base_list}"]
-                elif itype == "currency":
-                    conditions = ['Class == "Currency"', f"BaseType == {base_list}"]
-                elif itype == "fragment":
-                    conditions = ['Class == "Map Fragments" "Misc Map Items"', f"BaseType == {base_list}"]
-                else:
-                    conditions = [f"BaseType == {base_list}"]
-                _block(lines, "Show", conditions, text=text, bg=bg, border=border,
-                       font_size=font, sound=sound, volume=vol, beam=beam, icon=icon)
+        _emit_hot_tier(lines, label, items, text, bg, border, font, sound, vol, beam, icon)
         lines.append("")
+
+    # --- Influenced / Fractured / Synthesised rares (always in T4 style) ---
+    lines.append("# Tier 4 — Influenced & Fractured Rares (Price Check)")
+    _block(lines, "Show", [
+        "FracturedItem True",
+        "Rarity <= Rare",
+    ], text="255 150 50", bg="30 20 10 220", border="255 150 50", font_size=34)
+    _block(lines, "Show", [
+        "SynthesisedItem True",
+        "Rarity <= Rare",
+    ], text="255 150 50", bg="30 20 10 220", border="255 150 50", font_size=34)
+    for influence in ("Shaper", "Elder", "Hunter", "Warlord", "Crusader", "Redeemer"):
+        _block(lines, "Show", [
+            f"HasInfluence {influence}",
+            "Rarity <= Rare",
+            "ItemLevel >= 82",
+        ], text="255 150 50", bg="30 20 10 220", border="255 150 50", font_size=34)
+    lines.append("")
+
+
+def _emit_hot_tier(
+    lines: list[str], label: str, items: list[dict],
+    text: str, bg: str, border: str, font: int,
+    sound: int, vol: int, beam: str, icon: str,
+) -> None:
+    """Emit Show blocks for one hot items tier."""
+    # Group items by type for proper PoE filter conditions
+    by_type: dict[str, list[str]] = {}
+    for item in items:
+        itype = item.get("item_type", "base") if isinstance(item, dict) else "base"
+        name = item.get("name", "") if isinstance(item, dict) else str(item)
+        if name:
+            by_type.setdefault(itype, []).append(name)
+
+    lines.append(f"# {label}")
+    for itype, names in by_type.items():
+        # De-duplicate names within the same type
+        seen: set[str] = set()
+        unique_names: list[str] = []
+        for n in names:
+            if n not in seen:
+                seen.add(n)
+                unique_names.append(n)
+
+        # Split into chunks of 20 to avoid PoE filter line length limits
+        for i in range(0, len(unique_names), 20):
+            chunk = unique_names[i:i + 20]
+            base_list = " ".join(f'"{n}"' for n in chunk)
+            conditions: list[str] = []
+            if itype == "unique":
+                conditions = ["Rarity == Unique", f"BaseType == {base_list}"]
+            elif itype == "divcard":
+                conditions = ['Class == "Divination Cards"', f"BaseType == {base_list}"]
+            elif itype == "gem":
+                conditions = ['Class == "Skill Gems"', f"BaseType == {base_list}"]
+            elif itype == "currency":
+                conditions = ['Class == "Currency"', f"BaseType == {base_list}"]
+            elif itype == "fragment":
+                conditions = ['Class == "Map Fragments" "Misc Map Items"', f"BaseType == {base_list}"]
+            else:
+                conditions = [f"BaseType == {base_list}"]
+            _block(lines, "Show", conditions, text=text, bg=bg, border=border,
+                   font_size=font, sound=sound, volume=vol, beam=beam, icon=icon)
 
 
 def _section_currency(lines: list[str], cfg: FilterConfig) -> None:

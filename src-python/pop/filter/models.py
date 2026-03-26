@@ -128,9 +128,10 @@ class HotItemsConfig(BaseModel):
     """Hot items from poe.ninja, pre-categorized by price tier."""
 
     enabled: bool = False
-    tier1: list[dict] = Field(default_factory=list)  # 10+ div
-    tier2: list[dict] = Field(default_factory=list)  # 1-10 div
-    tier3: list[dict] = Field(default_factory=list)  # 50c - 1 div
+    tier1: list[dict] = Field(default_factory=list)  # 10+ div, guaranteed
+    tier2: list[dict] = Field(default_factory=list)  # 1-10 div, guaranteed
+    tier3: list[dict] = Field(default_factory=list)  # 50c+, no uniques
+    tier4: list[dict] = Field(default_factory=list)  # price-check: mixed unique bases
 
 
 class FilterConfig(BaseModel):

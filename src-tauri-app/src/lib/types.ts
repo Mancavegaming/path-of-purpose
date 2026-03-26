@@ -508,6 +508,7 @@ export interface HotItemsResult {
   tier1: HotItem[];
   tier2: HotItem[];
   tier3: HotItem[];
+  tier4: HotItem[];
   divine_ratio: number;
   fetched_at: string;
   total_count: number;
@@ -518,6 +519,7 @@ export interface HotItemsConfig {
   tier1: HotItem[];
   tier2: HotItem[];
   tier3: HotItem[];
+  tier4: HotItem[];
 }
 
 export interface FilterResult {
