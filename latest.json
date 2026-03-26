@@ -1,11 +1,11 @@
 {
-  "version": "0.13.1",
-  "notes": "Hot items T4 price-check tier — smarter unique base tiering with influenced/fractured rare highlights",
-  "pub_date": "2026-03-25T18:00:00Z",
+  "version": "0.13.2",
+  "notes": "Fix hot items — remove crafting base types that flooded minimap with false T1 drops",
+  "pub_date": "2026-03-26T08:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXBoblFETlhVZHcrdm8vRFlGUVNDUjZXY2svb2hZZ3VNL1hFcFhVWHFYRlVkUElnRXI3bG1MbDg5NEFlZC9YUWYxNC9LTkYwRnNjVXA0WG5odiszT1FFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0NDgwNTQ1CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTMuMV94NjQtc2V0dXAubnNpcy56aXAKY25FdGRkUVcxK1A2SDFqSjlCM1AyTEozelBQZmN4MnBxdzc5TndpdTN1aTRLV28vTEl2dXJDVmpYajk4bTlGSkJTa0prNFZzaGMyQ3VrL010QU91RGc9PQo=",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.13.1/Path.of.Purpose_0.13.1_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXVqZi93S1JDS2pRUjZSZVNwRzZVSE9yWDFuRWNSc0VGaklEZ21oWTd1N0RRTXFkdS9qcTlmamFzNnhxejgxWFVrZk9nT0p2SlAyYkNFakx2SFM0MEFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0NTQzODY1CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTMuMl94NjQtc2V0dXAubnNpcy56aXAKVzhpWkRGTWtrOXJoaVpNWWJuN28yNGxPTXdkQjkzRUE5ODZWK0d0NzFmQ2JwbWtrRVZuQWZZeFN6aHBRTTlzZmd3THhJN1hlZUJlTGlqVGgyTTJlQlE9PQo=",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.13.2/Path.of.Purpose_0.13.2_x64-setup.nsis.zip"
     }
   }
 }

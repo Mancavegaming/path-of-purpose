@@ -24,7 +24,6 @@ ITEM_CATEGORIES = [
     # Cards, gems, bases
     ("DivinationCard", "divcard"),
     ("SkillGem", "gem"),
-    ("BaseType", "base"),
     # Crafting materials
     ("Scarab", "base"),
     ("Fossil", "base"),
