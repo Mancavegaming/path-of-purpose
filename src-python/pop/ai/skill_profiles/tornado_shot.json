@@ -1,0 +1,54 @@
+{
+  "skill": "Tornado Shot",
+  "aliases": ["TS"],
+  "archetype": "attack",
+  "tags": ["bow", "projectile", "physical", "elemental", "conversion"],
+  "expert_source": "Fubgun / Empyrean",
+  "ascendancies": {
+    "top_pick": "Deadeye",
+    "alternatives": ["Pathfinder", "Champion"],
+    "notes": "Deadeye dominates — chain from Ricochet, +2 proj from Endless Munitions, Tailwind from Gathering Winds. Each extra projectile creates more secondary projectiles. Pathfinder for MF/juice. Champion for tanky variant with Fortify."
+  },
+  "gear_priorities": {
+    "weapon": "High pDPS bow for phys conversion builds, or flat ele for ele TS. Endgame: +2 arrow rare Thicket Bow is S-tier. Death's Opus is a strong budget option (+2 arrows). Mirror-tier: triple damage bow.",
+    "quiver": "+1 arrow is king on quiver — each arrow spawns secondary projectiles. Life, crit multi, flat damage. Rigwald's Quills for fork (insane clear but expensive).",
+    "helmet": "Rare with life, res, -9% nearby res (matching your damage type). TS enchant: +2 secondary projectiles is build-defining.",
+    "body_armour": "Hyrri's Ire budget. Endgame: Farruls Fur or rare with life + crit + suppression.",
+    "gloves": "Gripped Gloves (proj implicit). Life, attack speed, flat damage, res.",
+    "boots": "Rare with life, movespeed, res, spell suppression. Tailwind boots if not Deadeye.",
+    "amulet": "Crystallised Omniscience for omni variant. Otherwise: crit multi, flat damage, +1 phys/lightning gems.",
+    "rings": "Flat damage to attacks, life, res. Mark of the Elder combo endgame. Essence of Wrath craft for flat lightning.",
+    "belt": "Stygian Vise — life, elemental damage, res. Headhunter/Mageblood for absolute endgame juice.",
+    "flasks": "Dying Sun is CORE (+2 proj = more secondary explosions). Diamond Flask. Bottled Faith endgame."
+  },
+  "gem_links": {
+    "main_6l": ["Tornado Shot", "Greater Multiple Projectiles Support", "Elemental Damage with Attacks Support", "Trinity Support", "Inspiration Support", "Added Lightning Damage Support"],
+    "bossing_swap": "Some players run a separate Barrage 6L for single target in weapon swap. Otherwise swap GMP for Damage on Full Life.",
+    "auras": ["Wrath", "Grace", "Precision"],
+    "utility": "Sniper's Mark for bosses. Blood Rage for frenzy charges.",
+    "movement": "Blink Arrow + Faster Attacks.",
+    "guard": "Molten Shell or Steelskin depending on armour/evasion balance."
+  },
+  "tree_priorities": [
+    "100% spell suppression",
+    "All bow clusters: King of the Hill, Ballistic Mastery, Fury Bolts, Master Fletcher",
+    "Crit clusters: Depth Perception, Assassination, Heartseeker",
+    "Life wheels: Herbalism, Constitution, Thick Skin",
+    "Projectile damage: Forces of Nature, Point Blank (optional — bad for clear, good for bosses)"
+  ],
+  "breakpoints": [
+    "100% spell suppression",
+    "Dying Sun + GMP + ascendancy = 9+ projectiles for screen-wide clear",
+    "Helmet enchant +2 secondary projectiles — doubles the overlap potential",
+    "+1 arrow on bow AND quiver — each arrow creates independent secondary proj explosions",
+    "Ailment immunity (freeze kills you mid-pack)"
+  ],
+  "common_mistakes": [
+    "Thinking more projectiles only helps clear — in TS, more arrows = more secondary projectile overlap = more single target too, unlike LA.",
+    "Skipping Dying Sun — it's not optional for TS, +2 proj is a massive multiplier for both clear and single target.",
+    "Not getting the helmet enchant — +2 secondary projectiles is one of the biggest DPS increases in the game for TS.",
+    "Using Point Blank for mapping — it guts your clear since secondary projectiles travel away from you. Only use for dedicated bossing.",
+    "Investing in % increased damage instead of flat damage + crit multi — TS scales from raw projectile count and crit, not % increases."
+  ],
+  "scaling_tips": "TS is unique: each arrow that hits the ground creates 3 secondary projectiles. More arrows = exponentially more coverage. The helmet enchant (+2 secondary) and +arrow sources (bow, quiver, Dying Sun, ascendancy) are your biggest multipliers. Stack flat damage and crit multi, not % increased."
+}

@@ -1,0 +1,58 @@
+{
+  "skill": "Summon Skeletons",
+  "aliases": ["Skellies", "Skeletons", "Skeleton Mages", "Absolution"],
+  "archetype": "minion",
+  "tags": ["minion", "spell", "league_starter", "low_budget"],
+  "expert_source": "Ghazzy",
+  "ascendancies": {
+    "top_pick": "Necromancer",
+    "alternatives": [],
+    "notes": "Necromancer only. Order: Mindless Aggression → Unnatural Strength (+2 minion gems) → Mistress of Sacrifice (offerings) → Commander of Darkness. Dead Reckoning jewel converts melee skeletons into Skeleton Mages — this is the meta version."
+  },
+  "gear_priorities": {
+    "weapon": "+1 minion gems wand/sceptre. Trigger socketed spells craft for auto-Offering. Endgame: +2 minion gems. Budget: vendor recipe +1 minion.",
+    "shield": "+1 minion gems Shaper shield with life, res, block. Budget: Victario's Charity for charges to minions.",
+    "helmet": "Rare with life, res. Bone Helmet base for minion damage implicit. Less critical than for Spectre builds since skeletons are in body armour.",
+    "body_armour": "This is your main 6L for Summon Skeletons. Rare with life, res. Skin of the Loyal (+1 gems). Budget: Tabula.",
+    "gloves": "Rare with life, res. Triad Grip for cold conversion (4 green = 100% cold) if using Hatred.",
+    "boots": "Rare with life, movespeed, res.",
+    "amulet": "Ashes of the Stars (BIS — +1 gems + quality). Budget: +1 intelligence gems rare.",
+    "rings": "Life, res, mana regen. Unset Ring for socket.",
+    "belt": "Darkness Enthroned with minion abyss jewels. Stygian Vise otherwise.",
+    "flasks": "Quicksilver, life flask, Rumi's (block), utility. Flask-light build.",
+    "jewels": "Dead Reckoning — MANDATORY. Converts melee skeletons to Skeleton Mages. Without this jewel, you're playing a completely different (worse) build."
+  },
+  "gem_links": {
+    "main_6l": ["Summon Skeletons", "Spell Echo Support", "Minion Damage Support", "Greater Multiple Projectiles Support", "Elemental Focus Support", "Pierce Support"],
+    "bossing_swap": "Swap GMP + Pierce for Slower Projectiles + Concentrated Effect for single target. Skeleton Mages shotgun bosses with slower projectiles.",
+    "zombie_utility": ["Raise Zombie", "Feeding Frenzy Support", "Meat Shield Support", "Minion Life Support"],
+    "auras": ["Hatred (with Generosity)", "Determination", "Skitterbots (chill + shock)"],
+    "utility": "Desecrate + Bone Offering for block. Convocation. Sniper's Mark or Assassin's Mark on bosses.",
+    "movement": "Flame Dash + Faster Casting.",
+    "guard": "Molten Shell. Bone Offering block is your primary defense."
+  },
+  "tree_priorities": [
+    "Minion damage: Redemption, Righteous Army, Sacrifice, Gravepact, Death Attunement",
+    "Minion speed nodes — skeletons are slow without investment, speed = more hits = more DPS",
+    "Life + block near Witch",
+    "Jewel socket for Dead Reckoning (mandatory)",
+    "Aura effect if running Generosity Hatred",
+    "Minion crit if going Skeleton Mage crit variant"
+  ],
+  "breakpoints": [
+    "Dead Reckoning jewel — without it, no Skeleton Mages. This is step zero.",
+    "Gem level 25+ on Summon Skeletons — more skeletons + more damage per skeleton",
+    "75/75 block with Bone Offering + Mistress of Sacrifice",
+    "Triad Grip 4G for 100% cold conversion + Hatred for massive damage boost",
+    "Skeleton count: gem 20 = ~8 skeletons, gem 25+ = ~11. More skeletons = more shotgunning"
+  ],
+  "common_mistakes": [
+    "Forgetting Dead Reckoning jewel — Skeleton Mages are the build. Without the jewel, you have melee skeletons that get stuck on terrain and deal mediocre damage.",
+    "Not using Spell Echo — skeletons are resummoned frequently. Spell Echo means you spawn 2x as many per cast, which is critical for maintaining max count.",
+    "Ignoring the GMP → Slower Proj swap — Skeleton Mages shotgun with Slower Projectiles (projectiles overlap on close-range targets). This is a 3-4x single target DPS increase.",
+    "Skipping minion speed — slow skeletons = they spawn, waddle toward a pack, and the pack is already dead or you've moved on. Speed makes the build feel smooth.",
+    "Not scaling gem levels — same as all minion builds. +1 weapon, +1 shield, +1 amulet, ascendancy +2. Each level adds more skeletons AND more damage.",
+    "Using the build without Bone Offering block — you're squishy. Block is your survival."
+  ],
+  "scaling_tips": "Skeleton Mages are the 'army of wizards' minion build. They shotgun bosses (multiple projectiles hitting one target) which gives them surprising single target. Scale with gem levels (more skeletons), Triad Grip cold conversion + Hatred (type stacking), and minion speed (QoL). The Dead Reckoning jewel is non-negotiable. Ghazzy's key insight: Slower Projectiles for bossing makes skeleton mages overlap their hits — it's like a free 300% more damage on stationary targets."
+}

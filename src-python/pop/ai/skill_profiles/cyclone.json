@@ -1,0 +1,55 @@
+{
+  "skill": "Cyclone",
+  "aliases": ["CoC Cyclone", "Phys Cyclone"],
+  "archetype": "attack",
+  "tags": ["melee", "area", "physical", "channelling"],
+  "expert_source": "Community Meta",
+  "ascendancies": {
+    "top_pick": "Slayer",
+    "alternatives": ["Champion", "Berserker", "Assassin (CoC)"],
+    "notes": "Slayer for 20% cull, overleech, and massive AoE. Champion for Fortify + Inspirational aura effect + tanky. Berserker for raw damage (40% more). Assassin only for Cast on Crit Cyclone builds."
+  },
+  "gear_priorities": {
+    "weapon": "Highest pDPS weapon you can afford. Cyclone scales linearly with weapon damage. Endgame: 500+ pDPS rare. Budget: unique like Atziri's Disfavour (2H axe) or Starforge (2H sword). Dual wield: Paradoxica + stat stick.",
+    "helmet": "Rare with life, res, -9% phys res nearby (Warlord mod). Abyssus if you can handle the extra phys damage taken. Enchant: Cyclone attack speed or AoE.",
+    "body_armour": "Rare with life, res, % phys damage taken as ele (Warlord/Hunter). Endgame: explode chest for clear. Budget: Belly of the Beast or Tabula.",
+    "gloves": "Rare with life, attack speed, flat phys, res. Spiked Gloves base for melee damage implicit. Vulnerability on hit (Warlord mod) endgame.",
+    "boots": "Rare with life, 30% movespeed, res. Tailwind + Elusive boots endgame (Hunter/Redeemer). Cannot be slowed is good QoL for Cyclone.",
+    "amulet": "Impale effect, crit multi, flat phys, life. Endgame: +1 phys gems or Replica Farrul's Bite.",
+    "rings": "Steel Ring base (flat phys implicit). Life, res, flat phys, attack speed. Vulnerability on hit if not on gloves.",
+    "belt": "Stygian Vise with life, res, elemental damage. Ryslatha's Coil for huge phys damage variance scaling. Headhunter for mapping.",
+    "flasks": "Lion's Roar (melee phys + knockback), Diamond Flask, Quicksilver, life flask. Endgame: Bottled Faith."
+  },
+  "gem_links": {
+    "main_6l": ["Cyclone", "Melee Physical Damage Support", "Brutality Support", "Impale Support", "Infused Channelling Support", "Pulverise Support"],
+    "bossing_swap": "Swap Pulverise for Concentrated Effect or Close Combat. Pulverise is for AoE clear.",
+    "auras": ["Pride", "Blood and Sand", "Flesh and Stone", "Dread Banner"],
+    "utility": "Vulnerability curse. Ancestral Warchief or Ancestral Protector totem for boss DPS buff. Berserk (if Berserker).",
+    "movement": "Cyclone IS your movement. Leap Slam for crossing gaps only.",
+    "guard": "Molten Shell (armour stacking) or Immortal Call + CWDT. Enduring Cry for regen."
+  },
+  "tree_priorities": [
+    "Impale nodes: Swift Skewering, Forceful Skewering — impale is your main damage multiplier",
+    "Sword/Axe clusters matching your weapon type — NEVER take mismatched weapon nodes",
+    "Life wheels: Constitution, Heart of the Warrior, Discipline and Training",
+    "Resolute Technique (early) OR crit path (endgame) — pick one, don't half-commit",
+    "Fortify effect nodes if Champion",
+    "AoE nodes: Amplify wheel near Templar for bigger Cyclone radius"
+  ],
+  "breakpoints": [
+    "7 impale stacks (base 5 + Dread Banner + tree) — each stack is ~10% more phys damage",
+    "Attack speed > 5 APS for smooth Cyclone feel — below this it feels choppy",
+    "AoE radius: bigger = safer, don't neglect Pulverise + tree AoE nodes for mapping",
+    "Cannot be slowed below base speed — prevents Cyclone from getting bricked by temp chains",
+    "Stun immunity — Unwavering Stance or Cyclone's built-in stun immunity while channelling"
+  ],
+  "common_mistakes": [
+    "Using the wrong weapon type nodes on the tree — if you're using swords, take SWORD nodes, not axe nodes. This sounds obvious but many players path through wrong clusters.",
+    "Neglecting impale — impale is Cyclone's bread and butter for phys builds. 7 stacks with 100% impale chance should be your first priority.",
+    "Taking BOTH Resolute Technique AND crit nodes — pick one scaling path. RT means you never crit (100% hit chance, 0% crit). Crit path means skip RT entirely.",
+    "Forgetting Blood and Sand — free AoE in Sand Stance for clear, free concentrated effect in Blood Stance for bosses. It reserves almost nothing.",
+    "Not using Flesh and Stone — Blind from Sand Stance is a massive defensive layer (50% less chance to be hit by nearby enemies).",
+    "Spinning into dangerous situations — Cyclone locks your movement. Don't spin into Sirus die beam or Shaper slam. Learn to tap-spin, not hold."
+  ],
+  "scaling_tips": "Cyclone is the quintessential phys impale build. Your damage comes from: high pDPS weapon × impale stacks × crit (endgame) or RT (early). Blood and Sand + Flesh and Stone are free multipliers that cost almost no mana. Pride is your best aura. For clear, Pulverise + AoE nodes. For bosses, swap to Concentrated Effect + Blood Stance."
+}

@@ -1,0 +1,58 @@
+{
+  "skill": "Righteous Fire",
+  "aliases": ["RF"],
+  "archetype": "dot",
+  "tags": ["fire", "dot", "area", "tanky", "league_starter"],
+  "expert_source": "Pohx",
+  "ascendancies": {
+    "top_pick": "Chieftain",
+    "alternatives": ["Juggernaut", "Inquisitor"],
+    "notes": "Chieftain is the classic — fire damage, life regen, endurance charges, covered in ash. Juggernaut for maximum tankiness (accuracy doesn't matter for RF). Inquisitor for hybrid ES/life with Pious Path consecrated ground regen."
+  },
+  "gear_priorities": {
+    "weapon": "Sceptre with +1 fire gems, fire damage over time multi, burning damage. Endgame: crafted sceptre with +1 all, +1 fire, fire DoT multi. Budget: vendor recipe for +1 fire gems.",
+    "shield": "Rise of the Phoenix for early mapping (+5% max fire res is essential). Endgame: rare with +max fire res, life, spell suppression. Aegis Aurora for ES-armour hybrid.",
+    "helmet": "Rare Elder helmet with Concentrated Effect + Burning Damage support (pseudo 6L for RF). Life, fire res. Enchant: RF has 40% increased damage.",
+    "body_armour": "Rare with life, % life, fire res. Endgame: Brass Dome (+5% max res, no extra crit damage taken) or rare with life + max res craft. Legacy of Fury boots pair well for clear.",
+    "gloves": "Rare with life, res, fire DoT multi (Warlord/Elder mod). DOT multi is rare on gloves but huge when you get it.",
+    "boots": "Legacy of Fury — scorched ground proliferates RF damage and gives movespeed. BIS for RF. Budget: rare with life, movespeed, res.",
+    "amulet": "+1 fire gems, fire DoT multi, life. Endgame: Ashes of the Stars for quality scaling on gems, or rare with +2 fire gems.",
+    "rings": "Rare with life, res, strength (scales life). Essence of Anger craft for flat fire res. Pyre ring for corpse removal (QoL).",
+    "belt": "Rare with life, res, flask mods, strength. Elder belt with % life recovery rate is premium.",
+    "flasks": "Ruby Flask (fire res), life flask with instant recovery, Quicksilver. Endgame: Dying Sun (area), Bottled Faith."
+  },
+  "gem_links": {
+    "main_6l": ["Righteous Fire", "Elemental Focus Support", "Burning Damage Support", "Concentrated Effect Support", "Awakened Swift Affliction Support", "Awakened Increased Area of Effect Support"],
+    "bossing_swap": "Swap Increased AoE for Concentrated Effect (or use Conc Effect always and rely on tree AoE). Fire Trap 4L is your single target supplement.",
+    "fire_trap_4l": ["Fire Trap", "Trap and Mine Damage Support", "Burning Damage Support", "Swift Affliction Support"],
+    "auras": ["Determination", "Purity of Fire", "Vitality", "Malevolence (if mana allows)"],
+    "utility": "Flammability curse on hit ring or self-cast. Scorching Ray totem for -fire res exposure (huge for bosses).",
+    "movement": "Shield Charge + Faster Attacks. Flame Dash for gaps.",
+    "guard": "Molten Shell — you have massive armour from Determination. Enduring Cry for endurance charges + life regen burst."
+  },
+  "tree_priorities": [
+    "Life regen — you need to out-regen RF's self-damage. Purity of Flesh, Sanctity, life regen mastery",
+    "Maximum fire resistance — every 1% above 75% is huge for reducing RF self-damage",
+    "+max fire res nodes near Marauder/Templar",
+    "Life wheels: Constitution, Heart of the Warrior, Discipline and Training — RF scales with max life",
+    "Fire DoT multi: Holy Fire, Breath of Flames, Burning Brutality",
+    "Elemental Overload keystone (if not crit — RF can't crit, but Fire Trap can proc EO)",
+    "Unwavering Stance or stun immunity — getting stunned while RF is on = death"
+  ],
+  "breakpoints": [
+    "Max fire res >= 82% before enabling RF (75% base + Rise of Phoenix + tree + Purity of Fire)",
+    "Life regen > RF degen — check character sheet, regen must exceed the 90% of max fire res % degen",
+    "Elemental Overload proc — Fire Trap must crit to trigger EO for 40% more damage",
+    "Determination + high armour = Molten Shell absorbs 10k+ damage",
+    "Ailment immunity — burning ground immunity from pantheon, freeze from flask"
+  ],
+  "common_mistakes": [
+    "Turning on RF before you can sustain it — you need enough max fire res + life regen FIRST. Check: Purity of Fire + Rise of the Phoenix + tree nodes.",
+    "Neglecting Fire Trap — RF alone has mediocre single target. Fire Trap is your boss-killer, invest in it.",
+    "Stacking % increased fire damage instead of fire DoT multi — DoT multi is a separate multiplier and WAY more efficient per point.",
+    "Forgetting Elemental Overload — RF can't crit, but Fire Trap can. Proc EO with Fire Trap for 40% more elemental damage.",
+    "Not running Scorching Ray totem on bosses — it applies fire exposure (-25% fire res) which is a massive DPS boost on resistant bosses.",
+    "Skipping stun immunity — getting stunned with RF on and no regen flowing = you burn yourself to death."
+  ],
+  "scaling_tips": "RF is an endurance build — it scales with max life (bigger RF radius + more damage), fire DoT multi (separate multiplier), and max fire res (lets you sustain). Your DPS ceiling is lower than hit builds, but you're nearly unkillable. Fire Trap supplements your single target. Focus on being tanky enough to never die, then layer in DoT multi."
+}

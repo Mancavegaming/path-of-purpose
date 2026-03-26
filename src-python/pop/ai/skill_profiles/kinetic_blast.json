@@ -1,0 +1,58 @@
+{
+  "skill": "Kinetic Blast",
+  "aliases": ["KB", "Kinetic Blast Wander", "Wander"],
+  "archetype": "attack",
+  "tags": ["wand", "projectile", "elemental", "lightning", "physical"],
+  "expert_source": "Fubgun",
+  "ascendancies": {
+    "top_pick": "Deadeye",
+    "alternatives": ["Pathfinder", "Champion", "Assassin"],
+    "notes": "Deadeye for Gathering Winds (Tailwind), Endless Munitions (+2 proj), Ricochet (chain) — chain makes KB explosions overlap on packs. Pathfinder for flask sustain in juiced maps + MF variant. Champion for tanky wander (Fortify + aura effect). Assassin for pure crit poison KB (niche)."
+  },
+  "gear_priorities": {
+    "weapon": "THE most important slot. High eDPS wand with flat lightning + flat cold + attack speed + crit. Endgame: Piscator's Vigil (massive flat ele scaling from other gear) or rare wand with T1 flat lightning + T1 attack speed + crit multi. Budget: Piscator's is dirt cheap and scales with flat ele on gear.",
+    "shield": "Rare with life, res, spell suppression, crit chance. Or dual wield second wand for more damage.",
+    "helmet": "Rare with life, res, -9% lightning res nearby. Enchant: KB fires additional projectiles (build-defining). Devoto's Devotion for budget (attack speed + movespeed).",
+    "body_armour": "Rare with life, crit chance, spell suppression. Hyrri's Ire for budget. Queen of the Forest for MF speed variant. Endgame: explode chest for pack clear.",
+    "gloves": "Rare with flat lightning to attacks, attack speed, life, res. Gripped Gloves base (proj implicit). Essence of Wrath craft for T0 flat lightning.",
+    "boots": "Rare with movespeed, life, res, spell suppression. Tailwind + Elusive boots endgame.",
+    "amulet": "Flat lightning, crit multi, ele pen, life. Crystallised Omniscience for omni variant (all-element penetration). Badge of the Brotherhood for Frenzy/Power charge synergy.",
+    "rings": "Flat lightning to attacks on BOTH rings — this is where KB gets most of its damage. Mark of the Elder + Shaper ring combo. Essence of Wrath craft.",
+    "belt": "Stygian Vise with life, elemental damage, res. Headhunter for mapping. Mageblood for endgame sustain.",
+    "flasks": "Diamond Flask (crit), Dying Sun (+2 proj), Quicksilver, life. Vessel of Vinktar for lightning leech + flat lightning. Bottled Faith endgame."
+  },
+  "gem_links": {
+    "main_6l": ["Kinetic Blast", "Greater Multiple Projectiles Support", "Trinity Support", "Inspiration Support", "Elemental Damage with Attacks Support", "Added Lightning Damage Support"],
+    "single_target_6l": "KB alone has mediocre single target. Run a separate Power Siphon or Barrage 6L in weapon swap or second 6L for bossing.",
+    "power_siphon_links": ["Power Siphon", "Barrage Support", "Elemental Damage with Attacks Support", "Trinity Support", "Inspiration Support", "Damage on Full Life Support"],
+    "auras": ["Wrath", "Grace", "Precision (low level)", "Herald of Thunder (if mana allows)"],
+    "utility": "Sniper's Mark for single target. Blood Rage for frenzy charges. Assassin's Mark alternative for crit-heavy variant.",
+    "movement": "Flame Dash or Shield Charge. Blink Arrow if using bow swap.",
+    "guard": "Molten Shell or Steelskin."
+  },
+  "tree_priorities": [
+    "Wand nodes: Wandslinger, Nimbleness, Crackling Speed — these are your weapon-specific clusters",
+    "100% spell suppression — absolutely required for endgame",
+    "Crit: Depth Perception, Assassination, Heartseeker, Throatseeker",
+    "Life: Herbalism, Thick Skin, Constitution",
+    "Projectile: Forces of Nature, Point Blank (only if doing dedicated bossing setup)",
+    "Lightning/elemental: Heart of Thunder, Catalyse, Static Blows"
+  ],
+  "breakpoints": [
+    "100% spell suppression — non-negotiable",
+    "KB fires 5+ projectiles (base + GMP + Dying Sun + enchant) — each proj creates explosions that overlap on packs",
+    "Helmet enchant KB additional projectiles — each extra proj creates its own explosion radius. This is THE most important enchant in the build.",
+    "Flat lightning on both rings + amulet + gloves — KB scales from flat damage, not % increased",
+    "Ailment immunity — freeze/chill immunity from flask or pantheon",
+    "Separate single target setup — KB alone can't boss. Need Power Siphon or Barrage."
+  ],
+  "common_mistakes": [
+    "Trying to boss with KB alone — Kinetic Blast has awful single target. Its strength is pack clear from overlapping explosions. You NEED a separate single target skill (Power Siphon or Barrage) for bosses.",
+    "Stacking % increased damage instead of flat damage — KB with Piscator's or ele wands scales from flat lightning/cold on gear (rings, amulet, gloves, abyss jewels). % increased has diminishing returns when you already have a lot from the tree.",
+    "Skipping the helmet enchant — KB additional projectiles enchant is one of the most impactful enchants in the game for this skill. Each extra proj creates independent explosions. It's the difference between 'good clear' and 'entire screen explodes'.",
+    "Not using chain (Deadeye Ricochet) — KB explosions happen at the point of impact. Chain means the projectile hits, explodes, chains to another mob, explodes again. Double the explosions per projectile.",
+    "Neglecting Precision for accuracy — wand builds need accuracy. A low-level Precision (10-15) fixes hit chance cheaply.",
+    "Running out of mana — KB attacks fast and costs a lot. Inspiration Support helps, but you may need mana leech or -mana cost craft on jewelry."
+  ],
+  "scaling_tips": "KB is the king of pack clear. Each projectile creates an explosion on hit, and explosions overlap on nearby monsters. More projectiles × chain = exponential pack destruction. But single target is trash — you need Power Siphon or Barrage as a boss skill. Fubgun's approach: stack flat elemental damage everywhere (rings, amulet, gloves, abyss jewels), use Piscator's Vigil as a budget wand that scales all flat ele, and rely on crit + Trinity for multipliers. The build starts expensive but once it clicks, it's the fastest mapper in the game."
+}

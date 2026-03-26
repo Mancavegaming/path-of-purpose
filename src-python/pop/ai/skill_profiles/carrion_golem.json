@@ -1,0 +1,58 @@
+{
+  "skill": "Summon Carrion Golem",
+  "aliases": ["Carrion Golem", "Carrion Golems", "Golemancer", "Stone Golem"],
+  "archetype": "minion",
+  "tags": ["minion", "physical", "tanky", "golem"],
+  "expert_source": "Ghazzy",
+  "ascendancies": {
+    "top_pick": "Necromancer",
+    "alternatives": ["Elementalist"],
+    "notes": "Necromancer for Unnatural Strength (+2 gem levels) and Mindless Aggression. Elementalist for golem buff stacking variant — Liege of the Primordial (+1 golem per type, golem buffs), Elemancer (golem immunity). Elementalist trades raw damage for more golem variety and elemental immunity."
+  },
+  "gear_priorities": {
+    "weapon": "+1 minion gems, minion attack speed. Trigger craft for auto-Offering/Desecrate. Endgame: +2 minion gems with attack speed.",
+    "shield": "+1 minion gems Shaper shield. Life, block, res.",
+    "helmet": "Elder helmet with Minion Damage + Minion Life (or Concentrated Effect) built-in support. Bone Helmet base. This is the golem pseudo-link slot if not using body 6L.",
+    "body_armour": "Main 6L for Carrion Golem. Rare with life, res. Skin of the Loyal. Brass Dome for max tankiness.",
+    "gloves": "Rare with life, res. Less need for Triad Grip since Carrion Golems deal physical damage primarily.",
+    "boots": "Rare with life, movespeed, res.",
+    "amulet": "+1 phys gems or +1 all gems. Ashes of the Stars for quality scaling. Aul's Uprising for free Pride/Determination.",
+    "rings": "Rare with life, res. If Elementalist: Primordial Eminence + Primordial Harmony + Anima Stone for extra golems.",
+    "belt": "Darkness Enthroned or Stygian Vise. Phys damage abyss jewels with minion mods.",
+    "flasks": "Quicksilver, life flask, defensive utility. Very flask-light.",
+    "jewels": "Primordial jewels are CORE for golem builds: Primordial Might (aggressive AI), Primordial Harmony (golem cooldown recovery per golem type), Primordial Eminence (golem buff effect), Anima Stone (+1 golem). Stack these."
+  },
+  "gem_links": {
+    "main_6l": ["Summon Carrion Golem", "Minion Damage Support", "Melee Physical Damage Support", "Multistrike Support", "Brutality Support", "Feeding Frenzy Support"],
+    "bossing_swap": "Swap Feeding Frenzy for Concentrated Effect or Predator (target-focus AI).",
+    "other_golems": "Run 1 of each: Stone Golem (life regen buff), Chaos Golem (phys DR buff), Lightning Golem (attack speed buff). Each alive golem also buffs Carrion Golem damage via its innate 'per non-golem minion' mechanic.",
+    "auras": ["Pride (phys multiplier)", "Determination", "Flesh and Stone (Maim)"],
+    "utility": "Desecrate + Bone Offering for block. Convocation. Vulnerability curse for phys damage amp.",
+    "movement": "Flame Dash or Shield Charge.",
+    "guard": "Molten Shell (armour stacking). Block from Bone Offering."
+  },
+  "tree_priorities": [
+    "Minion damage clusters: Redemption, Righteous Army, Gravepact, Sacrifice",
+    "Golem-specific: Golem Commander (life + damage + attack/cast speed for golems)",
+    "Life + block near Witch",
+    "Jewel sockets for Primordial jewels — you need 3-5 sockets",
+    "Aura effect if stacking Pride + Determination",
+    "Minion attack speed — golems are melee, speed = more hits"
+  ],
+  "breakpoints": [
+    "Primordial Might jewel — without it, golems have passive AI and won't attack aggressively",
+    "3+ Primordial Harmony jewels — each one gives cooldown recovery per golem TYPE alive, stacking makes Carrion Golem slam constantly",
+    "Anima Stone — +1 golem if you have 3+ Primordial jewels. Extra golem = extra damage AND extra buff",
+    "Gem level 25+ on Carrion Golem — more base damage, more life, harder to kill",
+    "75/75 block with Bone Offering"
+  ],
+  "common_mistakes": [
+    "Not using Primordial Might — without it, golems stand around waiting to be attacked instead of charging into packs. This single jewel transforms the build from frustrating to smooth.",
+    "Only running Carrion Golems — you NEED the other golem types alive. Stone Golem (regen), Chaos Golem (phys DR), Lightning Golem (attack speed). Each gives you a buff AND makes Carrion Golem hit harder.",
+    "Skipping Primordial Harmony stacking — each Harmony jewel gives cooldown recovery per golem type. With 3+ types alive, your Carrion Golem slams every 0.5 seconds instead of every 2 seconds. This is the biggest DPS multiplier in the build.",
+    "Neglecting golem survivability — if your golems die in boss fights, your DPS goes to zero. Minion Life support on utility golems, gem levels, and tree nodes matter.",
+    "Not using Predator for bossing — Predator support lets you target-focus all golems on the boss. Without it, golems scatter and attack random adds.",
+    "Forgetting that Carrion Golem scales with non-golem minion count — running a few zombies or spectres alongside golems increases Carrion Golem's base flat phys damage."
+  ],
+  "scaling_tips": "Carrion Golems scale from: gem levels (more base damage), Primordial jewel stacking (cooldown recovery = more slams per second), number of non-golem minions alive (base flat phys per minion), and phys auras (Pride). The Primordial Harmony cooldown stacking is what makes the build go from 'okay' to 'amazing' — it's the hidden multiplier most people miss. Ghazzy's key insight: treat Primordial jewels as your most important gear, not optional extras."
+}

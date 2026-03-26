@@ -1,11 +1,11 @@
 {
-  "version": "0.13.2",
-  "notes": "Fix hot items — remove crafting base types that flooded minimap with false T1 drops",
-  "pub_date": "2026-03-26T08:00:00Z",
+  "version": "0.13.3",
+  "notes": "AI skill profiles — expert build knowledge for advisor and generator (Cyclone, KB, Tornado Shot, RF, Lightning Arrow, minions)",
+  "pub_date": "2026-03-26T18:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXVqZi93S1JDS2pRUjZSZVNwRzZVSE9yWDFuRWNSc0VGaklEZ21oWTd1N0RRTXFkdS9qcTlmamFzNnhxejgxWFVrZk9nT0p2SlAyYkNFakx2SFM0MEFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0NTQzODY1CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTMuMl94NjQtc2V0dXAubnNpcy56aXAKVzhpWkRGTWtrOXJoaVpNWWJuN28yNGxPTXdkQjkzRUE5ODZWK0d0NzFmQ2JwbWtrRVZuQWZZeFN6aHBRTTlzZmd3THhJN1hlZUJlTGlqVGgyTTJlQlE9PQo=",
-      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.13.2/Path.of.Purpose_0.13.2_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUK3UySTZOcnVvYXVRMkZNYkNzbFRaY2pGWDZpcHhuU0Z3Zk9vNlJvZmRuajN0SU5PdWk1a1ljNC9BTkIzU1hkNmRRUjNpcGZkRndyZ0plbCttQkdPaGF0VDI3OEhaUGdNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0NTY1NDQ1CWZpbGU6UGF0aCBvZiBQdXJwb3NlXzAuMTMuM194NjQtc2V0dXAubnNpcy56aXAKWDYwbm5SNDV6Q1RYRWFHSnlBVHRwOWFkZzA0ZVhBMXA0Q2p0akFRWUhJenFTVG5OMVBBMXF6VjZybFlOTitGSTEzV3o5c3ZKQ3YzamhjTWkzZFlMREE9PQo=",
+      "url": "https://github.com/Mancavegaming/path-of-purpose/releases/download/v0.13.3/Path.of.Purpose_0.13.3_x64-setup.nsis.zip"
     }
   }
 }

@@ -1,0 +1,58 @@
+{
+  "skill": "Raise Spectre",
+  "aliases": ["Spectres", "Spectre"],
+  "archetype": "minion",
+  "tags": ["minion", "spell", "league_starter", "low_budget"],
+  "expert_source": "Ghazzy",
+  "ascendancies": {
+    "top_pick": "Necromancer",
+    "alternatives": [],
+    "notes": "Necromancer is mandatory — Unnatural Strength (+2 minion gem levels), Mindless Aggression (minion speed + damage + attack/cast speed), Mistress of Sacrifice (offerings affect you for block), Commander of Darkness (res + damage from auras). Order: Mindless Aggression → Unnatural Strength → Mistress of Sacrifice → Commander of Darkness."
+  },
+  "gear_priorities": {
+    "weapon": "+1 minion gems sceptre/wand is the minimum. Endgame: +2 minion gems with trigger socketed spells craft (auto-casts Desecrate + Offering). Budget: Clayshaper (+1 golem, good minion stats) or vendor recipe +1 minion wand.",
+    "shield": "Rare with life, res, +1 minion gems (Shaper prefix). Victario's Charity for budget (frenzy + power charges to minions). Endgame: +2 minion gems shield with life + block.",
+    "helmet": "This is your spectre 'pseudo-link' slot. Elder helmet with +minion gem levels AND built-in Minion Damage + Concentrated Effect/Hypothermia supports. Bone Helmet base for minion damage implicit. This is the MOST important rare in the build.",
+    "body_armour": "Skin of the Loyal (+1 gems, 100% global defences) or rare with life + res + spell suppression. Budget: Tabula. Endgame: rare with +1 active gems (elevated Hunter mod).",
+    "gloves": "Rare with life, res. Triad Grip for damage conversion: 4 green sockets = 100% cold conversion (pairs with Hatred). This is Ghazzy's signature move for spectre builds.",
+    "boots": "Rare with life, 30% movespeed, res. Bones of Ullr (+1 spectre, +1 zombie) for budget extra spectre. Endgame: Ashes of the Stars amulet frees boot slot.",
+    "amulet": "Ashes of the Stars is BIS — +1 gems AND 20% quality on all gems (huge for spectres). Budget: rare with +1 intelligence gems, life, res. Ghazzy considers this the single biggest upgrade for minion builds.",
+    "rings": "Rare with life, res, mana regen. Unset Ring for extra gem socket. Essence Worm if you need to fit one more aura without reservation.",
+    "belt": "Darkness Enthroned — 75% increased effect on 2 abyss jewels (minion damage + life on each). Otherwise Stygian Vise with life, res, flask mods.",
+    "flasks": "Quicksilver, life flask, Rumi's Concoction (block), utility. Minion builds are flask-light — your minions do the work."
+  },
+  "gem_links": {
+    "main_6l_or_helmet": ["Raise Spectre", "Spell Echo Support", "Minion Damage Support", "Elemental Focus Support", "Hypothermia Support", "Greater Multiple Projectiles Support"],
+    "spectre_choice": "Choose spectre type based on content: Syndicate Operatives (phys proj, great all-around), Solar Guards (fire proj clear), Redemption Sentries (cold proj + crit). Ghazzy recommends Syndicate Operatives for league start.",
+    "zombie_4l": ["Raise Zombie", "Minion Life Support", "Feeding Frenzy Support", "Meat Shield Support"],
+    "auras": ["Hatred (with Generosity)", "Determination", "Discipline (if ES hybrid)"],
+    "utility": "Desecrate + Bone Offering (block for you AND minions via Mistress of Sacrifice). Convocation (recall minions). Animate Guardian with Kingmaker (Fortify + cull + rarity aura for the whole party).",
+    "movement": "Flame Dash + Faster Casting.",
+    "guard": "Molten Shell or Steelskin. Bone Offering + Mistress of Sacrifice gives you 75% block, which is your main defense."
+  },
+  "tree_priorities": [
+    "Minion damage clusters: Redemption, Righteous Army, Sacrifice, Gravepact, Death Attunement",
+    "+2 minion gem levels from ascendancy (Unnatural Strength) — this alone is worth more than most tree nodes",
+    "Life + block nodes near Witch start",
+    "Minion life/res if spectres are dying in endgame content",
+    "Aura effect nodes if running Generosity + Hatred (scales minion damage significantly)",
+    "Elemental Equilibrium if NOT using Triad Grip cold conversion (legacy builds)"
+  ],
+  "breakpoints": [
+    "Spectre gem level 25+ — number of spectres and their damage scales with gem level. Level 25 = 4 spectres.",
+    "+1 spectre count: gem level 21 gives 3rd spectre, level 25 gives 4th. Each extra spectre is a massive clear + DPS boost.",
+    "Block cap 75/75 with Bone Offering + Mistress of Sacrifice — your primary defensive layer",
+    "Animate Guardian survivability — if your AG dies, you lose expensive gear. Min 30k life on AG before giving it good items.",
+    "Triad Grip 4 green sockets for 100% cold conversion — pairs with Hatred for huge damage boost"
+  ],
+  "common_mistakes": [
+    "Not investing in spectre gem levels — spectres scale HARD with gem levels. +1 weapon, +1 shield, +1 amulet, +2 ascendancy, Empower Support. Getting from gem level 21 to 25 can DOUBLE your spectre count and damage.",
+    "Choosing the wrong spectre type — not all spectres are equal. Syndicate Operatives and Redemption Sentries are proven. Don't use random spectres you found in a map.",
+    "Skipping Animate Guardian — a well-geared AG with Kingmaker gives your entire party Fortify + Culling Strike + item rarity aura. It's a free 6th party member.",
+    "Letting Animate Guardian die — don't give AG expensive items until it has 30k+ life (from gem levels + Minion Life support). Start with cheap uniques: Leer Cast + Dying Breath + rare life gear.",
+    "Not using Bone Offering with Mistress of Sacrifice — this is your survival. Without it, you're a squishy Witch with no block.",
+    "Forgetting Convocation — your spectres will stand in fire and die, or wander off-screen doing nothing. Convocation snaps them to you. Use it constantly.",
+    "Running too many auras without Enlighten — minion builds need socket space. Plan your mana reservation carefully."
+  ],
+  "scaling_tips": "Spectres are the ultimate 'set it and forget it' minion build. Your damage scales from: gem levels (more spectres + stronger AI), Triad Grip conversion (cold + Hatred), and aura effect (Generosity). Your defenses come from block (Bone Offering) and the fact that enemies are attacking your minions, not you. Ghazzy's key insight: invest in gem levels above all else — a +5 setup does 3-4x the damage of a +0 setup."
+}

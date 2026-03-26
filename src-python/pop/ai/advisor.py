@@ -320,6 +320,13 @@ class Advisor:
         system = SYSTEM_PROMPT + _advisor_knowledge_addendum()
         if build_context:
             system += "\n\n" + _build_context_prompt(build_context)
+            # Inject skill-specific expert knowledge if we have a profile
+            main_skill = build_context.get("main_skill", "")
+            if main_skill:
+                from pop.ai.profile_loader import get_skill_context
+                skill_ctx = get_skill_context(main_skill)
+                if skill_ctx:
+                    system += skill_ctx
 
         assistant_text, tokens_used = chat_completion(
             provider=provider,

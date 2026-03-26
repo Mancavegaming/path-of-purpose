@@ -1,0 +1,57 @@
+{
+  "skill": "Lightning Arrow",
+  "aliases": ["LA"],
+  "archetype": "attack",
+  "tags": ["bow", "lightning", "elemental", "projectile"],
+  "expert_source": "Fubgun",
+  "ascendancies": {
+    "top_pick": "Deadeye",
+    "alternatives": ["Pathfinder", "Raider"],
+    "notes": "Deadeye is king — Gathering Winds (Tailwind), Endless Munitions (+2 proj), Ricochet (chain), Far Shot. Pathfinder for flask sustain in juiced maps. Raider for budget Onslaught/Frenzy."
+  },
+  "gear_priorities": {
+    "weapon": "Flat lightning + attack speed bow. Budget: Tempest or Death's Opus. Endgame: rare Thicket Bow with +1 arrow, flat lightning, attack speed, crit. Mirror-tier: +2 arrows bow replaces Dying Sun.",
+    "quiver": "Rare with life, crit multi, flat lightning, attack speed. Endgame: +1 arrow quiver is massive for clear.",
+    "helmet": "Rare with life, res, -9% lightning res to nearby enemies (delve mod). Enchant: LA fires 2 additional projectiles.",
+    "body_armour": "Hyrri's Ire for budget (flat cold + evasion + spell dodge). Endgame: rare with life, spell suppression, crit chance. Top end: Farruls Fur for Aspect of the Cat.",
+    "gloves": "Rare with life, res, attack speed, flat lightning. Gripped Gloves base for proj damage implicit.",
+    "boots": "Rare with life, 30% movespeed, res, spell suppression. Two-Toned base for extra res. Onslaught on kill is a nice bonus.",
+    "amulet": "Rare with flat lightning, crit multi, life. Endgame: +1 lightning gems or Crystallised Omniscience for all-pen.",
+    "rings": "Flat lightning to attacks is THE stat. Mark of the Elder + Shaper ring combo for huge DPS. Budget: resist + flat lightning Topaz/Sapphire rings.",
+    "belt": "Stygian Vise with life, res, elemental damage. Abyssal jewel slot for extra flat lightning.",
+    "flasks": "Diamond Flask (crit), Dying Sun (+2 proj — massive for LA), Quicksilver, life flask. Endgame: Bottled Faith for crit + consecrated ground."
+  },
+  "gem_links": {
+    "main_6l": ["Lightning Arrow", "Trinity Support", "Inspiration Support", "Added Lightning Damage Support", "Elemental Damage with Attacks Support", "Greater Multiple Projectiles Support"],
+    "bossing_swap": "Swap GMP for Damage on Full Life or Lightning Penetration. Some players swap for Barrage setup instead.",
+    "auras": ["Wrath", "Grace", "Precision (low level)"],
+    "utility": "Sniper's Mark on bosses. Assassin's Mark alternative for crit. Blood Rage for frenzy charges + attack speed.",
+    "movement": "Blink Arrow + Faster Attacks. Flame Dash as backup for crossing gaps.",
+    "guard": "Molten Shell with high armour from Grace + Iron Reflexes, or Steelskin if evasion-based."
+  },
+  "tree_priorities": [
+    "100% spell suppression — non-negotiable for endgame",
+    "Bow clusters: King of the Hill, Ballistic Mastery, Fury Bolts, Master Fletcher",
+    "Lightning/elemental wheels: Heart of Thunder, Forces of Nature, Catalyse",
+    "Life: Herbalism, Thick Skin, Constitution, Blood Siphon",
+    "Crit: Depth Perception, Assassination (Shadow area), Heartseeker",
+    "Point Blank keystone if not using Far Shot ascendancy"
+  ],
+  "breakpoints": [
+    "100% spell suppression — 50% less spell damage taken",
+    "100% hit chance — check with Precision + tree accuracy nodes",
+    "Ailment immunity — freeze from flask, shock from pantheon or mastery",
+    "75/75/75 elemental res (capped), -60% chaos res OK for softcore",
+    "5+ projectiles for comfortable clear (base + GMP + Dying Sun + quiver)",
+    "Diamond Flask + base crit > 7% for effective crit scaling"
+  ],
+  "common_mistakes": [
+    "Not stacking enough flat lightning on gear — LA scales from flat damage, not % increases alone. Rings, amulet, abyss jewels, gloves are your flat sources.",
+    "Running Wrath + Grace + Herald without enough mana reservation efficiency — you'll have no mana to attack. Plan Enlighten 3+ or drop a 50% aura.",
+    "Ignoring spell suppression — you WILL get one-shot by spell damage in red maps without it. Path to Suppression mastery near Ranger.",
+    "Using GMP for single target — swap to Damage on Full Life or Lightning Pen on bosses. GMP is a 26% LESS damage multiplier.",
+    "Skipping Precision — accuracy matters. A low-level Precision (Lv 10-15) costs almost no mana and fixes hit chance.",
+    "Not using Sniper's Mark on bosses — it's a huge damage multiplier for projectile builds, better than Assassin's Mark in most cases."
+  ],
+  "scaling_tips": "LA's damage comes from stacking flat lightning everywhere (rings, amulet, abyss jewels, gloves) then multiplying with crit + elemental penetration. Trinity is your best support if you can balance lightning/cold damage. The skill hits once per arrow, so more projectiles = more clear, not more single target (unlike Tornado Shot)."
+}

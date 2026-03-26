@@ -278,6 +278,15 @@ class BuildGenerator:
         if kb:
             system += build_knowledge_lite(kb)
 
+        # Scan conversation for skill mentions and inject expert profile
+        from pop.ai.profile_loader import get_skill_context
+        for msg in reversed(messages):
+            if msg.role == "user":
+                skill_ctx = get_skill_context(msg.content)
+                if skill_ctx:
+                    system += skill_ctx
+                    break
+
         assistant_text, tokens_used = chat_completion(
             provider=provider,
             api_key=api_key,
@@ -316,11 +325,16 @@ class BuildGenerator:
             f"- Playstyle: {preferences.playstyle or 'general'}\n"
         )
 
-        # Build system prompt with knowledge reference
+        # Build system prompt with knowledge reference + skill profile
         system = GENERATOR_SYSTEM_PROMPT
         kb = load_knowledge()
         if kb:
             system += build_knowledge_addendum(kb)
+        # Inject skill-specific expert knowledge for the main skill
+        from pop.ai.profile_loader import get_skill_context
+        skill_ctx = get_skill_context(preferences.main_skill)
+        if skill_ctx:
+            system += skill_ctx
 
         last_error: Exception | None = None
         for attempt in range(2):

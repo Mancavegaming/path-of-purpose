@@ -1,0 +1,56 @@
+{
+  "skill": "Summon Raging Spirit",
+  "aliases": ["SRS", "Raging Spirits"],
+  "archetype": "minion",
+  "tags": ["minion", "fire", "spell", "league_starter"],
+  "expert_source": "Kay / Ghazzy",
+  "ascendancies": {
+    "top_pick": "Necromancer",
+    "alternatives": ["Guardian"],
+    "notes": "Necromancer is the only real choice — Mindless Aggression (minion speed + damage), Unnatural Strength (+2 minion gems), Mistress of Sacrifice (offerings affect you), Commander of Darkness (aura effect for minions). Guardian only for support-style tanky variant."
+  },
+  "gear_priorities": {
+    "weapon": "+1 minion gems sceptre/wand. Endgame: +2 minion gems (crafted with Bound Fossil or Essence). Budget: vendor recipe for +1 minion gems. Trigger socketed spells craft for auto-curse.",
+    "shield": "Rare with life, res, +1 minion gems (shaper mod). Endgame: +2 minion gems shield. Budget: Victario's Charity for frenzy/power charges to minions.",
+    "helmet": "Rare with +2/+3 minion gem levels (Elder/Bound Fossil). Life, res. SRS enchant: +2 max SRS spirits. This is a pseudo 7L with Minion Damage + Concentrated Effect built-in.",
+    "body_armour": "Rare with life, res. Endgame: skin of the loyal (0-cost, +1 gems), or rare with +1 active gems and life. Budget: Tabula Rasa.",
+    "gloves": "Rare with life, res, minion damage (crafted). Gravebind for corpse generation if using Offering loop.",
+    "boots": "Rare with life, movespeed, res. Darkness Enthroned belt pairs well (double abyss jewel effect).",
+    "amulet": "+1 intelligence gems, +1 fire gems, or +1 all gems. Gem levels are THE scaling stat for SRS. Endgame: Ashes of the Stars.",
+    "rings": "Rare with life, res, mana regen (SRS is mana-hungry). Essence Worm if running one big aura.",
+    "belt": "Darkness Enthroned — 75% increased effect on 2 abyss jewels with minion damage + life. Otherwise Stygian Vise with life, res.",
+    "flasks": "Quicksilver (movespeed), life flask, Rumi's Concoction (block), utility flasks. Minion builds are flask-light."
+  },
+  "gem_links": {
+    "main_6l": ["Summon Raging Spirit", "Minion Damage Support", "Melee Splash Support", "Unleash Support", "Elemental Focus Support", "Feeding Frenzy Support"],
+    "bossing_swap": "Swap Melee Splash for Multistrike or Melee Physical Damage. Splash is only for clear.",
+    "auras": ["Hatred (minions benefit)", "Determination (for you)", "Generosity Support (links to Hatred)"],
+    "utility": "Desecrate + Bone Offering for block. Flesh Offering for minion speed during clear. Convocation to recall minions.",
+    "movement": "Flame Dash + Faster Casting. Shield Charge if using a shield.",
+    "guard": "Molten Shell or Steelskin. Bone Offering with Mistress of Sacrifice gives you block too."
+  },
+  "tree_priorities": [
+    "Minion damage clusters: Redemption, Righteous Army, Sacrifice, Gravepact",
+    "Gem level scaling: every +1 gem level is a big damage jump for SRS",
+    "Life + res near Witch/Templar start",
+    "Minion life if spirits are dying too fast (rare in softcore)",
+    "Aura effect nodes if running Generosity + Hatred",
+    "Elemental Overload — SRS has decent base crit, EO is free 40% more"
+  ],
+  "breakpoints": [
+    "20 max SRS spirits — achievable with gem level 21 + helmet enchant",
+    "Gem level 25+ on SRS — damage scales exponentially with gem levels for minions",
+    "Unleash 3 seals — cast 4 SRS at once, much smoother gameplay than manual spam",
+    "Block cap (75%) with Bone Offering + Mistress of Sacrifice + tree — makes YOU tanky",
+    "Minion accuracy — not usually an issue but check if using Lycosidae or Precision"
+  ],
+  "common_mistakes": [
+    "Not scaling gem levels — SRS damage scaling is almost entirely from gem levels (+1 gems on weapon, shield, amulet, body). A +5 gem level setup does 3x the damage of a +0 setup.",
+    "Forgetting Melee Splash for clear — without it, each spirit hits one mob. Your clear will feel terrible. Swap it out for bosses only.",
+    "Not using Convocation — your spirits wander off. Convocation snaps them to you instantly. Put it on left click or a convenient key.",
+    "Spamming SRS too fast and going OOM — Unleash solves this. Cast once every 2 seconds for 4 spirits instead of mashing the button.",
+    "Neglecting YOUR defenses — you're not a minion. You still take damage. Bone Offering + block + Determination keeps you alive.",
+    "Using Hatred without Generosity — Generosity makes Hatred only affect minions, but with 39% more effect. Way better than the base aura."
+  ],
+  "scaling_tips": "SRS is a gem level build. Every +1 to gem level is worth more than almost any other stat. Priority: +1 weapon, +1 shield, +1 amulet, +2 helmet (Elder), Empower Support. After gem levels, minion damage and attack speed are your next scalars. The spirits do fire damage, so Hatred + Generosity converts some phys to cold for a big boost."
+}

@@ -9,6 +9,7 @@ python -m nuitka ^
     --include-package=pop ^
     --include-data-dir=pop/knowledge/cache=pop/knowledge/cache ^
     --include-data-dir=pop/gamedata/cache=pop/gamedata/cache ^
+    --include-data-dir=pop/ai/skill_profiles=pop/ai/skill_profiles ^
     --enable-plugin=anti-bloat ^
     --assume-yes-for-downloads ^
     --windows-console-mode=disable ^
