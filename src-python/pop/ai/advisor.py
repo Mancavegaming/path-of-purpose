@@ -137,15 +137,21 @@ def _build_context_prompt(ctx: dict) -> str:
         groups = ctx["skill_groups"]
         if isinstance(groups, list):
             parts.append("\n**Gem Links**:")
-            for g in groups[:8]:
+            for g in groups:
+                if not g.get("is_enabled", True):
+                    continue
                 gems = g.get("gems", [])
                 slot = g.get("slot") or g.get("label", "?")
                 gem_names = []
                 for gm in gems:
+                    if not gm.get("is_enabled", True):
+                        continue
                     name = gm.get("name", "?")
                     lvl = gm.get("level", "")
+                    qual = gm.get("quality", 0)
                     sup = " (S)" if gm.get("is_support") else ""
-                    gem_names.append(f"{name} Lv{lvl}{sup}" if lvl else f"{name}{sup}")
+                    qual_str = f" Q{qual}" if qual else ""
+                    gem_names.append(f"{name} Lv{lvl}{qual_str}{sup}")
                 if gem_names:
                     parts.append(f"  [{slot}] {' — '.join(gem_names)}")
 
@@ -154,12 +160,23 @@ def _build_context_prompt(ctx: dict) -> str:
         items = ctx["items"]
         if isinstance(items, list):
             parts.append("\n**Gear**:")
-            for item in items[:15]:
+            for item in items:
                 name = item.get("name") or item.get("base_type", "Unknown")
                 slot = item.get("slot", "?")
+                rarity = item.get("rarity", "")
+                qual = item.get("quality", 0)
+                sockets = item.get("sockets", "")
                 mods = item.get("mods", [])
-                mod_str = f" | {', '.join(mods[:4])}" if mods else ""
-                parts.append(f"  [{slot}] {name}{mod_str}")
+                tags = []
+                if rarity and rarity != "NORMAL":
+                    tags.append(rarity.capitalize())
+                if qual:
+                    tags.append(f"Q{qual}")
+                if sockets:
+                    tags.append(sockets)
+                tag_str = f" ({', '.join(tags)})" if tags else ""
+                mod_str = f" | {', '.join(mods[:6])}" if mods else ""
+                parts.append(f"  [{slot}] {name}{tag_str}{mod_str}")
 
     # Passive tree info
     if ctx.get("passive_trees"):
@@ -176,6 +193,43 @@ def _build_context_prompt(ctx: dict) -> str:
                     parts.append(f"    Key nodes: {', '.join(key_nodes[:8])}")
                 if priority:
                     parts.append(f"    Priority: {priority}")
+
+    # PoB config toggles (charges, flasks, boss, curses, etc.)
+    if ctx.get("config"):
+        cfg = ctx["config"]
+        if isinstance(cfg, dict) and cfg:
+            config_parts = []
+            # Key toggles that affect DPS and survivability
+            toggle_map = {
+                "use_power_charges": "Power Charges",
+                "use_frenzy_charges": "Frenzy Charges",
+                "use_endurance_charges": "Endurance Charges",
+                "power_charges": "Power Charge Count",
+                "frenzy_charges": "Frenzy Charge Count",
+                "endurance_charges": "Endurance Charge Count",
+                "enemy_is_boss": "Boss Enemy",
+                "enemy_level": "Enemy Level",
+                "onslaught": "Onslaught",
+                "use_flasks": "Flasks Active",
+                "use_curses": "Curses Active",
+                "shock_value": "Shock %",
+                "wither_stacks": "Wither Stacks",
+                "enemy_is_shocked": "Enemy Shocked",
+                "enemy_is_chilled": "Enemy Chilled",
+                "enemy_is_intimidated": "Enemy Intimidated",
+                "enemy_is_unnerved": "Enemy Unnerved",
+                "enemy_is_moving": "Enemy Moving",
+                "enemy_fire_resist": "Enemy Fire Resist",
+                "enemy_cold_resist": "Enemy Cold Resist",
+                "enemy_lightning_resist": "Enemy Lightning Resist",
+                "enemy_chaos_resist": "Enemy Chaos Resist",
+            }
+            for key, label in toggle_map.items():
+                val = cfg.get(key)
+                if val is not None and val != "" and val != "0" and val != "false":
+                    config_parts.append(f"{label}: {val}")
+            if config_parts:
+                parts.append(f"\n**Config**: {', '.join(config_parts)}")
 
     # Bracket notes (from generated guides)
     if ctx.get("bracket_notes"):
@@ -271,15 +325,58 @@ def _build_context_prompt(ctx: dict) -> str:
         if dps_text:
             parts.append(f"\n{dps_text}")
 
+    # Defence data
+    if ctx.get("defence_data"):
+        d = ctx["defence_data"]
+        parts.append("\n## Defences (calculated)")
+        parts.append(f"  Life: {d.get('life', 0):,}")
+        es = d.get("energy_shield", 0)
+        if es > 0:
+            parts.append(f"  Energy Shield: {es:,}")
+        parts.append(f"  Armour: {d.get('armour', 0):,}")
+        parts.append(f"  Evasion: {d.get('evasion', 0):,}")
+        block = d.get("block_chance", 0)
+        spell_block = d.get("spell_block_chance", 0)
+        if block > 0 or spell_block > 0:
+            parts.append(f"  Block: {block}% / Spell Block: {spell_block}%")
+        dodge = d.get("dodge_chance", 0)
+        if dodge > 0:
+            parts.append(f"  Dodge: {dodge}%")
+        supp = d.get("spell_suppression", 0)
+        if supp > 0:
+            parts.append(f"  Spell Suppression: {supp}%")
+        phys_red = d.get("phys_damage_reduction", 0)
+        if phys_red > 0:
+            parts.append(f"  Phys Damage Reduction: {phys_red}%")
+        res = d.get("elemental_resistances", {})
+        parts.append(f"  Resistances: Fire {res.get('fire', 0)}% / "
+                     f"Cold {res.get('cold', 0)}% / "
+                     f"Lightning {res.get('lightning', 0)}%")
+        parts.append(f"  Chaos Resistance: {d.get('chaos_resistance', 0)}%")
+
     # Trade listing comparison
     if ctx.get("trade_listing"):
         tl = ctx["trade_listing"]
         name = tl.get("name") or tl.get("type_line", "Unknown")
         price = tl.get("price", "?")
         parts.append(f"\n**Comparing Trade Listing**: {name} (Price: {price})")
+        tags = []
+        if tl.get("ilvl"):
+            tags.append(f"ilvl {tl['ilvl']}")
+        if tl.get("corrupted"):
+            tags.append("CORRUPTED")
+        if tl.get("socket_count"):
+            links = tl.get("max_links", 0)
+            tags.append(f"{tl['socket_count']}S/{links}L")
+        if tags:
+            parts.append(f"  {', '.join(tags)}")
         mods = tl.get("mods", [])
         if mods:
-            parts.append(f"  Mods: {', '.join(mods[:8])}")
+            parts.append(f"  Mods: {', '.join(mods)}")
+        dps_change = tl.get("dps_change")
+        if dps_change is not None:
+            sign = "+" if dps_change > 0 else ""
+            parts.append(f"  DPS Change: {sign}{dps_change:,.0f}")
         parts.append("The user may be considering this upgrade. Provide specific advice.")
 
     return "\n".join(parts)

@@ -42,23 +42,29 @@ export default function AiAdvisorPanel(props: AiAdvisorPanelProps) {
       level: b.level,
       build_name: b.build_name || "",
       main_skill: mainSkill?.name ?? null,
-      items: b.items.slice(0, 15).map((i) => ({
+      items: b.items.map((i) => ({
         name: i.name,
         base_type: i.base_type,
         slot: i.slot,
+        rarity: i.rarity,
+        quality: i.quality,
+        sockets: i.sockets,
         mods: [
           ...i.implicits.map((m) => m.text),
           ...i.explicits.map((m) => m.text),
-        ].slice(0, 6),
+        ],
         ...(i.stat_priority?.length ? { stat_priority: i.stat_priority } : {}),
       })),
-      skill_groups: b.skill_groups.slice(0, 8).map((g) => ({
+      skill_groups: b.skill_groups.map((g) => ({
         slot: g.slot,
         label: g.label,
+        is_enabled: g.is_enabled,
         gems: g.gems.map((gm) => ({
           name: gm.name,
           level: gm.level,
+          quality: gm.quality,
           is_support: gm.is_support,
+          is_enabled: gm.is_enabled,
         })),
       })),
       passive_trees: b.passive_specs.map((ps) => ({
@@ -69,6 +75,7 @@ export default function AiAdvisorPanel(props: AiAdvisorPanelProps) {
         priority: ps.priority || "",
         url: ps.url || "",
       })),
+      config: b.config?.entries || {},
       bracket_notes: b.bracket_notes || {},
       bracket_atlas: b.bracket_atlas || {},
       bracket_map_warnings: b.bracket_map_warnings || {},
@@ -86,12 +93,33 @@ export default function AiAdvisorPanel(props: AiAdvisorPanelProps) {
         hits_per_second: dps.hits_per_second,
         crit_chance: dps.crit_chance,
         effective_crit_multi: dps.effective_crit_multi,
+        hit_chance: dps.hit_chance,
         type_breakdown: dps.type_breakdown,
         ignite_dps: dps.ignite_dps,
         bleed_dps: dps.bleed_dps,
         poison_dps: dps.poison_dps,
         total_dot_dps: dps.total_dot_dps,
+        impale_dps: dps.impale_dps,
+        enemy_damage_taken_multi: dps.enemy_damage_taken_multi,
         warnings: dps.warnings,
+      };
+    }
+
+    // Include defence data if available
+    const def = props.dpsResult?.defence;
+    if (def) {
+      ctx.defence_data = {
+        life: def.life,
+        energy_shield: def.energy_shield,
+        armour: def.armour,
+        evasion: def.evasion,
+        block_chance: def.block_chance,
+        spell_block_chance: def.spell_block_chance,
+        dodge_chance: def.dodge_chance,
+        spell_suppression: def.spell_suppression,
+        phys_damage_reduction: def.phys_damage_reduction,
+        elemental_resistances: def.elemental_resistances,
+        chaos_resistance: def.chaos_resistance,
       };
     }
 
@@ -119,6 +147,11 @@ export default function AiAdvisorPanel(props: AiAdvisorPanelProps) {
         name: selListing.item_name || selListing.type_line,
         type_line: selListing.type_line,
         price,
+        ilvl: selListing.ilvl,
+        corrupted: selListing.corrupted,
+        socket_count: selListing.socket_count,
+        max_links: selListing.max_links,
+        dps_change: selListing.dps_change,
         mods: [
           ...selListing.implicit_mods,
           ...selListing.explicit_mods,

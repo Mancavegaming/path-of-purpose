@@ -160,6 +160,17 @@ def format_single_dps_context(data: dict) -> str:
         lines.append(f"  Hits/sec: {data.get('hits_per_second', 0)}")
         lines.append(f"  Crit: {data.get('crit_chance', 0)}% chance, "
                       f"{data.get('effective_crit_multi', 1)}x multi")
+        hit_chance = data.get("hit_chance", 0)
+        if hit_chance and hit_chance < 100:
+            lines.append(f"  Hit Chance: {hit_chance}% (accuracy)")
+
+    impale = data.get("impale_dps", 0)
+    if impale > 0:
+        lines.append(f"  Impale DPS: {_fmt(impale)}")
+
+    enemy_multi = data.get("enemy_damage_taken_multi", 0)
+    if enemy_multi and enemy_multi != 1:
+        lines.append(f"  Enemy Damage Taken Multiplier: {enemy_multi:.2f}x")
 
     # Type breakdown
     breakdown = data.get("type_breakdown", [])
